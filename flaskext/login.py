@@ -251,7 +251,8 @@ class LoginManager(object):
             return self.unauthorized_callback()
         if not self.login_view:
             abort(401)
-        flash(self.login_message)
+        if self.login_message:
+            flash(self.login_message)
         return redirect(login_url(self.login_view, request.url))
     
     def needs_refresh_handler(self, callback):
