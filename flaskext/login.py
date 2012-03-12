@@ -251,7 +251,8 @@ class LoginManager(object):
             return self.unauthorized_callback()
         if not self.login_view:
             abort(401)
-        flash(self.login_message)
+        if self.login_message:
+            flash(self.login_message)
         return redirect(login_url(self.login_view, request.url))
     
     def needs_refresh_handler(self, callback):
@@ -373,7 +374,7 @@ class LoginManager(object):
         if self.token_callback:
             data = current_user.get_auth_token()
         else:
-            data = encode_cookie(session["user_id"])
+            data = encode_cookie(str(session["user_id"]))
         expires = datetime.now() + duration
         # actually set it
         response.set_cookie(cookie_name, data, expires=expires, domain=domain)
