@@ -390,7 +390,7 @@ class LoginManager(object):
 current_user = LocalProxy(lambda: _request_ctx_stack.top.user)
 
 def _user_context_processor():
-    return dict(current_user=_request_ctx_stack.top.user)
+    return dict(current_user=_get_user())
 
 
 def login_fresh():
