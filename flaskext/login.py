@@ -455,7 +455,7 @@ def confirm_login():
     user_login_confirmed.send(current_app._get_current_object())
 
 
-def login_required(fn):
+def login_required(group=None):
     """
     If you decorate a view with this, it will ensure that the current user is
     logged in and authenticated before calling the actual view. (If they are
@@ -476,12 +476,17 @@ def login_required(fn):
     
     :param fn: The view function to decorate.
     """
-    @wraps(fn)
-    def decorated_view(*args, **kwargs):
-        if not current_user.is_authenticated():
-            return current_app.login_manager.unauthorized()
-        return fn(*args, **kwargs)
-    return decorated_view
+    def inner_login_required(fn):
+        @wraps(fn)
+        def decorated_view(*args, **kwargs):
+            if not current_user.is_authenticated():
+                return current_app.login_manager.unauthorized()
+            elif group:
+                if not current_user.group() == group:
+                    return current_app.login_manager.unauthorized()
+            return fn(*args, **kwargs)
+        return decorated_view
+    return inner_login_required
 
 
 def fresh_login_required(fn):
