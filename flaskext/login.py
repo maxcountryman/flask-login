@@ -358,7 +358,7 @@ class LoginManager(object):
     
     def _update_remember_cookie(self, response):
         operation = session.pop("remember", None)
-        if operation == "set":
+        if operation == "set" and "user_id" in session:
             self._set_cookie(response)
         elif operation == "clear":
             self._clear_cookie(response)
