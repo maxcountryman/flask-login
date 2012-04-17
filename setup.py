@@ -14,7 +14,7 @@ Links
 `````
 * `documentation <http://packages.python.org/Flask-Login>`_
 * `development version
-  <http://bitbucket.org/leafstorm/flask-login/get/tip.gz#egg=Flask-Login-dev>`_
+  <https://github.com/maxcountryman/flask-login>`_
 
 
 """
@@ -23,7 +23,7 @@ from setuptools import setup
 
 setup(
     name='Flask-Login',
-    version='0.1',
+    version='0.1.1',
     url='http://bitbucket.org/leafstorm/flask-login/',
     license='MIT',
     author='Matthew Frazier',
