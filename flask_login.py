@@ -293,6 +293,8 @@ class LoginManager(object):
         return redirect(login_url(self.refresh_view, request.url))
 
     def _load_user(self):
+        if request.path.startswith(current_app.static_url_path):
+            return
         config = current_app.config
         if config.get("SESSION_PROTECTION", self.session_protection):
             deleted = self._session_protection()
