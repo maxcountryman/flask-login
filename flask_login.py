@@ -203,6 +203,15 @@ class LoginManager(object):
 
     def setup_app(self, app, add_context_processor=True):
         """
+        Deprecated
+        """
+        import warnings
+        warnings.warn("Warning setup_app is deprecated. Please use init_app", 
+                       DeprecationWarning)
+        init_app(app, add_context_processor)
+
+    def init_app(self, app, add_context_processor=True):
+        """
         Configures an application. This registers a `before_request` and an
         `after_request` call, and attaches this `LoginManager` to it as
         ``app.login_manager``.
