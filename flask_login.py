@@ -208,7 +208,7 @@ class LoginManager(object):
         import warnings
         warnings.warn("Warning setup_app is deprecated. Please use init_app", 
                        DeprecationWarning)
-        init_app(app, add_context_processor)
+        self.init_app(app, add_context_processor)
 
     def init_app(self, app, add_context_processor=True):
         """
