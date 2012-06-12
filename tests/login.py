@@ -300,6 +300,15 @@ def remember_interactive(app):
 
 
 @login.test
+def static_interactive(app):
+    setup_interactive(app)
+    with app.test_client() as c:
+        rv = c.get("/static/style.css")
+        assert rv.data == 'static content'
+        assert current_user.is_anonymous()
+
+
+@login.test
 def auth_token_interactive(app):
     setup_interactive(app)
     app.login_manager.token_loader(get_user_by_token)

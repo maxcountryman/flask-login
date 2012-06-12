@@ -206,7 +206,7 @@ class LoginManager(object):
         Deprecated
         """
         import warnings
-        warnings.warn("Warning setup_app is deprecated. Please use init_app", 
+        warnings.warn("Warning setup_app is deprecated. Please use init_app",
                        DeprecationWarning)
         self.init_app(app, add_context_processor)
 
@@ -303,6 +303,8 @@ class LoginManager(object):
 
     def _load_user(self):
         if request.path.startswith(current_app.static_url_path):
+            # load up an anonymous user for static pages
+            _request_ctx_stack.top.user = self.anonymous_user()
             return
         config = current_app.config
         if config.get("SESSION_PROTECTION", self.session_protection):
