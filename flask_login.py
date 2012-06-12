@@ -261,7 +261,7 @@ class LoginManager(object):
         if not self.login_view:
             abort(401)
         if self.login_message:
-            flash(self.login_message)
+            flash(unicode(self.login_message))
         return redirect(login_url(self.login_view, request.url))
 
     def needs_refresh_handler(self, callback):
@@ -298,7 +298,7 @@ class LoginManager(object):
             return self.needs_refresh_callback()
         if not self.refresh_view:
             abort(403)
-        flash(self.needs_refresh_message)
+        flash(unicode(self.needs_refresh_message))
         return redirect(login_url(self.refresh_view, request.url))
 
     def _load_user(self):
