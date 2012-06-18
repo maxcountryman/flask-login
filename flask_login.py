@@ -400,7 +400,7 @@ class LoginManager(object):
 
 
 #: A proxy for the current user.
-current_user = LocalProxy(lambda: getattr(_request_ctx_stack.top, 'user'))
+current_user = LocalProxy(lambda: getattr(_request_ctx_stack.top, 'user', None))
 
 def _user_context_processor():
     return dict(current_user=_get_user())
