@@ -521,6 +521,15 @@ def fresh_login_required(fn):
     return decorated_view
 
 
+class LoginRequiredMixin(object):
+    """
+    This provides an easy way to mark class-based views as requiring login.
+    """
+    @login_required
+    def dispatch_request(self, *args, **kwargs):
+        return super(LoginRequiredMixin, self).dispatch_request(*args, **kwargs) 
+
+    
 class UserMixin(object):
     """
     This provides default implementations for the methods that Flask-Login

@@ -13,12 +13,13 @@ from attest import Tests, raises, assert_hook
 from contextlib import contextmanager
 from flask import (Flask, session, get_flashed_messages, url_for, request,
                    signals_available)
+from flask.views import MethodView
 from flask.ext.login import (
     encode_cookie, decode_cookie, make_next_param, login_url, LoginManager,
-    login_user, logout_user, current_user, login_required, LOGIN_MESSAGE,
-    confirm_login, UserMixin, AnonymousUser, make_secure_token,
-    user_logged_in, user_logged_out, user_login_confirmed,
-    user_unauthorized, user_needs_refresh, session_protected
+    login_user, logout_user, current_user, login_required, LoginRequiredMixin,
+    LOGIN_MESSAGE, confirm_login, UserMixin, AnonymousUser, make_secure_token,
+    user_logged_in, user_logged_out, user_login_confirmed, user_unauthorized, 
+    user_needs_refresh, session_protected
 )
 from werkzeug.exceptions import Unauthorized
 from werkzeug.utils import parse_cookie
@@ -94,10 +95,10 @@ def app_context():
         else:
             return u"Go away, creeper"
 
-    @app.route("/protected")
-    @login_required
-    def protected():
-        return u"Welcome, %s" % current_user.name
+    class Protected(LoginRequiredMixin, MethodView):
+        def get(self):
+            return u"Welcome, %s" % current_user.name
+    app.add_url_rule('/protected', view_func=Protected.as_view('protected'))
 
     @app.route("/logout")
     @login_required
