@@ -370,11 +370,12 @@ class LoginManager(object):
             self.reload_user()
 
     def _update_remember_cookie(self, response):
-        operation = session.pop("remember", None)
-        if operation == "set" and "user_id" in session:
-            self._set_cookie(response)
-        elif operation == "clear":
-            self._clear_cookie(response)
+        if "remember" in session:
+            operation = session.pop("remember", None)
+            if operation == "set" and "user_id" in session:
+                self._set_cookie(response)
+            elif operation == "clear":
+                self._clear_cookie(response)
         return response
 
     def _set_cookie(self, response):
@@ -527,9 +528,9 @@ class LoginRequiredMixin(object):
     """
     @login_required
     def dispatch_request(self, *args, **kwargs):
-        return super(LoginRequiredMixin, self).dispatch_request(*args, **kwargs) 
+        return super(LoginRequiredMixin, self).dispatch_request(*args, **kwargs)
 
-    
+
 class UserMixin(object):
     """
     This provides default implementations for the methods that Flask-Login
