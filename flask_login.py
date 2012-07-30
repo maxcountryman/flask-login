@@ -388,7 +388,7 @@ class LoginManager(object):
             data = current_user.get_auth_token()
         else:
             data = encode_cookie(str(session["user_id"]))
-        expires = datetime.now() + duration
+        expires = datetime.utcnow() + duration
         # actually set it
         response.set_cookie(cookie_name, data, expires=expires, domain=domain)
 
