@@ -302,7 +302,9 @@ class LoginManager(object):
         return redirect(login_url(self.refresh_view, request.url))
 
     def _load_user(self):
-        if request.path.startswith(current_app.static_url_path):
+        if (current_app.static_url_path is not None and
+            request.path.startswith(current_app.static_url_path)
+        ):
             # load up an anonymous user for static pages
             _request_ctx_stack.top.user = self.anonymous_user()
             return
