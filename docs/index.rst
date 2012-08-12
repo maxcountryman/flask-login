@@ -143,6 +143,10 @@ customize the message, set `LoginManager.login_message`::
 
     login_manager.login_message = u"Bonvolu ensaluti por uzi tio paĝo."
 
+To customize the message category, set `LoginManager.login_message_category`::
+
+    login_manager.login_message_category = "info"
+
 When the log in view is redirected to, it will have a `next` variable in the
 query string, which is the page that the user was trying to access.
 
@@ -229,12 +233,14 @@ one's password should always require a password re-entry regardless.)
 in, will also ensure that their login is fresh. If not, it will send them to
 a page where they can re-enter their credentials. You can customize its
 behavior in the same ways as you can customize `login_required`, by setting
-`LoginManager.refresh_view` and `~LoginManager.needs_refresh_message`::
+`LoginManager.refresh_view`, `~LoginManager.needs_refresh_message`, and
+`~LoginManager.needs_refresh_message_category`::
 
     login_manager.refresh_view = "accounts.reauthenticate"
     login_manager.needs_refresh_message = (
         u"To protect your account, please reauthenticate to access this page."
     )
+    login_manager.needs_refresh_message_category = "info"
 
 Or by providing your own callback to handle refreshing::
 
