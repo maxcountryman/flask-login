@@ -145,9 +145,15 @@ COOKIE_DURATION = timedelta(days=365)
 #: The default flash message to display when users need to log in.
 LOGIN_MESSAGE = u"Please log in to access this page."
 
+#: The default flash message category to display when users need to log in.
+LOGIN_MESSAGE_CATEGORY = "message"
+
 #: The default flash message to display when users need to reauthenticate.
 REFRESH_MESSAGE = u"Please reauthenticate to access this page."
 
+#: The default flash message category to display when users need to
+#: reauthenticate.
+REFRESH_MESSAGE_CATEGORY = "message"
 
 class LoginManager(object):
     """
@@ -166,12 +172,18 @@ class LoginManager(object):
         self.login_view = None
         #: The message to flash when a user is redirected to the login page.
         self.login_message = LOGIN_MESSAGE
+        #: The message category to flash when a user is redirected to the login
+        #: page.
+        self.login_message_category = LOGIN_MESSAGE_CATEGORY
         #: The name of the view to redirect to when the user needs to
         #: reauthenticate.
         self.refresh_view = None
         #: The message to flash when a user is redirected to the "needs
         #: refresh" page.
         self.needs_refresh_message = REFRESH_MESSAGE
+        #: The message category to flash when a user is redirected to the
+        #: "needs refresh" page.
+        self.needs_refresh_message_category = REFRESH_MESSAGE_CATEGORY
         #: The mode to use session protection in. This can be either
         #: ``"basic"`` (the default) or ``"strong"``, or `None` to disable it.
         self.session_protection = "basic"
@@ -261,7 +273,7 @@ class LoginManager(object):
         if not self.login_view:
             abort(401)
         if self.login_message:
-            flash(self.login_message)
+            flash(self.login_message, category=self.login_message_category)
         return redirect(login_url(self.login_view, request.url))
 
     def needs_refresh_handler(self, callback):
@@ -298,7 +310,7 @@ class LoginManager(object):
             return self.needs_refresh_callback()
         if not self.refresh_view:
             abort(403)
-        flash(self.needs_refresh_message)
+        flash(self.needs_refresh_message, category=self.needs_refresh_message_category)
         return redirect(login_url(self.refresh_view, request.url))
 
     def _load_user(self):
@@ -529,9 +541,9 @@ class LoginRequiredMixin(object):
     """
     @login_required
     def dispatch_request(self, *args, **kwargs):
-        return super(LoginRequiredMixin, self).dispatch_request(*args, **kwargs) 
+        return super(LoginRequiredMixin, self).dispatch_request(*args, **kwargs)
 
-    
+
 class UserMixin(object):
     """
     This provides default implementations for the methods that Flask-Login
