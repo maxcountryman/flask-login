@@ -479,6 +479,7 @@ def confirm_login():
     are reloaded from a cookie.
     """
     session["_fresh"] = True
+    session["_id"] = _create_identifier()
     user_login_confirmed.send(current_app._get_current_object())
 
 
