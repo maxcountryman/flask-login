@@ -407,6 +407,19 @@ def user_mixin():
     assert not user.is_anonymous()
     assert user.get_id() == u"1"
 
+@login.test
+def user_equality():
+    class MyUser(UserMixin):
+        def __init__(self, id):
+            self.id = id
+
+    idOneA = MyUser(1)
+    idOneB = MyUser(1)
+    idTwo = MyUser(2)
+
+    assert idOneA == idOneA
+    assert idOneA == idOneB
+    assert idOneA != idTwo
 
 @login.test
 def anonymous_user():
