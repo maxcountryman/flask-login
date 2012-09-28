@@ -479,6 +479,7 @@ def confirm_login():
     are reloaded from a cookie.
     """
     session["_fresh"] = True
+    session["_id"] = _create_identifier()
     user_login_confirmed.send(current_app._get_current_object())
 
 
@@ -576,6 +577,23 @@ class UserMixin(object):
             return unicode(self.id)
         except AttributeError:
             raise NotImplementedError("No `id` attribute - override get_id")
+
+    def __eq__(self, other):
+        """
+        Checks the equality of two `UserMixin` objects using `get_id`.
+        """
+        if isinstance(other, UserMixin):
+            return self.get_id() == other.get_id()
+        return NotImplemented
+
+    def __ne__(self, other):
+        """
+        Checks the inequality of two `UserMixin` objects using `get_id`.
+        """
+        equal = self.__eq__(other)
+        if equal is NotImplemented:
+            return NotImplemented
+        return not equal
 
 
 class AnonymousUser(object):

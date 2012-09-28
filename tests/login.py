@@ -19,8 +19,8 @@ from flask.ext.login import (
     encode_cookie, decode_cookie, make_next_param, login_url, LoginManager,
     login_user, logout_user, current_user, login_required, LoginRequiredMixin,
     LOGIN_MESSAGE, confirm_login, UserMixin, AnonymousUser, make_secure_token,
-    user_logged_in, user_logged_out, user_login_confirmed, user_unauthorized, 
-    user_needs_refresh, session_protected, _create_identifier
+    user_logged_in, user_logged_out, user_login_confirmed, user_unauthorized,
+    user_needs_refresh, session_protected, fresh_login_required, _create_identifier
 )
 from werkzeug.exceptions import Unauthorized
 from werkzeug.utils import parse_cookie
@@ -100,6 +100,11 @@ def app_context():
         def get(self):
             return u"Welcome, %s" % current_user.name
     app.add_url_rule('/protected', view_func=Protected.as_view('protected'))
+
+    @app.route("/sensitive-action")
+    @fresh_login_required
+    def sensitive_action():
+        return u"Be careful, %s" % current_user.name
 
     @app.route("/logout")
     @login_required
@@ -365,6 +370,11 @@ def basic_session_protection(app):
         assert rv.data == u"Welcome, Notch"
         assert session["user_id"] == u"1"
         assert session["_fresh"] is False
+        with assert_fired(user_login_confirmed):
+            rv = c.get("/reauth", headers=[("User-Agent", "updated agent")])
+        assert session["_fresh"] is True
+        rv = c.get("/sensitive-action", headers=[("User-Agent", "updated agent")])
+        assert rv.data == u"Be careful, Notch"
 
 
 @login.test
@@ -413,6 +423,19 @@ def user_mixin():
     assert not user.is_anonymous()
     assert user.get_id() == u"1"
 
+@login.test
+def user_equality():
+    class MyUser(UserMixin):
+        def __init__(self, id):
+            self.id = id
+
+    idOneA = MyUser(1)
+    idOneB = MyUser(1)
+    idTwo = MyUser(2)
+
+    assert idOneA == idOneA
+    assert idOneA == idOneB
+    assert idOneA != idTwo
 
 @login.test
 def anonymous_user():
