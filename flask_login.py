@@ -133,7 +133,7 @@ def _create_identifier():
                               request.headers.get("User-Agent")), 'utf8', errors='replace')
     hsh = md5()
     hsh.update(base.encode("utf8"))
-    return hsh.digest()
+    return hsh.hexdigest()
 
 
 #: The default name of the "remember me" cookie (``remember_token``)

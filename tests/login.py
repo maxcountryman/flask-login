@@ -11,6 +11,7 @@ anything related to unittest.
 from __future__ import with_statement
 from attest import Tests, raises, assert_hook
 from contextlib import contextmanager
+import json
 from flask import (Flask, session, get_flashed_messages, url_for, request,
                    signals_available)
 from flask.views import MethodView
@@ -18,8 +19,8 @@ from flask.ext.login import (
     encode_cookie, decode_cookie, make_next_param, login_url, LoginManager,
     login_user, logout_user, current_user, login_required, LoginRequiredMixin,
     LOGIN_MESSAGE, confirm_login, UserMixin, AnonymousUser, make_secure_token,
-    user_logged_in, user_logged_out, user_login_confirmed, user_unauthorized, 
-    user_needs_refresh, session_protected, fresh_login_required
+    user_logged_in, user_logged_out, user_login_confirmed, user_unauthorized,
+    user_needs_refresh, session_protected, fresh_login_required, _create_identifier
 )
 from werkzeug.exceptions import Unauthorized
 from werkzeug.utils import parse_cookie
@@ -151,6 +152,11 @@ def login_url_generation(app):
             "https://auth.localhost/login?next=http%3A%2F%2Flocalhost%2Fprotected")
     assert (login_url("/login?affil=cgnu", PROTECTED) ==
             "/login?affil=cgnu&next=%2Fprotected")
+
+
+@login.test
+def create_identifier_json_serializeable(app):
+    assert isinstance(json.dumps(_create_identifier()), basestring)
 
 
 # login manager
