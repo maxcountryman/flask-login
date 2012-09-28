@@ -19,7 +19,7 @@ from flask.ext.login import (
     login_user, logout_user, current_user, login_required, LoginRequiredMixin,
     LOGIN_MESSAGE, confirm_login, UserMixin, AnonymousUser, make_secure_token,
     user_logged_in, user_logged_out, user_login_confirmed, user_unauthorized, 
-    user_needs_refresh, session_protected
+    user_needs_refresh, session_protected, fresh_login_required
 )
 from werkzeug.exceptions import Unauthorized
 from werkzeug.utils import parse_cookie
@@ -99,6 +99,11 @@ def app_context():
         def get(self):
             return u"Welcome, %s" % current_user.name
     app.add_url_rule('/protected', view_func=Protected.as_view('protected'))
+
+    @app.route("/sensitive-action")
+    @fresh_login_required
+    def sensitive_action():
+        return u"Be careful, %s" % current_user.name
 
     @app.route("/logout")
     @login_required
@@ -359,6 +364,11 @@ def basic_session_protection(app):
         assert rv.data == u"Welcome, Notch"
         assert session["user_id"] == u"1"
         assert session["_fresh"] is False
+        with assert_fired(user_login_confirmed):
+            rv = c.get("/reauth", headers=[("User-Agent", "updated agent")])
+        assert session["_fresh"] is True
+        rv = c.get("/sensitive-action", headers=[("User-Agent", "updated agent")])
+        assert rv.data == u"Be careful, Notch"
 
 
 @login.test
