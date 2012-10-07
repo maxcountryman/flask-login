@@ -258,7 +258,7 @@ class LoginManager(object):
 
         - Flash `login_message` to the user.
         - Redirect the user to `login_view`. (The page they were attempting
-          to access will be passed in the `next` query string variable, so
+          to access will be passed in the ``next`` query string variable, so
           you can redirect there if present instead of the homepage.)
 
         If `login_view` is not defined, then it will simply raise a 401
@@ -296,7 +296,7 @@ class LoginManager(object):
 
         - Flash `needs_refresh_message` to the user.
         - Redirect the user to `refresh_view`. (The page they were attempting
-          to access will be passed in the `next` query string variable, so
+          to access will be passed in the ``next`` query string variable, so
           you can redirect there if present instead of the homepage.)
 
         If `refresh_view` is not defined, then it will simply raise a 403
