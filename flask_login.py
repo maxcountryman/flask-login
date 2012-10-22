@@ -354,7 +354,6 @@ class LoginManager(object):
                 return True
         return False
 
-
     def reload_user(self):
         ctx = _request_ctx_stack.top
         user_id = session.get("user_id", None)
@@ -371,17 +370,17 @@ class LoginManager(object):
         if self.token_callback:
             user = self.token_callback(cookie)
             if user is not None:
-                session["user_id"] = user.get_id()
-                session["_fresh"] = False
-                _request_ctx_stack.top.user = user
-            else:
-                self.reload_user()
+                user_id = user.get_id()
         else:
             user_id = decode_cookie(cookie)
-            if user_id is not None:
-                session["user_id"] = user_id
-                session["_fresh"] = False
+
+        if user_id is not None:
+            session["user_id"] = user_id
+            session["_fresh"] = False
             self.reload_user()
+
+            app = current_app._get_current_object()
+            user_loaded_from_cookie.send(app, user=_get_user())
 
     def _update_remember_cookie(self, response):
         operation = session.pop("remember", None)
@@ -448,7 +447,6 @@ def login_user(user, remember=False, force=False):
     session["_fresh"] = True
     if remember:
         session["remember"] = "set"
-    app = current_app._get_current_object()
     current_app.login_manager.reload_user()
     user_logged_in.send(current_app._get_current_object(), user=_get_user())
     return True
@@ -622,6 +620,10 @@ user_logged_in = _signals.signal("logged-in")
 #: Sent when a user is logged out. In addition to the app (which is the
 #: sender), it is passed `user`, which is the user being logged out.
 user_logged_out = _signals.signal("logged-out")
+
+#: Sent when the user is loaded from the cookie. In addition to the app (which
+#: is the #: sender), it is passed `user`, which is the user being reloaded.
+user_loaded_from_cookie = _signals.signal("loaded-from-cookie")
 
 #: Sent when a user's login is confirmed, marking it as fresh. (It is not
 #: called for a normal login.)
