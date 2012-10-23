@@ -147,7 +147,7 @@ To customize the message category, set `LoginManager.login_message_category`::
 
     login_manager.login_message_category = "info"
 
-When the log in view is redirected to, it will have a `next` variable in the
+When the log in view is redirected to, it will have a ``next`` variable in the
 query string, which is the page that the user was trying to access.
 
 If you would like to customize the process further, decorate a function with
