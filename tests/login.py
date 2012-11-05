@@ -19,8 +19,9 @@ from flask.ext.login import (
     encode_cookie, decode_cookie, make_next_param, login_url, LoginManager,
     login_user, logout_user, current_user, login_required, LoginRequiredMixin,
     LOGIN_MESSAGE, confirm_login, UserMixin, AnonymousUser, make_secure_token,
-    user_logged_in, user_logged_out, user_login_confirmed, user_unauthorized,
-    user_needs_refresh, session_protected, fresh_login_required, _create_identifier
+    user_logged_in, user_logged_out, user_loaded_from_cookie,
+    user_login_confirmed,  user_unauthorized, user_needs_refresh,
+    session_protected, fresh_login_required, _create_identifier
 )
 from werkzeug.exceptions import Unauthorized
 from werkzeug.utils import parse_cookie
@@ -309,6 +310,16 @@ def remember_interactive(app):
         with assert_fired(user_login_confirmed):
             rv = c.get("/reauth")
         assert session["_fresh"] is True
+
+
+@login.test
+def loaded_from_cookie_signal(app):
+    setup_interactive(app)
+    with app.test_client() as c:
+        c.get("/login", query_string={"id": 1, "remember": "yes"})
+        c.cookie_jar.clear_session_cookies()
+        with assert_fired(user_loaded_from_cookie):
+            c.get("/protected")
 
 
 @login.test
