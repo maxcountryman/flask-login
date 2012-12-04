@@ -411,9 +411,21 @@ class LoginManager(object):
         domain = config.get("REMEMBER_COOKIE_DOMAIN", None)
         response.delete_cookie(cookie_name, domain=domain)
 
+def find_or_clear_user():
+    """
+    If the secret key for an app changes, the user session can
+    become corrupted. Check for this, and clear the session variables.
+    """
+
+    try:
+        return _request_ctx_stack.top.user
+    except AttributeError:
+        logout_user()
+
+    return _get_user()
 
 #: A proxy for the current user.
-current_user = LocalProxy(lambda: _request_ctx_stack.top.user)
+current_user = LocalProxy(find_or_clear_user)
 
 def _user_context_processor():
     return dict(current_user=_get_user())
