@@ -80,7 +80,8 @@ def make_next_param(login, current):
     return current
 
 
-def login_url(login_view, next_url=None, next_field="next"):
+def login_url(login_view, next_url=None, next_field="next",
+              login_view_params={}):
     """
     Creates a URL for redirecting to a login page. If only `login_view` is
     provided, this will just return the URL for it. If `next_url` is provided,
@@ -92,11 +93,15 @@ def login_url(login_view, next_url=None, next_field="next"):
     :param next_url: The URL to give the login view for redirection.
     :param next_field: What field to store the next URL in. (It defaults to
                        ``next``.)
+    :param login_view_params: The params to getting url by login view name.
+                       (It defaults to ``{}`` and also can be callable.)
     """
     if login_view.startswith(("https://", "http://", "/")):
         base = login_view
     else:
-        base = url_for(login_view)
+        if callable(login_view_params):
+            login_view_params = login_view_params()
+        base = url_for(login_view, **login_view_params)
     if next_url is None:
         return base
     parts = list(urlparse(base))
@@ -170,6 +175,8 @@ class LoginManager(object):
         #: (This can be an absolute URL as well, if your authentication
         #: machinery is external to your application.)
         self.login_view = None
+        # The params of the view to redirect to when the user needs to log in.
+        self.login_view_params = {}
         #: The message to flash when a user is redirected to the login page.
         self.login_message = LOGIN_MESSAGE
         #: The message category to flash when a user is redirected to the login
@@ -274,7 +281,8 @@ class LoginManager(object):
             abort(401)
         if self.login_message:
             flash(self.login_message, category=self.login_message_category)
-        return redirect(login_url(self.login_view, request.url))
+        return redirect(login_url(self.login_view, request.url,
+                                  login_view_params=self.login_view_params))
 
     def needs_refresh_handler(self, callback):
         """
@@ -311,7 +319,8 @@ class LoginManager(object):
         if not self.refresh_view:
             abort(403)
         flash(self.needs_refresh_message, category=self.needs_refresh_message_category)
-        return redirect(login_url(self.refresh_view, request.url))
+        return redirect(login_url(self.refresh_view, request.url,
+                                  login_view_params=self.login_view_params))
 
     def _load_user(self):
         if (current_app.static_url_path is not None and
