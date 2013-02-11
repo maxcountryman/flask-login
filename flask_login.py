@@ -206,7 +206,7 @@ class LoginManager(object):
         """
         This sets the callback for loading a user from an authentication
         token. The function you set should take an authentication token
-        (a `unicode, as returned by a user's `get_auth_token` method) and
+        (a `unicode`, as returned by a user's `get_auth_token` method) and
         return a user object, or `None` if the user does not exist.
 
         :param callback: The callback for retrieving a user object.
