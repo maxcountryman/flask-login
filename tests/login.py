@@ -323,6 +323,17 @@ def loaded_from_cookie_signal(app):
 
 
 @login.test
+def change_api_key(app):
+    setup_interactive(app)
+    with app.test_client() as c:
+        c.get("/login", query_string={"id": 1, "remember": "yes"})
+        c.cookie_jar.clear_session_cookies()
+        app.config["SECRET_KEY"] = "dffdf"
+        with assert_fired(user_loaded_from_cookie):
+            c.get("/protected")
+
+
+@login.test
 def static_interactive(app):
     setup_interactive(app)
     with app.test_client() as c:
