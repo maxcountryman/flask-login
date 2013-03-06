@@ -381,6 +381,8 @@ class LoginManager(object):
 
             app = current_app._get_current_object()
             user_loaded_from_cookie.send(app, user=_get_user())
+        else:
+            self.reload_user()
 
     def _update_remember_cookie(self, response):
         operation = session.pop("remember", None)
