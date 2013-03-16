@@ -46,7 +46,7 @@ they need to log in, and the like.
 Once the actual application object has been created, you can configure it for
 login with::
 
-    login_manager.setup_app(app)
+    login_manager.init_app(app)
 
 
 How it Works
