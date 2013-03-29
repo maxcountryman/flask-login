@@ -201,6 +201,7 @@ class LoginManager(object):
         :param callback: The callback for retrieving a user object.
         """
         self.user_callback = callback
+        return callback
 
     def token_loader(self, callback):
         """
@@ -212,6 +213,7 @@ class LoginManager(object):
         :param callback: The callback for retrieving a user object.
         """
         self.token_callback = callback
+        return callback
 
     def setup_app(self, app, add_context_processor=True):
         """
@@ -249,6 +251,7 @@ class LoginManager(object):
         :param callback: The callback for unauthorized users.
         """
         self.unauthorized_callback = callback
+        return callback
 
     def unauthorized(self):
         """
@@ -286,6 +289,7 @@ class LoginManager(object):
         :param callback: The callback for unauthorized users.
         """
         self.needs_refresh_callback = callback
+        return callback
 
     def needs_refresh(self):
         """
