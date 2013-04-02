@@ -23,7 +23,7 @@ from setuptools import setup
 
 setup(
     name='Flask-Login',
-    version='0.1.2',
+    version='0.1.3',
     url='https://github.com/maxcountryman/flask-login',
     license='MIT',
     author='Matthew Frazier',
