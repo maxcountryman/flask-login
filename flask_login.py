@@ -10,7 +10,7 @@
     :license: MIT/X11, see LICENSE for more details.
 '''
 
-__version_info__ = ('0', '1', '3')
+__version_info__ = ('0', '2', '0')
 __version__ = '.'.join(__version_info__)
 __author__ = 'Matthew Frazier'
 __license__ = 'MIT/X11'
@@ -67,7 +67,7 @@ class LoginManager(object):
     def __init__(self):
         #: A class or factory function that produces an anonymous user, which
         #: is used when no one is logged in.
-        self.anonymous_user = AnonymousUser
+        self.anonymous_user = AnonymousUserMixin
 
         #: The name of the view to redirect to when the user needs to log in.
         #: (This can be an absolute URL as well, if your authentication
@@ -106,29 +106,6 @@ class LoginManager(object):
 
         self.needs_refresh_callback = None
 
-    def user_loader(self, callback):
-        '''
-        This sets the callback for reloading a user from the session. The
-        function you set should take a user ID (a ``unicode``) and return a
-        user object, or ``None`` if the user does not exist.
-
-        :param callback: The callback for retrieving a user object.
-        :type callback: unicode
-        '''
-        self.user_callback = callback
-
-    def token_loader(self, callback):
-        '''
-        This sets the callback for loading a user from an authentication
-        token. The function you set should take an authentication token
-        (a ``unicode``, as returned by a user's `get_auth_token` method) and
-        return a user object, or ``None`` if the user does not exist.
-
-        :param callback: The callback for retrieving a user object.
-        :type callback: unicode
-        '''
-        self.token_callback = callback
-
     def setup_app(self, app, add_context_processor=True):
         '''
         This method has been deprecated. Please use
@@ -157,18 +134,6 @@ class LoginManager(object):
 
         if add_context_processor:
             app.context_processor(_user_context_processor)
-
-    def unauthorized_handler(self, callback):
-        '''
-        This will set the callback for the `unauthorized` method, which among
-        other things is used by `login_required`. It takes no arguments, and
-        should return a response to be sent to the user instead of their
-        normal view.
-
-        :param callback: The callback for unauthorized users.
-        :type callback: function
-        '''
-        self.unauthorized_callback = callback
 
     def unauthorized(self):
         '''
@@ -201,6 +166,44 @@ class LoginManager(object):
 
         return redirect(login_url(self.login_view, request.url))
 
+    def user_loader(self, callback):
+        '''
+        This sets the callback for reloading a user from the session. The
+        function you set should take a user ID (a ``unicode``) and return a
+        user object, or ``None`` if the user does not exist.
+
+        :param callback: The callback for retrieving a user object.
+        :type callback: unicode
+        '''
+        self.user_callback = callback
+        return callback
+
+    def token_loader(self, callback):
+        '''
+        This sets the callback for loading a user from an authentication
+        token. The function you set should take an authentication token
+        (a ``unicode``, as returned by a user's `get_auth_token` method) and
+        return a user object, or ``None`` if the user does not exist.
+
+        :param callback: The callback for retrieving a user object.
+        :type callback: unicode
+        '''
+        self.token_callback = callback
+        return callback
+
+    def unauthorized_handler(self, callback):
+        '''
+        This will set the callback for the `unauthorized` method, which among
+        other things is used by `login_required`. It takes no arguments, and
+        should return a response to be sent to the user instead of their
+        normal view.
+
+        :param callback: The callback for unauthorized users.
+        :type callback: function
+        '''
+        self.unauthorized_callback = callback
+        return callback
+
     def needs_refresh_handler(self, callback):
         '''
         This will set the callback for the `needs_refresh` method, which among
@@ -212,6 +215,7 @@ class LoginManager(object):
         :type callback: function
         '''
         self.needs_refresh_callback = callback
+        return callback
 
     def needs_refresh(self):
         '''
@@ -320,7 +324,7 @@ class LoginManager(object):
             user_loaded_from_cookie.send(app, user=_get_user())
 
     def _update_remember_cookie(self, response):
-        operation = session.pop('remember')
+        operation = session.pop('remember', None)
 
         if operation == 'set' and 'user_id' in session:
             self._set_cookie(response)
@@ -352,7 +356,7 @@ class LoginManager(object):
         response.delete_cookie(cookie_name, domain=domain)
 
 
-class User(object):
+class UserMixin(object):
     '''
     This provides default implementations for the methods that Flask-Login
     expects user objects to have.
@@ -376,7 +380,7 @@ class User(object):
         raise NotImplementedError
 
 
-class AnonymousUser(object):
+class AnonymousUserMixin(object):
     '''
     This is the default object for representing an anonymous user.
     '''
@@ -645,7 +649,8 @@ def _create_identifier():
                             request.headers.get('User-Agent'))
     base = unicode(base, 'utf-8', errors='replace')
     h = md5()
-    return h.update(base.encode('utf8')).hexdigest()
+    h.update(base.encode('utf8'))
+    return h.hexdigest()
 
 
 def _user_context_processor():
