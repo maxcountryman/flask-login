@@ -55,7 +55,7 @@ def load_user(id):
     return USERS.get(int(id))
 
 
-login_manager.setup_app(app)
+login_manager.init_app(app)
 
 @app.route("/")
 def index():
