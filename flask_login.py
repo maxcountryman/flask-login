@@ -322,6 +322,9 @@ class LoginManager(object):
 
     def _load_from_cookie(self, cookie):
         if self.token_callback:
+            # ensure `user_id` is not unbound
+            user_id = None
+
             user = self.token_callback(cookie)
             if user is not None:
                 user_id = user.get_id()
