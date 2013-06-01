@@ -10,13 +10,20 @@ users in and out in a database-independent manner.
 :license:   MIT/X11, see LICENSE for more details.
 """
 import hmac
+import sys
+
+if sys.version < '3':
+    from urlparse import urlparse, urlunparse
+else:
+    from urllib.parse import urlparse, urlunparse
+
 from datetime import datetime, timedelta
+from functools import wraps
+from hashlib import sha1, md5
+
 from flask import (current_app, session, _request_ctx_stack, redirect, url_for,
                    request, flash, abort)
 from flask.signals import Namespace
-from functools import wraps
-from hashlib import sha1, md5
-from urlparse import urlparse, urlunparse
 from werkzeug.local import LocalProxy
 from werkzeug.urls import url_decode, url_encode
 
@@ -28,10 +35,10 @@ def _get_user():
 
 
 def _cookie_digest(payload, key=None):
+    # TODO: Unicode weirdness ?
     if key is None:
         key = current_app.config["SECRET_KEY"]
-    payload = payload.encode("utf8")
-    mac = hmac.new(key, payload, sha1)
+    mac = hmac.new(key.encode("utf-8"), payload.encode("utf-8"), sha1)
     return mac.hexdigest()
 
 
@@ -52,12 +59,13 @@ def decode_cookie(cookie):
 
     :param cookie: An encoded cookie.
     """
+    # TODO: Unicode weirdness ?
     try:
         payload, digest = cookie.rsplit(u"|", 1)
         digest = digest.encode("ascii")
-    except ValueError:
+    except ValueError as e:
         return None
-    if _cookie_digest(payload) == digest:
+    if _cookie_digest(payload).encode("ascii") == digest:
         return payload
     else:
         return None
@@ -118,21 +126,26 @@ def make_secure_token(*args, **options):
     :param options: To manually specify a secret key, pass ``key=THE_KEY``.
                     Otherwise, the current app's secret key will be used.
     """
+    # TODO: Unicode weirdness ?
     key = options.get("key")
     if key is None:
         key = current_app.config["SECRET_KEY"]
-    payload = "\0".join((
-        s.encode("utf8") if isinstance(s, unicode) else s) for s in args
-    )
-    mac = hmac.new(key, payload, sha1)
-    return mac.hexdigest().decode("utf8")
+    payload = "\0".join(args)
+    mac = hmac.new(key.encode('utf-8'), payload.encode('utf-8'), sha1)
+    return mac.hexdigest()
 
 
 def _create_identifier():
-    base = unicode("%s|%s" % (request.remote_addr,
-                              request.headers.get("User-Agent")), 'utf8', errors='replace')
+    # TODO: Unicode weirdness ?
+    user_agent = request.headers.get("User-Agent")
+    try:
+        user_agent = user_agent.decode('utf-8', 'replace')
+    except AttributeError:
+        pass
+
+    base = "%s|%s" % (request.remote_addr, user_agent)
     hsh = md5()
-    hsh.update(base.encode("utf8"))
+    hsh.update(base.encode("utf-8"))
     return hsh.hexdigest()
 
 
@@ -577,10 +590,12 @@ class UserMixin(object):
         Assuming that the user object has an `id` attribute, this will take
         that and convert it to `unicode`.
         """
-        try:
-            return unicode(self.id)
-        except AttributeError:
+        if getattr(self, 'id', None) is None:
             raise NotImplementedError("No `id` attribute - override get_id")
+
+        # TODO: Unicode weirdness ?
+        rv = str(self.id) if isinstance(self.id, int) else self.id
+        return rv.decode('utf-8') if hasattr(rv, 'decode') else rv
 
     def __eq__(self, other):
         """
