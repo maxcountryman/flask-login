@@ -23,7 +23,7 @@ from setuptools import setup
 
 setup(
     name='Flask-Login',
-    version='0.1.2',
+    version='0.2.0-dev',
     url='https://github.com/maxcountryman/flask-login',
     license='MIT',
     author='Matthew Frazier',
@@ -46,7 +46,6 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
-    tests_require=['Attest'],
-    test_loader='attest:auto_reporter.test_loader',
-    test_suite='tests.login.login'
+    tests_require=['nose'],
+    test_suite='nose.collector'
 )
