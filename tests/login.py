@@ -30,6 +30,7 @@ login = Tests()
 
 # utilities
 
+
 class User(UserMixin):
     def __init__(self, name, id, active=True):
         self.id = id
@@ -50,8 +51,10 @@ USERS = {1: notch, 2: steve, 3: creeper}
 
 USER_TOKENS = dict((u.get_auth_token(), u) for u in USERS.itervalues())
 
+
 def get_user(id):
     return USERS.get(int(id))
+
 
 def get_user_by_token(token):
     return USER_TOKENS.get(token)
@@ -62,8 +65,10 @@ def assert_fired(signal, l=None):
     if signals_available:
         if l is None:
             l = []
+
         def _handler(sender, **kwargs):
             l.append(kwargs)
+
         with signal.connected_to(_handler):
             yield
         assert len(l) > 0
@@ -138,7 +143,8 @@ def cookie_encoding(app):
 def next_reduction():
     assert (make_next_param("/login", "http://localhost/profile") ==
             "/profile")
-    assert (make_next_param("https://localhost/login", "http://localhost/profile") ==
+    assert (make_next_param("https://localhost/login",
+                            "http://localhost/profile") ==
             "http://localhost/profile")
     assert (make_next_param("http://accounts.localhost/login",
                             "http://localhost/profile") ==
@@ -149,8 +155,10 @@ def next_reduction():
 def login_url_generation(app):
     PROTECTED = "http://localhost/protected"
     assert login_url("login", PROTECTED) == "/login?next=%2Fprotected"
-    assert (login_url("https://auth.localhost/login", PROTECTED) ==
-            "https://auth.localhost/login?next=http%3A%2F%2Flocalhost%2Fprotected")
+
+    LOGIN_URL = "https://auth.localhost/login"
+    EXPECTED = "%s?next=http%3A%2F%2Flocalhost%2Fprotected" % LOGIN_URL
+    assert (login_url(LOGIN_URL, PROTECTED) == EXPECTED)
     assert (login_url("/login?affil=cgnu", PROTECTED) ==
             "/login?affil=cgnu&next=%2Fprotected")
 
@@ -206,9 +214,11 @@ def login_message(app):
 def unauthorized_callback(app):
     lm = LoginManager()
     lm.login_view = "login"
+
     @lm.unauthorized_handler
     def unauth():
         return "UNAUTHORIZED!"
+
     lm.setup_app(app)
     assert lm.unauthorized() == "UNAUTHORIZED!"
     assert len(get_flashed_messages()) == 0
@@ -237,9 +247,11 @@ def setup_interactive(app):
     lm = LoginManager()
     lm.login_view = "login"
     lm.user_loader(get_user)
+
     @lm.unauthorized_handler
     def unauth():
         return "UNAUTHORIZED!"
+
     lm.setup_app(app)
 
 
@@ -377,8 +389,8 @@ def russian_cp1251_user_agent(app):
         rv = c.get("/", headers=[("User-Agent", u'ЯЙЮя'.encode('cp1251'))])
         assert rv.data == u"The index"
 
-# session protection
 
+# session protection
 @login.test
 def basic_session_protection(app):
     setup_interactive(app)
@@ -395,7 +407,8 @@ def basic_session_protection(app):
         with assert_fired(user_login_confirmed):
             rv = c.get("/reauth", headers=[("User-Agent", "updated agent")])
         assert session["_fresh"] is True
-        rv = c.get("/sensitive-action", headers=[("User-Agent", "updated agent")])
+        rv = c.get("/sensitive-action",
+                   headers=[("User-Agent", "updated agent")])
         assert rv.data == u"Be careful, Notch"
 
 
@@ -445,6 +458,7 @@ def user_mixin():
     assert not user.is_anonymous()
     assert user.get_id() == u"1"
 
+
 @login.test
 def user_equality():
     class MyUser(UserMixin):
@@ -458,6 +472,7 @@ def user_equality():
     assert idOneA == idOneA
     assert idOneA == idOneB
     assert idOneA != idTwo
+
 
 @login.test
 def anonymous_user():
