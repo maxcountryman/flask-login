@@ -27,10 +27,15 @@ from werkzeug.urls import url_decode, url_encode
 from datetime import datetime, timedelta
 from functools import wraps
 from hashlib import sha1, md5
-from urlparse import urlparse, urlunparse
 
 import hmac
 import warnings
+import sys
+
+if sys.version < '3':
+    from urlparse import urlparse, urlunparse
+else:
+    from urllib.parse import urlparse, urlunparse
 
 _signals = Namespace()
 
