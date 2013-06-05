@@ -481,7 +481,7 @@ def test_login_user(test_client, user, remember=False, force=False):
     Logs in an user. This is used in the unittesting environment where we need
     a specific session context in order to correctly set sessions.
 
-    :param test_client: A test client instance.
+    :param test_client: A test client instance from .test_client() as c
     """
     with test_client.session_transaction() as session:
         user_id = user.get_id()
@@ -496,7 +496,7 @@ def test_logout_user(test_client):
     Logs out an user. This is used in the unittesting environment where we
     need a specific session context in order to correctly set sessions.
 
-    :param test_client: A test client instance.
+    :param test_client: A test client instance from with .test_client() as c
     """
     with test_client.session_transaction() as session:
         if "user_id" in session:
@@ -504,8 +504,9 @@ def test_logout_user(test_client):
         if "_fresh" in session:
             del session["_fresh"]
 
-        # What about cookies?
-
+        cookie_name = current_app.config.get("REMEMBER_COOKIE_NAME", COOKIE_NAME)
+        if cookie_name in request.cookies:
+            session["remember"] = "clear"
 
 
 def confirm_login():
