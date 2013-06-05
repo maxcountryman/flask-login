@@ -432,6 +432,35 @@ def login_fresh():
     return session.get("_fresh", False)
 
 
+def _actually_login_user(session, user, remember=False, force=False):
+    if (not force) and (not user.is_active()):
+        return False
+    user_id = user.get_id()
+    session["user_id"] = user_id
+    session["_fresh"] = True
+    if remember:
+        session["remember"] = "set"
+    current_app.login_manager.reload_user()
+    user_logged_in.send(current_app._get_current_object(), user=_get_user())
+    return True
+
+
+def _actually_logout_user(session):
+
+    if "user_id" in session:
+        del session["user_id"]
+    if "_fresh" in session:
+        del session["_fresh"]
+    cookie_name = current_app.config.get("REMEMBER_COOKIE_NAME", COOKIE_NAME)
+    if cookie_name in request.cookies:
+        session["remember"] = "clear"
+    user = _get_user()
+    if user and (not user.is_anonymous()):
+        user_logged_out.send(current_app._get_current_object(), user=user)
+    current_app.login_manager.reload_user()
+    return True
+
+
 def login_user(user, remember=False, force=False):
     """
     Logs a user in. You should pass the actual user object to this. If the
@@ -446,16 +475,7 @@ def login_user(user, remember=False, force=False):
     :param force: If the user is inactive, setting this to `True` will log
                   them in regardless.
     """
-    if (not force) and (not user.is_active()):
-        return False
-    user_id = user.get_id()
-    session["user_id"] = user_id
-    session["_fresh"] = True
-    if remember:
-        session["remember"] = "set"
-    current_app.login_manager.reload_user()
-    user_logged_in.send(current_app._get_current_object(), user=_get_user())
-    return True
+    return _actually_login_user(session, user, remember, force)
 
 
 def logout_user():
@@ -463,18 +483,29 @@ def logout_user():
     Logs a user out. (You do not need to pass the actual user.) This will
     also clean up the remember me cookie if it exists.
     """
-    if "user_id" in session:
-        del session["user_id"]
-    if "_fresh" in session:
-        del session["_fresh"]
-    cookie_name = current_app.config.get("REMEMBER_COOKIE_NAME", COOKIE_NAME)
-    if cookie_name in request.cookies:
-        session["remember"] = "clear"
-    user = _get_user()
-    if user and (not user.is_anonymous()):
-        user_logged_out.send(current_app._get_current_object(), user=user)
-    current_app.login_manager.reload_user()
-    return True
+    return _actually_logout_user(session)
+
+
+def test_login_user(test_client, user, remember=False, force=False):
+    """
+    Logs in an user. This is used in the unittesting environment where we need
+    a specific session context in order to correctly set sessions.
+
+    :param test_client: A test client instance.
+    """
+    with test_client.session_transaction() as sess:
+        return _actually_login_user(sess, user, remember, force)
+
+
+def test_logout_user(test_client):
+    """
+    Logs out an user. This is used in the unittesting environment where we
+    need a specific session context in order to correctly set sessions.
+
+    :param test_client: A test client instance.
+    """
+    with test_client.session_transaction() as sess:
+        return _actually_logout_user(sess)
 
 
 def confirm_login():
