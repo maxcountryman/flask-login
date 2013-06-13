@@ -22,15 +22,24 @@ import sys
 
 from setuptools import setup
 
-from flask_login import __version__
-
 if sys.argv[-1] == 'test':
     status = os.system('make check')
     status >>= 8
     sys.exit(status)
 
+
+def get_version(version_tuple):
+    if not isinstance(version_tuple[-1], int):
+        return '.'.join(map(str, version_tuple[:-1])) + version_tuple[-1]
+    return '.'.join(map(str, version_tuple))
+
+module_path = os.path.join(os.path.dirname(__file__), 'flask_login.py')
+version_line = list(filter(lambda l: l.startswith('__version_info__'), open(module_path)))[0]
+
+VERSION = get_version(eval(version_line.split('=')[-1]))
+
 setup(name='Flask-Login',
-      version=__version__,
+      version=VERSION,
       url='https://github.com/maxcountryman/flask-login',
       license='MIT',
       author='Matthew Frazier',
