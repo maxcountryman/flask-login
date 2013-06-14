@@ -129,11 +129,17 @@ def make_secure_token(*args, **options):
 
 
 def _create_identifier():
-    base = unicode("%s|%s" % (request.remote_addr,
-                              request.headers.get("User-Agent")), 'utf8', errors='replace')
+    ua = request.headers.get('User-Agent')
+
+    if not isinstance(ua, unicode):
+        ua = ua.decode('utf-8', 'replace')
+
+    base = u"%s|%s" % (request.remote_addr, ua)
+
     hsh = md5()
     hsh.update(base.encode("utf8"))
-    return hsh.digest()
+
+    return hsh.hexdigest()
 
 
 #: The default name of the "remember me" cookie (``remember_token``)
