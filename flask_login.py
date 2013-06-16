@@ -32,15 +32,15 @@ import hmac
 import warnings
 import sys
 
-if sys.version < '3':
+if sys.version < '3': #pragma: no cover
     from urlparse import urlparse, urlunparse
-else:
+else: #pragma: no cover
     from urllib.parse import urlparse, urlunparse
 
 _signals = Namespace()
 
-#: A proxy for the current user.
-current_user = LocalProxy(lambda: _request_ctx_stack.top.user)
+#: A proxy for the current user. If no user is logged in, this will be an anonymous user
+current_user = LocalProxy(lambda: _get_user() or current_app.login_manager.anonymous_user())
 
 #: The default name of the 'remember me' cookie (``remember_token``)
 COOKIE_NAME = 'remember_token'
@@ -376,14 +376,27 @@ class UserMixin(object):
         return False
 
     def get_id(self):
-        raise NotImplementedError
+        try:
+            return unicode(self.id)
+        except AttributeError:
+            raise NotImplementedError('No `id` attribute - override `get_id`')
 
     def __eq__(self, other):
-        raise NotImplementedError
+        """
+        Checks the equality of two `UserMixin` objects using `get_id`.
+        """
+        if isinstance(other, UserMixin):
+            return self.get_id() == other.get_id()
+        return NotImplemented
 
     def __ne__(self, other):
-        raise NotImplementedError
-
+        """
+        Checks the inequality of two `UserMixin` objects using `get_id`.
+        """
+        equal = self.__eq__(other)
+        if equal is NotImplemented:
+            return NotImplemented
+        return not equal
 
 class AnonymousUserMixin(object):
     '''
@@ -425,7 +438,7 @@ def decode_cookie(cookie):
         payload, digest = cookie.rsplit(u'|', 1)
         digest = digest.encode('ascii')
     except ValueError:
-        pass
+        return None
 
     if _cookie_digest(payload) == digest:
         return payload
@@ -447,7 +460,7 @@ def make_next_param(login_url, current_url):
     if (not l.scheme or l.scheme == c.scheme) and \
             (not l.netloc or l.netloc == c.netloc):
         return urlunparse(('', '', c.path, c.params, c.query, ''))
-    return c
+    return current_url
 
 
 def login_url(login_view, next_url=None, next_field='next'):
@@ -474,14 +487,11 @@ def login_url(login_view, next_url=None, next_field='next'):
     if next_url is None:
         return base
 
-    p = urlparse(base)
-    d = url_decode(p.query)
-
-    d[next_field] = make_next_param(base, next_url)
-    p.query = url_encode(d, sort=True)
-
-    return urlunparse(p)
-
+    parts = list(urlparse(base))
+    md = url_decode(parts[4])
+    md[next_field] = make_next_param(base, next_url)
+    parts[4] = url_encode(md, sort=True)
+    return urlunparse(parts)
 
 def make_secure_token(*args, **options):
     '''
@@ -544,7 +554,7 @@ def login_user(user, remember=False, force=False):
     if remember:
         session['remember'] = 'set'
 
-    current_app.login_manager.reload_user()
+    _request_ctx_stack.top.user = user
     user_logged_in.send(current_app._get_current_object(), user=_get_user())
     return True
 
