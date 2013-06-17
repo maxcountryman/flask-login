@@ -321,6 +321,8 @@ class LoginManager(object):
         return False
 
     def _load_from_cookie(self, cookie):
+        user_id = None #initialize user_id to None to prevent UnboundLocalError
+        
         if self.token_callback:
             # ensure `user_id` is not unbound
             user_id = None
