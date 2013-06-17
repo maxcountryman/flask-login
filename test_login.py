@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-import unittest
+import unittest2 as unittest
 
 from datetime import timedelta, datetime
 from contextlib import contextmanager
 
 from flask import Flask, Response, session, get_flashed_messages
+
 from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
                              make_secure_token, current_user, login_user,
                              logout_user, user_logged_in, user_logged_out,
