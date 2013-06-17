@@ -44,11 +44,17 @@ _signals = Namespace()
 current_user = LocalProxy(lambda: _get_user() or
                           current_app.login_manager.anonymous_user())
 
-#: The default name of the 'remember me' cookie (``remember_token``)
+#: The default name of the "remember me" cookie (``remember_token``)
 COOKIE_NAME = 'remember_token'
 
-#: The default time before the 'remember me' cookie expires (365 days).
+#: The default time before the "remember me" cookie expires (365 days).
 COOKIE_DURATION = timedelta(days=365)
+
+#: Whether the "remember me" cookie requires Secure; defaults to ``None``
+COOKIE_SECURE = None
+
+#: Whether the "remember me" cookie uses HttpOnly or not; defaults to ``False``
+COOKIE_HTTPONLY = False
 
 #: The default flash message to display when users need to log in.
 LOGIN_MESSAGE = u'Please log in to access this page.'
@@ -346,6 +352,9 @@ class LoginManager(object):
         duration = config.get('REMEMBER_COOKIE_DURATION', COOKIE_DURATION)
         domain = config.get('REMEMBER_COOKIE_DOMAIN')
 
+        secure = config.get('REMEMBER_COOKIE_SECURE', COOKIE_SECURE)
+        httponly = config.get('REMEMBER_COOKIE_HTTPONLY', COOKIE_HTTPONLY)
+
         # prepare data
         if self.token_callback:
             data = current_user.get_auth_token()
@@ -354,7 +363,12 @@ class LoginManager(object):
         expires = datetime.utcnow() + duration
 
         # actually set it
-        response.set_cookie(cookie_name, data, expires=expires, domain=domain)
+        response.set_cookie(cookie_name,
+                            value=data,
+                            expires=expires,
+                            domain=domain,
+                            secure=secure,
+                            httponly=httponly)
 
     def _clear_cookie(self, response):
         config = current_app.config
