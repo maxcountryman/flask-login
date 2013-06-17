@@ -1,23 +1,25 @@
 # -*- coding: utf-8 -*-
-import time
 import unittest
+
 from datetime import timedelta, datetime
 from contextlib import contextmanager
 
-from flask import Flask, Response, redirect, session, get_flashed_messages
-from flask.ext.login import (
-    LoginManager, UserMixin, AnonymousUserMixin, make_secure_token,
-    current_user, login_user, logout_user, user_logged_in, user_logged_out,
-    user_loaded_from_cookie, user_login_confirmed, user_unauthorized,
-    user_needs_refresh, make_next_param, login_url, login_fresh,
-    login_required, session_protected, fresh_login_required, confirm_login,
-    encode_cookie, decode_cookie
-)
+from flask import Flask, Response, session, get_flashed_messages
+from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
+                             make_secure_token, current_user, login_user,
+                             logout_user, user_logged_in, user_logged_out,
+                             user_loaded_from_cookie, user_login_confirmed,
+                             user_unauthorized, user_needs_refresh,
+                             make_next_param, login_url, login_fresh,
+                             login_required, session_protected,
+                             fresh_login_required, confirm_login,
+                             encode_cookie, decode_cookie,
+                             _user_context_processor)
 
 
 @contextmanager
 def listen_to(signal):
-    """ Context Manager that listens to signals and records emissions
+    ''' Context Manager that listens to signals and records emissions
 
     Example:
 
@@ -30,17 +32,17 @@ def listen_to(signal):
         # Of course, you can always just look at the list yourself
         self.assertEqual(1, len(listener.heard))
 
-    """
+    '''
     class _SignalsCaught(object):
         def __init__(self):
             self.heard = []
 
         def add(self, *args, **kwargs):
-            """ The actual handler of the signal. """
+            ''' The actual handler of the signal. '''
             self.heard.append((args, kwargs))
 
         def assert_heard_one(self, *args, **kwargs):
-            """ The signal fired once, and with the arguments given """
+            ''' The signal fired once, and with the arguments given '''
             if len(self.heard) == 0:
                 raise AssertionError('No signals were fired')
             elif len(self.heard) > 1:
@@ -59,6 +61,7 @@ def listen_to(signal):
     finally:
         signal.disconnect(results.add)
 
+
 class User(UserMixin):
     def __init__(self, name, id, active=True):
         self.id = id
@@ -74,12 +77,14 @@ class User(UserMixin):
     def get_auth_token(self):
         return make_secure_token(self.name, key='deterministic')
 
+
 notch = User(u'Notch', 1)
 steve = User(u'Steve', 2)
 creeper = User(u'Creeper', 3, False)
 
 USERS = {1: notch, 2: steve, 3: creeper}
 USER_TOKENS = dict((u.get_auth_token(), u) for u in USERS.itervalues())
+
 
 class StaticTestCase(unittest.TestCase):
     def test_static_loads_anonymous(self):
@@ -89,11 +94,12 @@ class StaticTestCase(unittest.TestCase):
         lm.init_app(app)
 
         with app.test_client() as c:
-            r = c.get('/static/favicon.ico')
+            c.get('/static/favicon.ico')
             self.assertTrue(current_user.is_anonymous())
 
+
 class LoginTestCase(unittest.TestCase):
-    """ Tests for results of the login_user function """
+    ''' Tests for results of the login_user function '''
 
     def setUp(self):
         self.app = Flask(__name__)
@@ -139,8 +145,7 @@ class LoginTestCase(unittest.TestCase):
         def username():
             if current_user.is_authenticated():
                 return current_user.name
-            else:
-                return u'Anonymous'
+            return u'Anonymous'
 
         @self.app.route('/is-fresh')
         def is_fresh():
@@ -239,7 +244,6 @@ class LoginTestCase(unittest.TestCase):
     def test_unauthorized_flashes_message_with_login_view(self):
         self.login_manager.login_view = '/login'
 
-        category_filter = [self.login_manager.login_message_category]
         expected_message = self.login_manager.login_message = u'Log in!'
         expected_category = self.login_manager.login_message_category = 'login'
 
@@ -274,7 +278,7 @@ class LoginTestCase(unittest.TestCase):
             result = c.get('/secret')
             self.assertEqual(result.status_code, 302)
             self.assertEqual(result.location,
-                'http://localhost/login-notch?next=%2Fsecret')
+                             'http://localhost/login-notch?next=%2Fsecret')
 
     #
     # Session Persistence/Freshness
@@ -298,7 +302,7 @@ class LoginTestCase(unittest.TestCase):
         # will seem as if the user is no longer valid
         @self.login_manager.user_loader
         def new_user_loader(user_id):
-            return None
+            return
 
         with self.app.test_client() as c:
             # Successfully logs in
@@ -310,7 +314,7 @@ class LoginTestCase(unittest.TestCase):
     def test_authentication_is_fresh(self):
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
-            result  = c.get('/is-fresh')
+            result = c.get('/is-fresh')
             self.assertEqual(u'True', result.data)
 
     def test_remember_me(self):
@@ -331,10 +335,10 @@ class LoginTestCase(unittest.TestCase):
 
             # TODO: Is there a better way to test this?
             self.assertTrue(domain in c.cookie_jar._cookies,
-                    'Custom domain not found as cookie domain')
+                            'Custom domain not found as cookie domain')
             domain_cookie = c.cookie_jar._cookies[domain]
             self.assertTrue(name in domain_cookie['/'],
-                    'Custom name not found as cookie name')
+                            'Custom name not found as cookie name')
             cookie = domain_cookie['/'][name]
 
             expiration_date = datetime.fromtimestamp(cookie.expires)
@@ -395,7 +399,7 @@ class LoginTestCase(unittest.TestCase):
             c.get('/login-notch-remember')
             c.get('/needs-refresh')
             msgs = get_flashed_messages(category_filter=category_filter)
-            self.assertTrue(self.login_manager.needs_refresh_message in msgs)
+            self.assertIn(self.login_manager.needs_refresh_message, msgs)
 
     def test_needs_refresh_aborts_403(self):
         with self.app.test_client() as c:
@@ -413,8 +417,8 @@ class LoginTestCase(unittest.TestCase):
             c.get('/login-notch-remember')
             result = c.get('/needs-refresh')
             self.assertEqual(result.status_code, 302)
-            self.assertEqual(result.location,
-                'http://localhost/refresh-view?next=%2Fneeds-refresh')
+            expected = 'http://localhost/refresh-view?next=%2Fneeds-refresh'
+            self.assertEqual(result.location, expected)
 
     def test_confirm_login(self):
         with self.app.test_client() as c:
@@ -437,7 +441,8 @@ class LoginTestCase(unittest.TestCase):
         self.app.config['SESSION_PROTECTION'] = 'basic'
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
-            username_result = c.get('/username', headers=[('User-Agent', 'different')])
+            username_result = c.get('/username',
+                                    headers=[('User-Agent', 'different')])
             self.assertEqual(u'Notch', username_result.data)
             fresh_result = c.get('/is-fresh')
             self.assertEqual(u'False', fresh_result.data)
@@ -450,12 +455,13 @@ class LoginTestCase(unittest.TestCase):
             with listen_to(session_protected) as listener:
                 c.get('/username', headers=[('User-Agent', 'different')])
                 listener.assert_heard_one(self.app)
-    
+
     def test_permanent_strong_session_protection_marks_session_unfresh(self):
         self.app.config['SESSION_PROTECTION'] = 'strong'
         with self.app.test_client() as c:
             c.get('/login-notch-permanent')
-            username_result = c.get('/username', headers=[('User-Agent', 'different')])
+            username_result = c.get('/username', headers=[('User-Agent',
+                                                           'different')])
             self.assertEqual(u'Notch', username_result.data)
             fresh_result = c.get('/is-fresh')
             self.assertEqual(u'False', fresh_result.data)
@@ -468,15 +474,16 @@ class LoginTestCase(unittest.TestCase):
             with listen_to(session_protected) as listener:
                 c.get('/username', headers=[('User-Agent', 'different')])
                 listener.assert_heard_one(self.app)
-        
+
     def test_session_protection_strong_deletes_session(self):
         self.app.config['SESSION_PROTECTION'] = 'strong'
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
-            username_result = c.get('/username', headers=[('User-Agent', 'different')])
+            username_result = c.get('/username', headers=[('User-Agent',
+                                                           'different')])
             self.assertEqual(u'Anonymous', username_result.data)
 
-    def test_session_protection_basic_fires_signal(self):
+    def test_session_protection_strong_fires_signal_user_agent(self):
         self.app.config['SESSION_PROTECTION'] = 'strong'
 
         with self.app.test_client() as c:
@@ -513,9 +520,9 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
             self._delete_session(c)
-            self.app.config["SECRET_KEY"] = "ima change this now"
+            self.app.config['SECRET_KEY'] = 'ima change this now'
 
-            result = c.get("/username")
+            result = c.get('/username')
             self.assertEqual(result.data, u'Notch')
 
     #
@@ -533,7 +540,7 @@ class LoginTestCase(unittest.TestCase):
 
             c.get('/login-notch')
             result2 = c.get('/protected')
-            self.assertTrue('Access Granted' in result2.data) 
+            self.assertIn('Access Granted', result2.data)
 
     def test_fresh_login_required_decorator(self):
         @self.app.route('/very-protected')
@@ -551,52 +558,64 @@ class LoginTestCase(unittest.TestCase):
 
             self._delete_session(c)
             stale_result = c.get('/very-protected')
-            self.assertEqual(result.status_code, 401)
+            self.assertEqual(stale_result.status_code, 403)
 
             c.get('/confirm-login')
             refreshed_result = c.get('/very-protected')
-            self.assertEqual(u'Access Granted', logged_in_result.data)
-                
+            self.assertEqual(u'Access Granted', refreshed_result.data)
 
     #
     # Misc
     #
     def test_chinese_user_agent(self):
         with self.app.test_client() as c:
-            result = c.get("/", headers=[("User-Agent", u"中文")])
+            result = c.get('/', headers=[('User-Agent', u'中文')])
             self.assertEqual(u'Welcome!', result.data)
 
     def test_russian_cp1251_user_agent(self):
         with self.app.test_client() as c:
-            headers = [("User-Agent", u'ЯЙЮя'.encode('cp1251'))]
-            response = c.get("/", headers=headers)
+            headers = [('User-Agent', u'ЯЙЮя'.encode('cp1251'))]
+            response = c.get('/', headers=headers)
             self.assertEqual(response.data, u'Welcome!')
+
+    def test_make_secure_token_default_key(self):
+        with self.app.test_request_context():
+            self.assertEqual(make_secure_token('foo'),
+                             '0f05743a2b617b2625362ab667c0dbdf4c9ec13a')
+
+    def test_user_context_processor(self):
+        self.assertEqual(_user_context_processor(), {'current_user': None})
+
 
 class TestLoginUrlGeneration(unittest.TestCase):
     def test_make_next_param(self):
         self.assertEqual('/profile',
-            make_next_param('/login', 'http://localhost/profile'))
-        
-        self.assertEqual('http://localhost/profile',
-            make_next_param('https://localhost/login', 'http://localhost/profile'))
+                         make_next_param('/login', 'http://localhost/profile'))
 
         self.assertEqual('http://localhost/profile',
-            make_next_param('http://accounts.localhost/login', 'http://localhost/profile'))
+                         make_next_param('https://localhost/login',
+                                         'http://localhost/profile'))
+
+        self.assertEqual('http://localhost/profile',
+                         make_next_param('http://accounts.localhost/login',
+                                         'http://localhost/profile'))
 
     def test_login_url_generation(self):
-        PROTECTED = "http://localhost/protected"
+        PROTECTED = 'http://localhost/protected'
 
-        self.assertEqual('/login?n=%2Fprotected',
-            login_url('/login', PROTECTED, 'n'))
+        self.assertEqual('/login?n=%2Fprotected', login_url('/login',
+                                                            PROTECTED, 'n'))
 
-        self.assertEqual('/login?next=%2Fprotected',
-            login_url('/login', PROTECTED))
+        self.assertEqual('/login?next=%2Fprotected', login_url('/login',
+                                                               PROTECTED))
 
-        self.assertEqual('https://auth.localhost/login?next=http%3A%2F%2Flocalhost%2Fprotected',
-            login_url('https://auth.localhost/login', PROTECTED))
-                 
+        expected = 'https://auth.localhost/login' + \
+                   '?next=http%3A%2F%2Flocalhost%2Fprotected'
+        self.assertEqual(expected,
+                         login_url('https://auth.localhost/login', PROTECTED))
+
         self.assertEqual('/login?affil=cgnu&next=%2Fprotected',
-            login_url('/login?affil=cgnu', PROTECTED))
+                         login_url('/login?affil=cgnu', PROTECTED))
 
     def test_login_url_generation_with_view(self):
         app = Flask(__name__)
@@ -609,35 +628,42 @@ class TestLoginUrlGeneration(unittest.TestCase):
 
         with app.test_request_context():
             self.assertEqual('/login?next=%2Fprotected',
-                login_url('login', '/protected'))
+                             login_url('login', '/protected'))
+
+    def test_login_url_no_next_url(self):
+        self.assertEqual(login_url('/foo'), '/foo')
+
 
 class CookieEncodingTestCase(unittest.TestCase):
     def test_cookie_encoding(self):
         app = Flask(__name__)
         app.config['SECRET_KEY'] = 'deterministic'
 
-        COOKIE = u"1|7d276051c1eec578ed86f6b8478f7f7d803a7970"
+        COOKIE = u'1|7d276051c1eec578ed86f6b8478f7f7d803a7970'
 
         with app.test_request_context():
             self.assertEqual(COOKIE, encode_cookie(u'1'))
             self.assertEqual(u'1', decode_cookie(COOKIE))
-            self.assertEqual(None, decode_cookie(u'Foo|BAD_BASH'))
-            self.assertEqual(None, decode_cookie(u'no bar'))
-    
+            self.assertIsNone(decode_cookie(u'Foo|BAD_BASH'))
+            self.assertIsNone(decode_cookie(u'no bar'))
+
+
 class ImplicitIdUser(UserMixin):
     def __init__(self, id):
         self.id = id
+
 
 class ExplicitIdUser(UserMixin):
     def __init__(self, name):
         self.name = name
 
+
 class UserMixinTestCase(unittest.TestCase):
     def test_default_values(self):
         user = ImplicitIdUser(1)
-        self.assertEqual(True, user.is_active())
-        self.assertEqual(True, user.is_authenticated())
-        self.assertEqual(False, user.is_anonymous())
+        self.assertTrue(user.is_active())
+        self.assertTrue(user.is_authenticated())
+        self.assertFalse(user.is_anonymous())
 
     def test_get_id_from_id_attribute(self):
         user = ImplicitIdUser(1)
@@ -652,6 +678,7 @@ class UserMixinTestCase(unittest.TestCase):
         same = ImplicitIdUser(1)
         different = ImplicitIdUser(2)
 
+        # Explicitly test the equality operator
         self.assertTrue(first == same)
         self.assertFalse(first == different)
         self.assertFalse(first != same)
@@ -660,11 +687,12 @@ class UserMixinTestCase(unittest.TestCase):
         self.assertFalse(first == u'1')
         self.assertTrue(first != u'1')
 
+
 class AnonymousUserTestCase(unittest.TestCase):
     def test_values(self):
         user = AnonymousUserMixin()
 
-        self.assertEqual(False, user.is_active())
-        self.assertEqual(False, user.is_authenticated())
-        self.assertEqual(True, user.is_anonymous())
-
+        self.assertFalse(user.is_active())
+        self.assertFalse(user.is_authenticated())
+        self.assertTrue(user.is_anonymous())
+        self.assertIsNone(user.get_id())
