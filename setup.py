@@ -22,7 +22,11 @@ import sys
 
 from setuptools import setup
 
-from flask_login import __version__
+module_path = os.path.join(os.path.dirname(__file__), 'flask_login.py')
+version_line = filter(lambda l: l.startswith('__version_info__'),
+                      open(module_path))[0]
+
+__version__ = '.'.join(eval(version_line.split('__version_info__ = ')[-1]))
 
 if sys.argv[-1] == 'test':
     status = os.system('make check')
