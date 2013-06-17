@@ -1,0 +1,8 @@
+flask==0.10.1
+blinker==1.2
+coverage==3.6
+nose==1.2.1
+pep8==1.4.2
+pyflakes==0.6.1
+yanc==0.2.3
+werkzeug==0.9.1

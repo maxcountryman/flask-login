@@ -37,6 +37,7 @@ if sys.version < '3':  # pragma: no cover
     from urlparse import urlparse, urlunparse
 else:  # pragma: no cover
     from urllib.parse import urlparse, urlunparse
+    unicode = str
 
 _signals = Namespace()
 
@@ -453,7 +454,8 @@ def decode_cookie(cookie):
     '''
     try:
         payload, digest = cookie.rsplit(u'|', 1)
-        digest = digest.encode('ascii')
+        if hasattr(digest, 'decode'):
+            digest = digest.decode('ascii')
     except ValueError:
         return
 
@@ -530,11 +532,19 @@ def make_secure_token(*args, **options):
     if key is None:
         key = current_app.config['SECRET_KEY']
 
-    l = [s.encode('utf-8') if isinstance(s, unicode) else s for s in args]
+    if hasattr(key, 'encode'):  # pragma: no cover
+        key = key.encode('utf-8')  # ensure bytes
 
-    payload = '\0'.join(l)
+    l = [s if isinstance(s, bytes) else s.encode('utf-8') for s in args]
 
-    return hmac.new(key, payload, sha1).hexdigest().decode('utf-8')
+    payload = b'\0'.join(l)
+
+    token_value = hmac.new(key, payload, sha1).hexdigest()
+
+    if hasattr(token_value, 'decode'):  # pragma: no cover
+        token_value = token_value.decode('utf-8')  # ensure bytes
+
+    return token_value
 
 
 def login_fresh():
@@ -674,13 +684,17 @@ def _cookie_digest(payload, key=None):
     if key is None:
         key = current_app.config['SECRET_KEY']
 
+    if hasattr(key, 'encode'):
+        key = key.encode('utf-8')  # ensure bytes
+
     return hmac.new(key, payload.encode('utf-8'), sha1).hexdigest()
 
 
 def _create_identifier():
     base = '{0}|{1}'.format(request.remote_addr,
                             request.headers.get('User-Agent'))
-    base = unicode(base, 'utf-8', errors='replace')
+    if str is bytes:
+        base = unicode(base, 'utf-8', errors='replace')
     h = md5()
     h.update(base.encode('utf8'))
     return h.hexdigest()
