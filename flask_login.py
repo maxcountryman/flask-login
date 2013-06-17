@@ -32,15 +32,17 @@ import hmac
 import warnings
 import sys
 
-if sys.version < '3': #pragma: no cover
+if sys.version < '3':  # pragma: no cover
     from urlparse import urlparse, urlunparse
-else: #pragma: no cover
+else:  # pragma: no cover
     from urllib.parse import urlparse, urlunparse
 
 _signals = Namespace()
 
-#: A proxy for the current user. If no user is logged in, this will be an anonymous user
-current_user = LocalProxy(lambda: _get_user() or current_app.login_manager.anonymous_user())
+#: A proxy for the current user. If no user is logged in, this will be an
+#: anonymous user
+current_user = LocalProxy(lambda: _get_user() or
+                          current_app.login_manager.anonymous_user())
 
 #: The default name of the 'remember me' cookie (``remember_token``)
 COOKIE_NAME = 'remember_token'
@@ -111,7 +113,7 @@ class LoginManager(object):
 
         self.needs_refresh_callback = None
 
-    def setup_app(self, app, add_context_processor=True):
+    def setup_app(self, app, add_context_processor=True):  # pragma: no cover
         '''
         This method has been deprecated. Please use
         :meth:`LoginManager.init_app` instead.
@@ -382,21 +384,22 @@ class UserMixin(object):
             raise NotImplementedError('No `id` attribute - override `get_id`')
 
     def __eq__(self, other):
-        """
+        '''
         Checks the equality of two `UserMixin` objects using `get_id`.
-        """
+        '''
         if isinstance(other, UserMixin):
             return self.get_id() == other.get_id()
         return NotImplemented
 
     def __ne__(self, other):
-        """
+        '''
         Checks the inequality of two `UserMixin` objects using `get_id`.
-        """
+        '''
         equal = self.__eq__(other)
         if equal is NotImplemented:
             return NotImplemented
         return not equal
+
 
 class AnonymousUserMixin(object):
     '''
@@ -412,7 +415,7 @@ class AnonymousUserMixin(object):
         return True
 
     def get_id(self):
-        return None
+        return
 
 
 def encode_cookie(payload):
@@ -438,7 +441,7 @@ def decode_cookie(cookie):
         payload, digest = cookie.rsplit(u'|', 1)
         digest = digest.encode('ascii')
     except ValueError:
-        return None
+        return
 
     if _cookie_digest(payload) == digest:
         return payload
@@ -492,6 +495,7 @@ def login_url(login_view, next_url=None, next_field='next'):
     md[next_field] = make_next_param(base, next_url)
     parts[4] = url_encode(md, sort=True)
     return urlunparse(parts)
+
 
 def make_secure_token(*args, **options):
     '''
