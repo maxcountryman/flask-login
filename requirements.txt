@@ -1,0 +1,2 @@
+flask==0.9
+werkzeug==0.8.3
