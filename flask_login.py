@@ -664,7 +664,7 @@ def _cookie_digest(payload, key=None):
 
 
 def _create_identifier():
-    ua = request.headers.get('User-Agent')
+    ua = request.headers.get('User-Agent', '')
 
     if not isinstance(ua, unicode):
         ua = ua.decode('utf-8', 'replace')
