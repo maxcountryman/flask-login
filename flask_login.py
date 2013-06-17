@@ -664,12 +664,17 @@ def _cookie_digest(payload, key=None):
 
 
 def _create_identifier():
-    base = '{0}|{1}'.format(request.remote_addr,
-                            request.headers.get('User-Agent'))
-    base = unicode(base, 'utf-8', errors='replace')
-    h = md5()
-    h.update(base.encode('utf8'))
-    return h.hexdigest()
+    ua = request.headers.get('User-Agent')
+
+    if not isinstance(ua, unicode):
+        ua = ua.decode('utf-8', 'replace')
+
+    base = u"%s|%s" % (request.remote_addr, ua)
+
+    hsh = md5()
+    hsh.update(base.encode("utf8"))
+
+    return hsh.hexdigest()
 
 
 def _user_context_processor():
