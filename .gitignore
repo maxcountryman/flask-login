@@ -1,2 +1,3 @@
 !.gitignore
+.tox/
 tests_output/
