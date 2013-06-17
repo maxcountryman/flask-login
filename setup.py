@@ -23,8 +23,8 @@ import sys
 from setuptools import setup
 
 module_path = os.path.join(os.path.dirname(__file__), 'flask_login.py')
-version_line = filter(lambda l: l.startswith('__version_info__'),
-                      open(module_path))[0]
+version_line = [line for line in open(module_path)
+                if line.startswith('__version_info__')][0]
 
 __version__ = '.'.join(eval(version_line.split('__version_info__ = ')[-1]))
 
