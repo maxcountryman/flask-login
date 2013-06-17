@@ -277,13 +277,6 @@ class LoginManager(object):
                 ctx.user = user
 
     def _load_user(self):
-        if current_app.static_url_path is not None \
-                and request.path.startswith(current_app.static_url_path):
-
-            # load up an anonymous user for static pages
-            _request_ctx_stack.top.user = self.anonymous_user()
-            return
-
         config = current_app.config
         if config.get('SESSION_PROTECTION', self.session_protection):
             deleted = self._session_protection()
