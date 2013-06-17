@@ -418,6 +418,23 @@ class AnonymousUserMixin(object):
         return
 
 
+def _constant_time_compare(a, b):
+    '''
+    Returns True if the two strings are equal, False otherwise.
+
+    The time taken is independent of the number of characters that match.
+    '''
+
+    if len(a) != len(b):
+        return False
+
+    result = 0
+    for x, y in zip(a, b):
+        result |= ord(x) ^ ord(y)
+
+    return result == 0
+
+
 def encode_cookie(payload):
     '''
     This will encode a ``unicode`` value into a cookie, and sign that cookie
@@ -443,7 +460,7 @@ def decode_cookie(cookie):
     except ValueError:
         return
 
-    if _cookie_digest(payload) == digest:
+    if _constant_time_compare(_cookie_digest(payload), digest):
         return payload
 
 
