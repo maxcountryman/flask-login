@@ -10,7 +10,7 @@
     :license: MIT/X11, see LICENSE for more details.
 '''
 
-__version_info__ = ('0', '2', '2')
+__version_info__ = ('0', '2', '3')
 __version__ = '.'.join(__version_info__)
 __author__ = 'Matthew Frazier'
 __license__ = 'MIT/X11'
@@ -316,20 +316,21 @@ class LoginManager(object):
 
     def _load_from_cookie(self, cookie):
         if self.token_callback:
-            # ensure `user_id` is not unbound
-            user_id = None
-
             user = self.token_callback(cookie)
             if user is not None:
-                user_id = user.get_id()
+                session['user_id'] = user.get_id()
+                session['_fresh'] = False
+                _request_ctx_stack.top.user = user
+
+            else:  # pragma: no cover
+                self.reload_user()
         else:
             user_id = decode_cookie(cookie)
+            if user_id is not None:
+                session['user_id'] = user_id
+                session['_fresh'] = False
 
-        if user_id is not None:
-            session['user_id'] = user_id
-            session['_fresh'] = False
             self.reload_user()
-
             app = current_app._get_current_object()
             user_loaded_from_cookie.send(app, user=_get_user())
 
