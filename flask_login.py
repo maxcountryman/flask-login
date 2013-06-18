@@ -37,6 +37,7 @@ if sys.version < '3':  # pragma: no cover
     from urlparse import urlparse, urlunparse
 else:  # pragma: no cover
     from urllib.parse import urlparse, urlunparse
+    unicode = str
 
 _signals = Namespace()
 
@@ -390,10 +391,7 @@ class UserMixin(object):
 
     def get_id(self):
         try:
-            if str is bytes:
-                return unicode(self.id)
-            else:
-                return str(self.id)
+            return unicode(self.id)
         except AttributeError:
             raise NotImplementedError('No `id` attribute - override `get_id`')
 
