@@ -492,7 +492,8 @@ class LoginTestCase(unittest.TestCase):
             c.get('/login-notch-remember')
             username_result = c.get('/username', headers=[('User-Agent',
                                                            'different')])
-            self.assertEqual(u'Anonymous',username_result.data.decode('utf-8'))
+            self.assertEqual(u'Anonymous',
+                             username_result.data.decode('utf-8'))
 
     def test_session_protection_strong_fires_signal_user_agent(self):
         self.app.config['SESSION_PROTECTION'] = 'strong'
