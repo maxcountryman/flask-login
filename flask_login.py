@@ -24,6 +24,7 @@ from flask.signals import Namespace
 from werkzeug.local import LocalProxy
 from werkzeug.security import safe_str_cmp
 from werkzeug.urls import url_decode, url_encode
+from werkzeug.security import safe_str_cmp
 
 from datetime import datetime, timedelta
 from functools import wraps
