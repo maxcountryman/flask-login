@@ -322,7 +322,7 @@ class LoginManager(object):
                 session['_fresh'] = False
                 _request_ctx_stack.top.user = user
 
-            else:  # pragma: no cover
+            else:
                 self.reload_user()
         else:
             user_id = decode_cookie(cookie)

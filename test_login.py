@@ -502,7 +502,7 @@ class LoginTestCase(unittest.TestCase):
             return USER_TOKENS.get(token)
 
         with self.app.test_client() as c:
-            c.get('login-notch-remember')
+            c.get('/login-notch-remember')
             self._delete_session(c)
 
             # Test that remember me functionality still works
@@ -525,6 +525,18 @@ class LoginTestCase(unittest.TestCase):
 
             result = c.get('/username')
             self.assertEqual(result.data, u'Notch')
+
+    def test_custom_token_loader_with_no_user(self):
+        @self.login_manager.token_loader
+        def load_token(token):
+            return
+
+        with self.app.test_client() as c:
+            c.get('/login-notch-remember')
+            self._delete_session(c)
+
+            result = c.get('/username')
+            self.assertEqual(result.data, u'Anonymous')
 
     #
     # View Decorators
