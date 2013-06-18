@@ -22,6 +22,7 @@ from flask import (_request_ctx_stack, abort, current_app, flash, redirect,
 from flask.signals import Namespace
 
 from werkzeug.local import LocalProxy
+from werkzeug.security import safe_str_cmp
 from werkzeug.urls import url_decode, url_encode
 
 from datetime import datetime, timedelta
@@ -428,23 +429,6 @@ class AnonymousUserMixin(object):
         return
 
 
-def _constant_time_compare(a, b):
-    '''
-    Returns True if the two strings are equal, False otherwise.
-
-    The time taken is independent of the number of characters that match.
-    '''
-
-    if len(a) != len(b):
-        return False
-
-    result = 0
-    for x, y in zip(a, b):
-        result |= ord(x) ^ ord(y)
-
-    return result == 0
-
-
 def encode_cookie(payload):
     '''
     This will encode a ``unicode`` value into a cookie, and sign that cookie
@@ -470,7 +454,7 @@ def decode_cookie(cookie):
     except ValueError:
         return
 
-    if _constant_time_compare(_cookie_digest(payload), digest):
+    if safe_str_cmp(_cookie_digest(payload), digest):
         return payload
 
 
