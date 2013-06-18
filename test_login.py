@@ -121,7 +121,7 @@ class LoginTestCase(unittest.TestCase):
             return self.login_manager.unauthorized()
 
         @self.app.route('/login-notch')
-        def login():
+        def login_notch():
             return unicode(login_user(notch))
 
         @self.app.route('/login-notch-remember')
@@ -279,7 +279,7 @@ class LoginTestCase(unittest.TestCase):
             result = c.get('/secret')
             self.assertEqual(result.status_code, 302)
             self.assertEqual(result.location,
-                             'http://localhost/login-notch?next=%2Fsecret')
+                             'http://localhost/login?next=%2Fsecret')
 
     #
     # Session Persistence/Freshness
