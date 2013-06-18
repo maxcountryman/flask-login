@@ -7,6 +7,8 @@ except ImportError:
 from datetime import timedelta, datetime
 from contextlib import contextmanager
 
+
+from werkzeug import __version__ as werkzeug_version
 from flask import Flask, Response, session, get_flashed_messages
 
 from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
@@ -21,6 +23,7 @@ from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
                              _user_context_processor)
 
 
+# be compatible with py3k
 if str is not bytes:
     unicode = str
 
@@ -589,14 +592,16 @@ class LoginTestCase(unittest.TestCase):
     #
     # Misc
     #
+    @unittest.skipIf(werkzeug_version.startswith("0.9"),
+                     "wait for upstream implementing RFC 5987")
     def test_chinese_user_agent(self):
-        return  # FIXME skip?
         with self.app.test_client() as c:
             result = c.get('/', headers=[('User-Agent', u'中文')])
             self.assertEqual(u'Welcome!', result.data.decode('utf-8'))
 
+    @unittest.skipIf(werkzeug_version.startswith("0.9"),
+                     "wait for upstream implementing RFC 5987")
     def test_russian_cp1251_user_agent(self):
-        return  # FIXME skip?
         with self.app.test_client() as c:
             headers = [('User-Agent', u'ЯЙЮя'.encode('cp1251'))]
             response = c.get('/', headers=headers)
