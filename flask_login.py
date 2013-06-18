@@ -289,9 +289,8 @@ class LoginManager(object):
         # cookie user ID to the session.
         cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
         if cookie_name in request.cookies and 'user_id' not in session:
-            self._load_from_cookie(request.cookies[cookie_name])
-        else:
-            self.reload_user()
+            return self._load_from_cookie(request.cookies[cookie_name])
+        return self.reload_user()
 
     def _session_protection(self):
         sess = session._get_current_object()
