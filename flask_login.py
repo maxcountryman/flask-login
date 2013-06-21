@@ -129,8 +129,9 @@ def make_secure_token(*args, **options):
 
 
 def _create_identifier():
-    base = unicode("%s|%s" % (request.remote_addr,
-                              request.headers.get("User-Agent")), 'utf8', errors='replace')
+    base = "%s|%s" % (request.remote_addr, request.headers.get("User-Agent"))
+    if not isinstance(base, unicode):
+        base = unicode(base, 'utf8', errors='replace')
     hsh = md5()
     hsh.update(base.encode("utf8"))
     return hsh.hexdigest()
