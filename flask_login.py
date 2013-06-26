@@ -121,7 +121,7 @@ class LoginManager(object):
         self.needs_refresh_callback = None
 
         if app is not None:
-            pass
+            self.init_app(app, add_context_processor)
 
     def setup_app(self, app, add_context_processor=True):  # pragma: no cover
         '''
