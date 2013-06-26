@@ -78,7 +78,7 @@ class LoginManager(object):
     one in the main body of your code and then bind it to your
     app in a factory function.
     '''
-    def __init__(self):
+    def __init__(self, app=None, add_context_processor=True):
         #: A class or factory function that produces an anonymous user, which
         #: is used when no one is logged in.
         self.anonymous_user = AnonymousUserMixin
@@ -119,6 +119,9 @@ class LoginManager(object):
         self.unauthorized_callback = None
 
         self.needs_refresh_callback = None
+
+        if app is not None:
+            self.init_app(app, add_context_processor)
 
     def setup_app(self, app, add_context_processor=True):  # pragma: no cover
         '''

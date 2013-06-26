@@ -99,6 +99,25 @@ class StaticTestCase(unittest.TestCase):
             self.assertTrue(current_user.is_anonymous())
 
 
+class InitializationTestCase(unittest.TestCase):
+    ''' Tests the two initialization methods '''
+
+    def setUp(self):
+        self.app = Flask(__name__)
+        self.app.config['TESTING'] = True
+
+    def test_init_app(self):
+        login_manager = LoginManager()
+        login_manager.init_app(self.app, add_context_processor=True)
+
+        self.assertIsInstance(login_manager, LoginManager)
+
+    def test_class_init(self):
+        login_manager = LoginManager(self.app, add_context_processor=True)
+
+        self.assertIsInstance(login_manager, LoginManager)
+
+
 class LoginTestCase(unittest.TestCase):
     ''' Tests for results of the login_user function '''
 
