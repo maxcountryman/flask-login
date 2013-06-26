@@ -24,3 +24,15 @@ or alternatively if you have pip installed:
 ```sh
 $ pip install flask-login
 ```
+
+## Contributing
+
+We welcome contributions! If you would like to hack on Flask-Login, please
+follow these steps:
+
+1. Fork this repository
+2. Make your changes
+3. Install the requirements in `dev-requirements.txt`
+4. Submit a pull request after running `make check` (ensure it does not error!)
+
+Please give us adequate time to review your submission. Thanks!
