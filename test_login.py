@@ -101,7 +101,7 @@ class StaticTestCase(unittest.TestCase):
 
 class InitializationTestCase(unittest.TestCase):
     ''' Tests the two initialization methods '''
-    
+
     def setUp(self):
         self.app = Flask(__name__)
         self.app.config['TESTING'] = True
@@ -109,12 +109,12 @@ class InitializationTestCase(unittest.TestCase):
     def test_init_app(self):
         login_manager = LoginManager()
         login_manager.init_app(self.app, add_context_processor=True)
-        
+
         self.assertIsInstance(login_manager, LoginManager)
 
     def test_class_init(self):
         login_manager = LoginManager(self.app, add_context_processor=True)
-        
+
         self.assertIsInstance(login_manager, LoginManager)
 
 
