@@ -162,7 +162,7 @@ If you would like to customize the process further, decorate a function with
 Anonymous Users
 ===============
 By default, when a user is not actually logged in, `current_user` is set to
-an `AnonymousUser` object. It has the following properties:
+an `AnonymousUserMixin` object. It has the following properties:
 
 - `is_active` and `is_authenticated` return `False`
 - `is_anonymous` returns `True`
