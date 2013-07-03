@@ -189,6 +189,10 @@ class LoginTestCase(unittest.TestCase):
         def load_user(user_id):
             return USERS[int(user_id)]
 
+        @self.app.route('/empty_session')
+        def empty_session():
+            return unicode(u'modified=%s' % session.modified)
+
         # This will help us with the possibility of typoes in the tests. Now
         # we shouldn't have to check each response to help us set up state
         # (such as login pages) to make sure it worked: we will always
@@ -463,6 +467,17 @@ class LoginTestCase(unittest.TestCase):
             with listen_to(user_login_confirmed) as listener:
                 c.get('/confirm-login')
                 listener.assert_heard_one(self.app)
+
+    def test_session_not_modified(self):
+        with self.app.test_client() as c:
+            # Within the request we think we didn't modify the session.
+            self.assertEquals(
+                u'modified=False',
+                c.get('/empty_session').data.decode('utf-8'))
+            # But after the request, the session could be modified by the
+            # "after_request" handlers that call _update_remember_cookie.
+            # Ensure that if nothing changed the session is not modified.
+            self.assertFalse(session.modified)
 
     #
     # Session Protection
