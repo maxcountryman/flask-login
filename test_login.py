@@ -538,6 +538,16 @@ class LoginTestCase(unittest.TestCase):
                 c.get('/username', headers=[('User-Agent', 'different')])
                 listener.assert_heard_one(self.app)
 
+    def test_session_protection_strong_fires_signal_x_forwarded_for(self):
+        self.app.config['SESSION_PROTECTION'] = 'strong'
+
+        with self.app.test_client() as c:
+            c.get('/login-notch-remember',
+                  headers=[('X-Forwarded-For', '10.1.1.1')])
+            with listen_to(session_protected) as listener:
+                c.get('/username', headers=[('X-Forwarded-For', '10.1.1.2')])
+                listener.assert_heard_one(self.app)
+
     #
     # Custom Token Loader
     #
