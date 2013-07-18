@@ -127,6 +127,10 @@ class InitializationTestCase(unittest.TestCase):
 
         self.assertIsInstance(login_manager, LoginManager)
 
+    def test_login_disabled_is_set(self):
+        login_manager = LoginManager(self.app, add_context_processor=True)
+        self.assertTrue(login_manager._login_disabled)
+
 
 class LoginTestCase(unittest.TestCase):
     ''' Tests for results of the login_user function '''
@@ -140,6 +144,7 @@ class LoginTestCase(unittest.TestCase):
         self.app.config['REMEMBER_COOKIE_NAME'] = self.remember_cookie_name
         self.login_manager = LoginManager()
         self.login_manager.init_app(self.app)
+        self.login_manager._login_disabled = False
 
         @self.app.route('/')
         def index():
@@ -609,6 +614,19 @@ class LoginTestCase(unittest.TestCase):
             c.get('/login-notch')
             result2 = c.get('/protected')
             self.assertIn(u'Access Granted', result2.data.decode('utf-8'))
+
+    def test_decorators_are_disabled(self):
+        @self.app.route('/protected')
+        @login_required
+        @fresh_login_required
+        def protected():
+            return u'Access Granted'
+
+        self.app.login_manager._login_disabled = True
+
+        with self.app.test_client() as c:
+            result = c.get('/protected')
+            self.assertIn(u'Access Granted', result.data.decode('utf-8'))
 
     def test_fresh_login_required_decorator(self):
         @self.app.route('/very-protected')
