@@ -20,7 +20,7 @@ from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
                              login_required, session_protected,
                              fresh_login_required, confirm_login,
                              encode_cookie, decode_cookie,
-                             _user_context_processor)
+                             _secret_key, _user_context_processor)
 
 
 # be compatible with py3k
@@ -738,6 +738,24 @@ class CookieEncodingTestCase(unittest.TestCase):
             self.assertEqual(u'1', decode_cookie(COOKIE))
             self.assertIsNone(decode_cookie(u'Foo|BAD_BASH'))
             self.assertIsNone(decode_cookie(u'no bar'))
+
+
+class SecretKeyTestCase(unittest.TestCase):
+    def setUp(self):
+        self.app = Flask(__name__)
+
+    def test_bytes(self):
+        self.app.config['SECRET_KEY'] = b'\x9e\x8f\x14'
+        with self.app.test_request_context():
+            self.assertEqual(_secret_key(), b'\x9e\x8f\x14')
+
+    def test_native(self):
+        self.app.config['SECRET_KEY'] = '\x9e\x8f\x14'
+        with self.app.test_request_context():
+            self.assertEqual(_secret_key(), b'\x9e\x8f\x14')
+
+    def test_default(self):
+        self.assertEqual(_secret_key('\x9e\x8f\x14'), b'\x9e\x8f\x14')
 
 
 class ImplicitIdUser(UserMixin):

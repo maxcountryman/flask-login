@@ -534,12 +534,7 @@ def make_secure_token(*args, **options):
     :type \*\*options: kwargs
     '''
     key = options.get('key')
-
-    if key is None:
-        key = current_app.config['SECRET_KEY']
-
-    if hasattr(key, 'encode'):  # pragma: no cover
-        key = key.encode('utf-8')  # ensure bytes
+    key = _secret_key(key)
 
     l = [s if isinstance(s, bytes) else s.encode('utf-8') for s in args]
 
@@ -699,11 +694,7 @@ def _get_user():
 
 
 def _cookie_digest(payload, key=None):
-    if key is None:
-        key = current_app.config['SECRET_KEY']
-
-    if hasattr(key, 'encode'):
-        key = key.encode('utf-8')  # ensure bytes
+    key = _secret_key(key)
 
     return hmac.new(key, payload.encode('utf-8'), sha1).hexdigest()
 
@@ -724,6 +715,16 @@ def _create_identifier():
 
 def _user_context_processor():
     return dict(current_user=_get_user())
+
+
+def _secret_key(key=None):
+    if key is None:
+        key = current_app.config['SECRET_KEY']
+
+    if isinstance(key, unicode):  # pragma: no cover
+        key = key.encode('latin1')  # ensure bytes
+
+    return key
 
 
 # Signals
