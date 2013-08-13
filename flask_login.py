@@ -705,7 +705,7 @@ def _get_remote_addr():
 
 def _create_identifier():
     remote = _get_remote_addr().encode('utf-8')
-    base = '{0}|{1}'.format(remote, 
+    base = '{0}|{1}'.format(remote,
                             request.headers.get('User-Agent'))
     if str is bytes:
         base = unicode(base, 'utf-8', errors='replace')
