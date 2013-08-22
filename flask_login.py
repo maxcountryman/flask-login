@@ -701,14 +701,14 @@ def _cookie_digest(payload, key=None):
 
 def _get_remote_addr():
     address = request.headers.get('X-Forwarded-For', request.remote_addr)
-    if address:
+    if address is not None:
         address = address.encode('utf-8')
     return address
 
 
 def _create_identifier():
     user_agent = request.headers.get('User-Agent')
-    if user_agent:
+    if user_agent is not None:
         user_agent = user_agent.encode('utf-8')
     base = '{0}|{1}'.format(_get_remote_addr(), user_agent)
     if str is bytes:
