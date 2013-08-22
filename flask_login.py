@@ -700,12 +700,17 @@ def _cookie_digest(payload, key=None):
 
 
 def _get_remote_addr():
-    return request.headers.get('X-Forwarded-For', request.remote_addr)
+    address = request.headers.get('X-Forwarded-For', request.remote_addr)
+    if address:
+        address = address.encode('utf-8')
+    return address
 
 
 def _create_identifier():
-    base = '{0}|{1}'.format(_get_remote_addr(),
-                            request.headers.get('User-Agent'))
+    user_agent = request.headers.get('User-Agent')
+    if user_agent:
+        user_agent = user_agent.encode('utf-8')
+    base = '{0}|{1}'.format(_get_remote_addr(), user_agent)
     if str is bytes:
         base = unicode(base, 'utf-8', errors='replace')
     h = md5()
