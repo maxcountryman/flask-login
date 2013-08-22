@@ -701,7 +701,9 @@ def _cookie_digest(payload, key=None):
 
 def _get_remote_addr():
     address = request.headers.get('X-Forwarded-For', request.remote_addr)
-    return address.encode('utf-8')
+    if address:
+        address = address.encode('utf-8')
+    return address
 
 
 def _create_identifier():
