@@ -12,15 +12,12 @@ from werkzeug import __version__ as werkzeug_version
 from flask import Flask, Response, session, get_flashed_messages
 
 from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
-                             make_secure_token, current_user, login_user,
-                             logout_user, user_logged_in, user_logged_out,
-                             user_loaded_from_cookie, user_login_confirmed,
-                             user_unauthorized, user_needs_refresh,
-                             make_next_param, login_url, login_fresh,
-                             login_required, session_protected,
-                             fresh_login_required, confirm_login,
-                             encode_cookie, decode_cookie,
-                             _secret_key, _user_context_processor)
+                             make_secure_token, user_logged_in,
+                             user_logged_out, user_loaded_from_cookie,
+                             user_login_confirmed, user_unauthorized,
+                             user_needs_refresh, make_next_param, login_url,
+                             session_protected, encode_cookie, decode_cookie,
+                             _secret_key)
 
 
 # be compatible with py3k
@@ -106,7 +103,7 @@ class StaticTestCase(unittest.TestCase):
 
         with app.test_client() as c:
             c.get('/static/favicon.ico')
-            self.assertTrue(current_user.is_anonymous())
+            self.assertTrue(lm.current_user.is_anonymous())
 
 
 class InitializationTestCase(unittest.TestCase):
@@ -142,7 +139,7 @@ class LoginTestCase(unittest.TestCase):
         self.app.config['TESTING'] = True
         self.remember_cookie_name = 'remember'
         self.app.config['REMEMBER_COOKIE_NAME'] = self.remember_cookie_name
-        self.login_manager = LoginManager()
+        self.login_manager = lm = LoginManager()
         self.login_manager.init_app(self.app)
         self.login_manager._login_disabled = False
 
@@ -152,43 +149,43 @@ class LoginTestCase(unittest.TestCase):
 
         @self.app.route('/secret')
         def secret():
-            return self.login_manager.unauthorized()
+            return lm.unauthorized()
 
         @self.app.route('/login-notch')
         def login_notch():
-            return unicode(login_user(notch))
+            return unicode(lm.login_user(notch))
 
         @self.app.route('/login-notch-remember')
         def login_notch_remember():
-            return unicode(login_user(notch, remember=True))
+            return unicode(lm.login_user(notch, remember=True))
 
         @self.app.route('/login-notch-permanent')
         def login_notch_permanent():
             session.permanent = True
-            return unicode(login_user(notch))
+            return unicode(lm.login_user(notch))
 
         @self.app.route('/needs-refresh')
         def needs_refresh():
-            return self.login_manager.needs_refresh()
+            return lm.needs_refresh()
 
         @self.app.route('/confirm-login')
         def _confirm_login():
-            confirm_login()
+            lm.confirm_login()
             return u''
 
         @self.app.route('/username')
         def username():
-            if current_user.is_authenticated():
-                return current_user.name
+            if lm.current_user.is_authenticated():
+                return lm.current_user.name
             return u'Anonymous'
 
         @self.app.route('/is-fresh')
         def is_fresh():
-            return unicode(login_fresh())
+            return unicode(lm.login_fresh())
 
         @self.app.route('/logout')
         def logout():
-            return unicode(logout_user())
+            return unicode(lm.logout_user())
 
         @self.login_manager.user_loader
         def load_user(user_id):
@@ -210,7 +207,8 @@ class LoginTestCase(unittest.TestCase):
 
     def _get_remember_cookie(self, test_client):
         our_cookies = test_client.cookie_jar._cookies['localhost.local']['/']
-        return our_cookies[self.remember_cookie_name]
+        return our_cookies[self.login_manager.prefix \
+                           + self.remember_cookie_name]
 
     def _delete_session(self, c):
         # Helper method to cause the session to be deleted
@@ -225,7 +223,7 @@ class LoginTestCase(unittest.TestCase):
     #
     def test_test_request_context_users_are_anonymous(self):
         with self.app.test_request_context():
-            self.assertTrue(current_user.is_anonymous())
+            self.assertTrue(self.login_manager.current_user.is_anonymous())
 
     def test_defaults_anonymous(self):
         with self.app.test_client() as c:
@@ -234,41 +232,41 @@ class LoginTestCase(unittest.TestCase):
 
     def test_login_user(self):
         with self.app.test_request_context():
-            result = login_user(notch)
+            result = self.login_manager.login_user(notch)
             self.assertTrue(result)
-            self.assertEqual(current_user.name, u'Notch')
+            self.assertEqual(self.login_manager.current_user.name, u'Notch')
 
     def test_login_user_emits_signal(self):
         with self.app.test_request_context():
             with listen_to(user_logged_in) as listener:
-                login_user(notch)
+                self.login_manager.login_user(notch)
                 listener.assert_heard_one(self.app, user=notch)
 
     def test_login_inactive_user(self):
         with self.app.test_request_context():
-            result = login_user(creeper)
-            self.assertTrue(current_user.is_anonymous())
+            result = self.login_manager.login_user(creeper)
+            self.assertTrue(self.login_manager.current_user.is_anonymous())
             self.assertFalse(result)
 
     def test_login_inactive_user_forced(self):
         with self.app.test_request_context():
-            login_user(creeper, force=True)
-            self.assertEqual(current_user.name, u'Creeper')
+            self.login_manager.login_user(creeper, force=True)
+            self.assertEqual(self.login_manager.current_user.name, u'Creeper')
 
     #
     # Logout
     #
     def test_logout_logs_out_current_user(self):
         with self.app.test_request_context():
-            login_user(notch)
-            logout_user()
-            self.assertTrue(current_user.is_anonymous())
+            self.login_manager.login_user(notch)
+            self.login_manager.logout_user()
+            self.assertTrue(self.login_manager.current_user.is_anonymous())
 
     def test_logout_emits_signal(self):
         with self.app.test_request_context():
-            login_user(notch)
+            self.login_manager.login_user(notch)
             with listen_to(user_logged_out) as listener:
-                logout_user()
+                self.login_manager.logout_user()
                 listener.assert_heard_one(self.app, user=notch)
 
     #
@@ -373,12 +371,12 @@ class LoginTestCase(unittest.TestCase):
             c.get('/login-notch-remember')
 
             # TODO: Is there a better way to test this?
-            self.assertTrue(domain in c.cookie_jar._cookies,
-                            'Custom domain not found as cookie domain')
+            self.assertIn(domain, c.cookie_jar._cookies,
+                          'Custom domain not found as cookie domain')
             domain_cookie = c.cookie_jar._cookies[domain]
-            self.assertTrue(name in domain_cookie['/'],
-                            'Custom name not found as cookie name')
-            cookie = domain_cookie['/'][name]
+            self.assertIn(self.login_manager.prefix + name, domain_cookie['/'],
+                          'Custom name not found as cookie name')
+            cookie = domain_cookie['/'][self.login_manager.prefix + name]
 
             expiration_date = datetime.fromtimestamp(cookie.expires)
             expected_date = datetime.now() + duration
@@ -603,7 +601,7 @@ class LoginTestCase(unittest.TestCase):
     #
     def test_login_required_decorator(self):
         @self.app.route('/protected')
-        @login_required
+        @self.login_manager.login_required
         def protected():
             return u'Access Granted'
 
@@ -617,12 +615,12 @@ class LoginTestCase(unittest.TestCase):
 
     def test_decorators_are_disabled(self):
         @self.app.route('/protected')
-        @login_required
-        @fresh_login_required
+        @self.login_manager.login_required
+        @self.login_manager.fresh_login_required
         def protected():
             return u'Access Granted'
 
-        self.app.login_manager._login_disabled = True
+        self.login_manager._login_disabled = True
 
         with self.app.test_client() as c:
             result = c.get('/protected')
@@ -630,7 +628,7 @@ class LoginTestCase(unittest.TestCase):
 
     def test_fresh_login_required_decorator(self):
         @self.app.route('/very-protected')
-        @fresh_login_required
+        @self.login_manager.fresh_login_required
         def very_protected():
             return 'Access Granted'
 
@@ -676,7 +674,8 @@ class LoginTestCase(unittest.TestCase):
                              '0f05743a2b617b2625362ab667c0dbdf4c9ec13a')
 
     def test_user_context_processor(self):
-        self.assertEqual(_user_context_processor(), {'current_user': None})
+        self.assertEqual(self.login_manager._user_context_processor(),
+                         {self.login_manager.prefix + 'current_user': None})
 
 
 class TestLoginUrlGeneration(unittest.TestCase):
@@ -806,3 +805,163 @@ class AnonymousUserTestCase(unittest.TestCase):
         self.assertFalse(user.is_authenticated())
         self.assertTrue(user.is_anonymous())
         self.assertIsNone(user.get_id())
+
+
+class AnotherUser(UserMixin):
+
+    def __init__(self, name, id, active=True):
+        self.id = id
+        self.name = name
+        self.active = active
+
+    def get_id(self):
+        return self.id
+
+    def is_active(self):
+        return self.active
+
+    def get_auth_token(self):
+        return make_secure_token(self.name, key='deterministicQ')
+
+notch2 = AnotherUser(u'Notch2', 1)
+steve2 = AnotherUser(u'Steve2', 2)
+creeper2 = AnotherUser(u'Creeper2', 3, False)
+
+USERS2 = {1: notch2, 2: steve2, 3: creeper2}
+USER_TOKENS2 = dict((u.get_auth_token(), u) for u in USERS2.values())
+
+
+class MultipleLoginManagerTest(unittest.TestCase):
+
+    def setUp(self):
+        self.app = app = Flask(__name__)
+        self.app.config['SECRET_KEY'] = 'deterministic'
+        self.app.config['SESSION_PROTECTION'] = None
+        self.app.config['TESTING'] = True
+        self.cookie_remember_key = 'remember'
+        self.app.config['REMEMBER_COOKIE_NAME'] = self.cookie_remember_key
+        self.login_manager = lm = LoginManager(prefix='lm1')
+        self.login_manager.init_app(self.app)
+        self.login_manager._login_disabled = False
+        self.login_manager2 = lm2 = LoginManager(prefix='lm2')
+
+        @app.route('/')
+        def index():
+            return u'Welcome!'
+
+        @app.route('/secret')
+        def secret():
+            return lm.unauthorized()
+
+        @app.route('/secret2')
+        def secret2():
+            return lm2.unauthorized()
+
+        @app.route('/login-notch')
+        def login_notch():
+            return unicode(lm.login_user(notch))
+
+        @app.route('/login-notch2')
+        def login_notch2():
+            return unicode(lm2.login_user(notch2))
+
+        @app.route('/login-notch-remember')
+        def login_notch_remember():
+            return unicode(lm.login_user(notch, remember=True))
+
+        @app.route('/login-notch2-remember')
+        def login_notch2_remember():
+            return unicode(lm2.login_user(notch2, remember=True))
+
+        @app.route('/login-notch-permanent')
+        def login_notch_permanent():
+            session.permanent = True
+            return unicode(lm.login_user(notch))
+
+        @app.route('/login-notch2-permanent')
+        def login_notch2_permanent():
+            session.permanent = True
+            return unicode(lm2.login_user(notch2))
+
+        @app.route('/needs-refresh')
+        def needs_refresh():
+            return lm.needs_refresh()
+
+        @app.route('/needs-refresh2')
+        def needs_refresh2():
+            return lm2.needs_refresh()
+
+        @app.route('/confirm-login2')
+        def _confirm_login():
+            lm.confirm_login()
+            return u''
+
+        @app.route('/confirm-login2')
+        def _confirm_login2():
+            lm.confirm_login()
+            return u''
+
+        @app.route('/username')
+        def username():
+            if lm.current_user.is_authenticated():
+                return lm.current_user.name
+            return u'Anonymous'
+
+        @app.route('/username2')
+        def username2():
+            if lm2.current_user.is_authenticated():
+                return lm2.current_user.name
+            return u'Anonymous'
+
+        @app.route('/is-fresh')
+        def is_fresh():
+            return unicode(lm.login_fresh())
+
+        @app.route('/is-fresh2')
+        def is_fresh2():
+            return unicode(lm2.login_fresh())
+
+        @app.route('/logout')
+        def logout():
+            return unicode(lm.logout_user())
+
+        @app.route('/logout2')
+        def logout2():
+            return unicode(lm2.logout_user())
+
+        @lm.user_loader
+        def load_user(user_id):
+            return USERS[int(user_id)]
+
+        @lm2.user_loader
+        def load_user2(user_id):
+            return USERS2[int(user_id)]
+
+        @app.route('/empty_session')
+        def empty_session():
+            return unicode(u'modified=%s' % session.modified)
+
+        # This will help us with the possibility of typoes in the tests. Now
+        # we shouldn't have to check each response to help us set up state
+        # (such as login pages) to make sure it worked: we will always
+        # get an exception raised (rather than return a 404 response)
+        @app.errorhandler(404)
+        def handle_404(e):
+            raise e
+
+    def test_multiple_login(self):
+        with self.app.test_request_context():
+            self.assertTrue(self.login_manager.login_user(notch))
+            self.assertEqual(self.login_manager.current_user.name, u'Notch')
+            self.assertTrue(self.login_manager2.current_user.is_anonymous())
+            self.assertTrue(self.login_manager2.login_user(notch2))
+            self.assertEqual(self.login_manager.current_user.name, u'Notch')
+            self.assertEqual(self.login_manager2.current_user.name, u'Notch2')
+
+    def test_logout_logs_out_one_user(self):
+        with self.app.test_request_context():
+            self.login_manager.login_user(notch)
+            self.login_manager2.login_user(notch2)
+            self.login_manager.logout_user()
+            self.assertTrue(self.login_manager.current_user.is_anonymous())
+            self.assertFalse(self.login_manager2.current_user.is_anonymous())

@@ -43,6 +43,14 @@ The login manager contains the code that lets your application and Flask-Login
 work together, such as how to load a user from an ID, where to send users when
 they need to log in, and the like.
 
+If you have more than one independent logins, one for users and one for your
+staffs, for example, you can configure another login manager.
+
+    login_manager_for_user = LoginManager(prefix='user_')
+    login_manager_for_staffs = LoginManager(prefix='staff_')
+
+That's all.
+
 Once the actual application object has been created, you can configure it for
 login with::
 
@@ -89,7 +97,7 @@ decorated with the `login_required` decorator::
 When the user is ready to log out::
 
     @app.route("/logout")
-    @login_required
+    @login_manager.login_required
     def logout():
         logout_user()
         return redirect(somewhere)
@@ -362,27 +370,22 @@ Configuring Login
    
    .. automethod:: needs_refresh_handler
 
+   .. attribute:: current_user
 
-Login Mechanisms
-----------------
-.. data:: current_user
+      Returns the current logged in user.
 
-   A proxy for the current user.
+   .. automethod:: login_fresh
 
-.. autofunction:: login_fresh
+   .. automethod:: login_user
 
-.. autofunction:: login_user
+   .. automethod:: logout_user
 
-.. autofunction:: logout_user
+   .. automethod:: confirm_login
 
-.. autofunction:: confirm_login
+   .. automethod:: login_required
 
+   .. automethod:: fresh_login_required
 
-Protecting Views
-----------------
-.. autofunction:: login_required
-
-.. autofunction:: fresh_login_required
 
 
 User Object Helpers

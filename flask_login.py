@@ -21,7 +21,6 @@ from flask import (_request_ctx_stack, abort, current_app, flash, redirect,
                    request, session, url_for)
 from flask.signals import Namespace
 
-from werkzeug.local import LocalProxy
 from werkzeug.security import safe_str_cmp
 from werkzeug.urls import url_decode, url_encode
 
@@ -40,11 +39,6 @@ else:  # pragma: no cover
     unicode = str
 
 _signals = Namespace()
-
-#: A proxy for the current user. If no user is logged in, this will be an
-#: anonymous user
-current_user = LocalProxy(lambda: _get_user() or
-                          current_app.login_manager.anonymous_user())
 
 #: The default name of the "remember me" cookie (``remember_token``)
 COOKIE_NAME = 'remember_token'
@@ -79,7 +73,7 @@ class LoginManager(object):
     one in the main body of your code and then bind it to your
     app in a factory function.
     '''
-    def __init__(self, app=None, add_context_processor=True):
+    def __init__(self, app=None, add_context_processor=True, prefix=''):
         #: A class or factory function that produces an anonymous user, which
         #: is used when no one is logged in.
         self.anonymous_user = AnonymousUserMixin
@@ -121,6 +115,8 @@ class LoginManager(object):
 
         self.needs_refresh_callback = None
 
+        self.prefix = prefix
+
         if app is not None:
             self.init_app(app, add_context_processor)
 
@@ -146,7 +142,6 @@ class LoginManager(object):
             Defaults to ``True``.
         :type add_context_processor: bool
         '''
-        app.login_manager = self
         app.before_request(self._load_user)
         app.after_request(self._update_remember_cookie)
 
@@ -154,7 +149,7 @@ class LoginManager(object):
                                               app.config.get('TESTING', False))
 
         if add_context_processor:
-            app.context_processor(_user_context_processor)
+            app.context_processor(self._user_context_processor)
 
     def unauthorized(self):
         '''
@@ -273,16 +268,16 @@ class LoginManager(object):
 
     def reload_user(self):
         ctx = _request_ctx_stack.top
-        user_id = session.get('user_id')
+        user_id = session.get(self.session_user_id_key)
 
         if user_id is None:
-            ctx.user = self.anonymous_user()
+            setattr(ctx, self.request_ctx_user_key, self.anonymous_user())
         else:
             user = self.user_callback(user_id)
             if user is None:
-                logout_user()
+                self.logout_user()
             else:
-                ctx.user = user
+                setattr(ctx, self.request_ctx_user_key, user)
 
     def _load_user(self):
         config = current_app.config
@@ -294,8 +289,9 @@ class LoginManager(object):
 
         # If a remember cookie is set, and the session is not, move the
         # cookie user ID to the session.
-        cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
-        if cookie_name in request.cookies and 'user_id' not in session:
+        cookie_name = self.cookie_remember_key
+        if cookie_name in request.cookies \
+                and self.session_user_id_key not in session:
             return self._load_from_cookie(request.cookies[cookie_name])
         return self.reload_user()
 
@@ -303,19 +299,19 @@ class LoginManager(object):
         sess = session._get_current_object()
         ident = _create_identifier()
 
-        if '_id' not in sess:
-            sess['_id'] = ident
-        elif ident != sess['_id']:
+        if self.session_id_key not in sess:
+            sess[self.session_id_key] = ident
+        elif ident != sess[self.session_id_key]:
             app = current_app._get_current_object()
             mode = app.config.get('SESSION_PROTECTION',
                                   self.session_protection)
             if mode == 'basic' or sess.permanent:
-                sess['_fresh'] = False
+                sess[self.session_fresh_key] = False
                 session_protected.send(app)
                 return False
             elif mode == 'strong':
                 sess.clear()
-                sess['remember'] = 'clear'
+                sess[self.session_remember_op_key] = 'clear'
                 session_protected.send(app)
                 return True
         return False
@@ -324,28 +320,27 @@ class LoginManager(object):
         if self.token_callback:
             user = self.token_callback(cookie)
             if user is not None:
-                session['user_id'] = user.get_id()
-                session['_fresh'] = False
-                _request_ctx_stack.top.user = user
-
+                session[self.session_user_id_key] = user.get_id()
+                session[self.session_fresh_key] = False
+                setattr(_request_ctx_stack.top, self.request_ctx_user_key,
+                        user)
             else:
                 self.reload_user()
         else:
             user_id = decode_cookie(cookie)
             if user_id is not None:
-                session['user_id'] = user_id
-                session['_fresh'] = False
+                session[self.session_user_id_key] = user_id
+                session[self.session_fresh_key] = False
 
             self.reload_user()
             app = current_app._get_current_object()
-            user_loaded_from_cookie.send(app, user=_get_user())
+            user_loaded_from_cookie.send(app, user=self._get_user())
 
     def _update_remember_cookie(self, response):
         # Don't modify the session unless there's something to do.
-        if 'remember' in session:
-            operation = session.pop('remember', None)
-
-            if operation == 'set' and 'user_id' in session:
+        operation = session.pop(self.session_remember_op_key, None)
+        if operation is not None:
+            if operation == 'set' and self.session_user_id_key in session:
                 self._set_cookie(response)
             elif operation == 'clear':
                 self._clear_cookie(response)
@@ -355,7 +350,7 @@ class LoginManager(object):
     def _set_cookie(self, response):
         # cookie settings
         config = current_app.config
-        cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
+        cookie_name = self.cookie_remember_key
         duration = config.get('REMEMBER_COOKIE_DURATION', COOKIE_DURATION)
         domain = config.get('REMEMBER_COOKIE_DOMAIN')
 
@@ -364,9 +359,9 @@ class LoginManager(object):
 
         # prepare data
         if self.token_callback:
-            data = current_user.get_auth_token()
+            data = self.current_user.get_auth_token()
         else:
-            data = encode_cookie(str(session['user_id']))
+            data = encode_cookie(str(session[self.session_user_id_key]))
         expires = datetime.utcnow() + duration
 
         # actually set it
@@ -379,9 +374,183 @@ class LoginManager(object):
 
     def _clear_cookie(self, response):
         config = current_app.config
-        cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
+        cookie_name = self.cookie_remember_key
         domain = config.get('REMEMBER_COOKIE_DOMAIN')
         response.delete_cookie(cookie_name, domain=domain)
+
+    @property
+    def current_user(self):
+        '''
+        Returns current user. If no user is logged in, this will be an
+        anonymous user
+        '''
+        return self._get_user() or self.anonymous_user()
+
+    def login_fresh(self):
+        '''
+        This returns ``True`` if the current login is fresh.
+        '''
+        return session.get(self.session_fresh_key, False)
+
+    def login_user(self, user, remember=False, force=False):
+        '''
+        Logs a user in. You should pass the actual user object to this. If the
+        user's `is_active` method returns ``False``, they will not be logged in
+        unless `force` is ``True``.
+
+        This will return ``True`` if the log in attempt succeeds, and ``False``
+        if it fails (i.e. because the user is inactive).
+
+        :param user: The user object to log in.
+        :type user: object
+        :param remember: Whether to remember the user after their session
+            expires. Defaults to ``False``.
+        :type remember: bool
+        :param force: If the user is inactive, setting this to ``True`` will
+            log them in regardless. Defaults to ``False``.
+        :type force: bool
+        '''
+        if not force and not user.is_active():
+            return False
+
+        user_id = user.get_id()
+        session[self.session_user_id_key] = user_id
+        session[self.session_fresh_key] = True
+
+        if remember:
+            session[self.session_remember_op_key] = 'set'
+
+        setattr(_request_ctx_stack.top, self.request_ctx_user_key, user)
+        user_logged_in.send(current_app._get_current_object(),
+                            user=self._get_user())
+        return True
+
+    def logout_user(self):
+        '''
+        Logs a user out. (You do not need to pass the actual user.) This will
+        also clean up the remember me cookie if it exists.
+        '''
+        session.pop(self.session_user_id_key, None)
+        session.pop(self.session_fresh_key, None)
+
+        cookie_name = self.cookie_remember_key
+        if cookie_name in request.cookies:
+            session[self.session_remember_op_key] = 'clear'
+
+        user = self._get_user()
+        if user and not user.is_anonymous():
+            user_logged_out.send(current_app._get_current_object(), user=user)
+
+        self.reload_user()
+        return True
+
+    def confirm_login(self):
+        '''
+        This sets the current session as fresh. Sessions become stale when they
+        are reloaded from a cookie.
+        '''
+        session[self.session_fresh_key] = True
+        session[self.session_id_key] = _create_identifier()
+        user_login_confirmed.send(current_app._get_current_object())
+
+    def login_required(self, func):
+        '''
+        If you decorate a view with this, it will ensure that the current user
+        is logged in and authenticated before calling the actual view. (If they
+        are not, it calls the :attr:`LoginManager.unauthorized` callback.) For
+        example::
+
+            @app.route('/post')
+            @login_manager.login_required
+            def post():
+                pass
+
+        If there are only certain times you need to require that your user is
+        logged in, you can do so with::
+
+            if not login_manager.current_user.is_authenticated():
+                return login_manager.unauthorized()
+
+        ...which is essentially the code that this function adds to your views.
+
+        It can be convenient to globally turn off authentication when unit
+        testing. To enable this, if either of the application
+        configuration variables `LOGIN_DISABLED` or `TESTING` is set to
+        `True`, this decorator will be ignored.
+
+        :param func: The view function to decorate.
+        :type func: function
+        '''
+        @wraps(func)
+        def decorated_view(*args, **kwargs):
+            if self._login_disabled:
+                return func(*args, **kwargs)
+            elif not self.current_user.is_authenticated():
+                return self.unauthorized()
+            return func(*args, **kwargs)
+        return decorated_view
+
+    def fresh_login_required(self, func):
+        '''
+        If you decorate a view with this, it will ensure that the current
+        user's login is fresh - i.e. there session was not restored from a
+        'remember me' cookie. Sensitive operations, like changing a password or
+        e-mail, should be protected with this, to impede the efforts of cookie
+        thieves.
+
+        If the user is not authenticated, :meth:`LoginManager.unauthorized` is
+        called as normal. If they are authenticated, but their session is not
+        fresh, it will call :meth:`LoginManager.needs_refresh` instead. (In
+        that case, you will need to provide a
+        :attr:`LoginManager.refresh_view`.)
+
+        Behaves identically to the :func:`login_required` decorator with
+        respect to configutation variables.
+
+        :param func: The view function to decorate.
+        :type func: function
+        '''
+        @wraps(func)
+        def decorated_view(*args, **kwargs):
+            if self._login_disabled:
+                return func(*args, **kwargs)
+            elif not self.current_user.is_authenticated():
+                return self.unauthorized()
+            elif not self.login_fresh():
+                return self.needs_refresh()
+            return func(*args, **kwargs)
+        return decorated_view
+
+    def _get_user(self):
+        return getattr(_request_ctx_stack.top, self.request_ctx_user_key, None)
+
+    def _user_context_processor(self):
+        return {self.prefix + 'current_user': self._get_user()}
+
+    @property
+    def request_ctx_user_key(self):
+        return self.prefix + 'user'
+
+    @property
+    def cookie_remember_key(self):
+        return self.prefix + \
+            current_app.config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
+
+    @property
+    def session_remember_op_key(self):
+        return self.prefix + 'remember'
+
+    @property
+    def session_user_id_key(self):
+        return self.prefix + 'user_id'
+
+    @property
+    def session_id_key(self):
+        return self.prefix + '_id'
+
+    @property
+    def session_fresh_key(self):
+        return self.prefix + '_fresh'
 
 
 class UserMixin(object):
@@ -548,151 +717,6 @@ def make_secure_token(*args, **options):
     return token_value
 
 
-def login_fresh():
-    '''
-    This returns ``True`` if the current login is fresh.
-    '''
-    return session.get('_fresh', False)
-
-
-def login_user(user, remember=False, force=False):
-    '''
-    Logs a user in. You should pass the actual user object to this. If the
-    user's `is_active` method returns ``False``, they will not be logged in
-    unless `force` is ``True``.
-
-    This will return ``True`` if the log in attempt succeeds, and ``False`` if
-    it fails (i.e. because the user is inactive).
-
-    :param user: The user object to log in.
-    :type user: object
-    :param remember: Whether to remember the user after their session expires.
-        Defaults to ``False``.
-    :type remember: bool
-    :param force: If the user is inactive, setting this to ``True`` will log
-        them in regardless. Defaults to ``False``.
-    :type force: bool
-    '''
-    if not force and not user.is_active():
-        return False
-
-    user_id = user.get_id()
-    session['user_id'] = user_id
-    session['_fresh'] = True
-
-    if remember:
-        session['remember'] = 'set'
-
-    _request_ctx_stack.top.user = user
-    user_logged_in.send(current_app._get_current_object(), user=_get_user())
-    return True
-
-
-def logout_user():
-    '''
-    Logs a user out. (You do not need to pass the actual user.) This will
-    also clean up the remember me cookie if it exists.
-    '''
-    if 'user_id' in session:
-        session.pop('user_id')
-
-    if '_fresh' in session:
-        session.pop('_fresh')
-
-    cookie_name = current_app.config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
-    if cookie_name in request.cookies:
-        session['remember'] = 'clear'
-
-    user = _get_user()
-    if user and not user.is_anonymous():
-        user_logged_out.send(current_app._get_current_object(), user=user)
-
-    current_app.login_manager.reload_user()
-    return True
-
-
-def confirm_login():
-    '''
-    This sets the current session as fresh. Sessions become stale when they
-    are reloaded from a cookie.
-    '''
-    session['_fresh'] = True
-    session['_id'] = _create_identifier()
-    user_login_confirmed.send(current_app._get_current_object())
-
-
-def login_required(func):
-    '''
-    If you decorate a view with this, it will ensure that the current user is
-    logged in and authenticated before calling the actual view. (If they are
-    not, it calls the :attr:`LoginManager.unauthorized` callback.) For
-    example::
-
-        @app.route('/post')
-        @login_required
-        def post():
-            pass
-
-    If there are only certain times you need to require that your user is
-    logged in, you can do so with::
-
-        if not current_user.is_authenticated():
-            return current_app.login_manager.unauthorized()
-
-    ...which is essentially the code that this function adds to your views.
-
-    It can be convenient to globally turn off authentication when unit
-    testing. To enable this, if either of the application
-    configuration variables `LOGIN_DISABLED` or `TESTING` is set to
-    `True`, this decorator will be ignored.
-
-    :param func: The view function to decorate.
-    :type func: function
-    '''
-    @wraps(func)
-    def decorated_view(*args, **kwargs):
-        if current_app.login_manager._login_disabled:
-            return func(*args, **kwargs)
-        elif not current_user.is_authenticated():
-            return current_app.login_manager.unauthorized()
-        return func(*args, **kwargs)
-    return decorated_view
-
-
-def fresh_login_required(func):
-    '''
-    If you decorate a view with this, it will ensure that the current user's
-    login is fresh - i.e. there session was not restored from a 'remember me'
-    cookie. Sensitive operations, like changing a password or e-mail, should
-    be protected with this, to impede the efforts of cookie thieves.
-
-    If the user is not authenticated, :meth:`LoginManager.unauthorized` is
-    called as normal. If they are authenticated, but their session is not
-    fresh, it will call :meth:`LoginManager.needs_refresh` instead. (In that
-    case, you will need to provide a :attr:`LoginManager.refresh_view`.)
-
-    Behaves identically to the :func:`login_required` decorator with respect
-    to configutation variables.
-
-    :param func: The view function to decorate.
-    :type func: function
-    '''
-    @wraps(func)
-    def decorated_view(*args, **kwargs):
-        if current_app.login_manager._login_disabled:
-            return func(*args, **kwargs)
-        elif not current_user.is_authenticated():
-            return current_app.login_manager.unauthorized()
-        elif not login_fresh():
-            return current_app.login_manager.needs_refresh()
-        return func(*args, **kwargs)
-    return decorated_view
-
-
-def _get_user():
-    return getattr(_request_ctx_stack.top, 'user', None)
-
-
 def _cookie_digest(payload, key=None):
     key = _secret_key(key)
 
@@ -716,10 +740,6 @@ def _create_identifier():
     h = md5()
     h.update(base.encode('utf8'))
     return h.hexdigest()
-
-
-def _user_context_processor():
-    return dict(current_user=_get_user())
 
 
 def _secret_key(key=None):
