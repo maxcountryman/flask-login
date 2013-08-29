@@ -127,7 +127,12 @@ class InitializationTestCase(unittest.TestCase):
 
         self.assertIsInstance(login_manager, LoginManager)
 
+    def test_login_disabled_is_not_set(self):
+        login_manager = LoginManager(self.app, add_context_processor=True)
+        self.assertFalse(login_manager._login_disabled)
+
     def test_login_disabled_is_set(self):
+        self.app.config['LOGIN_DISABLED'] = True
         login_manager = LoginManager(self.app, add_context_processor=True)
         self.assertTrue(login_manager._login_disabled)
 
