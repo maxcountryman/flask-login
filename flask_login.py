@@ -150,8 +150,7 @@ class LoginManager(object):
         app.before_request(self._load_user)
         app.after_request(self._update_remember_cookie)
 
-        self._login_disabled = app.config.get('LOGIN_DISABLED',
-                                              app.config.get('TESTING', False))
+        self._login_disabled = app.config.get('LOGIN_DISABLED', False)
 
         if add_context_processor:
             app.context_processor(_user_context_processor)
@@ -642,12 +641,13 @@ def login_required(func):
     ...which is essentially the code that this function adds to your views.
 
     It can be convenient to globally turn off authentication when unit
-    testing. To enable this, if either of the application
-    configuration variables `LOGIN_DISABLED` or `TESTING` is set to
-    `True`, this decorator will be ignored.
+    testing. To enable this, set the application configuration
+    variable `LOGIN_DISABLED` to `True`, and this decorator will be
+    ignored.
 
     :param func: The view function to decorate.
     :type func: function
+
     '''
     @wraps(func)
     def decorated_view(*args, **kwargs):
