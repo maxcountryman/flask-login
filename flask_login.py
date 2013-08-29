@@ -642,7 +642,7 @@ def login_required(func):
 
     It can be convenient to globally turn off authentication when unit
     testing. To enable this, set the application configuration
-    variables `LOGIN_DISABLED` to `True`, this decorator will be
+    variable `LOGIN_DISABLED` to `True`, and this decorator will be
     ignored.
 
     :param func: The view function to decorate.
