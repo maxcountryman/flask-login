@@ -292,7 +292,6 @@ class LoginManager(object):
         config = current_app.config
         if config.get('SESSION_PROTECTION', self.session_protection):
             deleted = self._session_protection()
-            current_app.logger.warn(deleted)
             if deleted:
                 return self.reload_user()
 
@@ -314,9 +313,6 @@ class LoginManager(object):
     def _session_protection(self):
         sess = session._get_current_object()
         ident = _create_identifier()
-
-        current_app.logger.warn(sess)
-        current_app.logger.warn(ident)
 
         if '_id' not in sess:
             sess['_id'] = ident
@@ -728,8 +724,6 @@ def _create_identifier():
     user_agent = request.headers.get('User-Agent')
     if user_agent is not None:
         user_agent = user_agent.encode('utf-8')
-    current_app.logger.warn(_get_remote_addr())
-    current_app.logger.warn(user_agent)
     base = '{0}|{1}'.format(_get_remote_addr(), user_agent)
     if str is bytes:
         base = unicode(base, 'utf-8', errors='replace')
