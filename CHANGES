@@ -1,0 +1,23 @@
+Flask-Login Changelog
+===============
+
+Here you can see the full list of changes between each Flask-Login release.
+
+Version 0.2.7-dev
+-----------
+
+(release date to be announced)
+
+- Session data is now only read when the user is requested. This can be
+  beneficial for cookie and caching control when differenting between
+  requests that use user information for rendering and ones where all users
+  (including anonymous) get the same result (e.g. static pages)
+- BREAKING: User *must* always be accessed through the ``current_user``
+  local. This breaks any previous direct access to ``_request_ctx.top.user``.
+  This is because user is not loaded until current_user is accessed.
+- Fixes unnecessary access to the session when the user is anonymous
+  and session protection is active.
+  see https://github.com/maxcountryman/flask-login/issues/120
+- Fixes issue where order dependency of applying the login manager
+  before dependent applications was required.
+  see https://github.com/mattupstate/flask-principal/issues/22
