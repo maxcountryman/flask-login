@@ -147,7 +147,7 @@ class LoginManager(object):
         :type add_context_processor: bool
         '''
         app.login_manager = self
-        app.before_request(self._load_user)
+        # app.before_request(self._load_user)
         app.after_request(self._update_remember_cookie)
 
         self._login_disabled = app.config.get('LOGIN_DISABLED',
@@ -276,7 +276,7 @@ class LoginManager(object):
         user_id = session.get('user_id')
 
         if user_id is None:
-            ctx.user = self.anonymous_user()
+            ctx.user = None
         else:
             user = self.user_callback(user_id)
             if user is None:
@@ -285,23 +285,38 @@ class LoginManager(object):
                 ctx.user = user
 
     def _load_user(self):
+        '''Loads user from session or remember_me cookie as applicable'''
+        user_accessed.send(current_app._get_current_object())
+
+        #first check SESSION_PROTECTION
         config = current_app.config
         if config.get('SESSION_PROTECTION', self.session_protection):
             deleted = self._session_protection()
+            current_app.logger.warn(deleted)
             if deleted:
-                self.reload_user()
-                return
-
+                return self.reload_user()
+        
         # If a remember cookie is set, and the session is not, move the
         # cookie user ID to the session.
-        cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
-        if cookie_name in request.cookies and 'user_id' not in session:
-            return self._load_from_cookie(request.cookies[cookie_name])
+        # However, if the session may have been set if the user has been
+        # logged out on this request, and thus 'remember' would be set to clear,
+        # so we should check for that and not restore the session
+        remember_cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
+        has_remember_me_cookie = (remember_cookie_name in request.cookies and
+                                  session.get('remember', None) != 'clear')
+        is_missing_user_id = 'user_id' not in session
+        if has_remember_me_cookie and is_missing_user_id:
+            return self._load_from_cookie(request.cookies[remember_cookie_name])
+
+        #default reload_user
         return self.reload_user()
 
     def _session_protection(self):
         sess = session._get_current_object()
         ident = _create_identifier()
+
+        current_app.logger.warn(sess)
+        current_app.logger.warn(ident)
 
         if '_id' not in sess:
             sess['_id'] = ident
@@ -327,7 +342,6 @@ class LoginManager(object):
                 session['user_id'] = user.get_id()
                 session['_fresh'] = False
                 _request_ctx_stack.top.user = user
-
             else:
                 self.reload_user()
         else:
@@ -579,6 +593,7 @@ def login_user(user, remember=False, force=False):
     user_id = user.get_id()
     session['user_id'] = user_id
     session['_fresh'] = True
+    session['_id'] = _create_identifier()
 
     if remember:
         session['remember'] = 'set'
@@ -690,6 +705,9 @@ def fresh_login_required(func):
 
 
 def _get_user():
+    if not hasattr(_request_ctx_stack.top, 'user'):
+        current_app.login_manager._load_user()
+
     return getattr(_request_ctx_stack.top, 'user', None)
 
 
@@ -710,6 +728,8 @@ def _create_identifier():
     user_agent = request.headers.get('User-Agent')
     if user_agent is not None:
         user_agent = user_agent.encode('utf-8')
+    current_app.logger.warn(_get_remote_addr())
+    current_app.logger.warn(user_agent)
     base = '{0}|{1}'.format(_get_remote_addr(), user_agent)
     if str is bytes:
         base = unicode(base, 'utf-8', errors='replace')
@@ -758,6 +778,10 @@ user_unauthorized = _signals.signal('unauthorized')
 #: Sent when the `needs_refresh` method is called on a `LoginManager`. It
 #: receives no additional arguments besides the app.
 user_needs_refresh = _signals.signal('needs-refresh')
+
+#: Sent whenever the user is accessed/loaded
+#: receives no additional arguments besides the app.
+user_accessed = _signals.signal('accessed')
 
 #: Sent whenever session protection takes effect, and a session is either
 #: marked non-fresh or deleted. It receives no additional arguments besides
