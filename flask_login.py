@@ -295,18 +295,18 @@ class LoginManager(object):
             current_app.logger.warn(deleted)
             if deleted:
                 return self.reload_user()
-        
+
         # If a remember cookie is set, and the session is not, move the
         # cookie user ID to the session.
         # However, if the session may have been set if the user has been
-        # logged out on this request, and thus 'remember' would be set to clear,
+        # logged out on this request,'remember' would be set to clear,
         # so we should check for that and not restore the session
-        remember_cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
-        has_remember_me_cookie = (remember_cookie_name in request.cookies and
+        remember_ck_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
+        has_remember_me_cookie = (remember_ck_name in request.cookies and
                                   session.get('remember', None) != 'clear')
         is_missing_user_id = 'user_id' not in session
         if has_remember_me_cookie and is_missing_user_id:
-            return self._load_from_cookie(request.cookies[remember_cookie_name])
+            return self._load_from_cookie(request.cookies[remember_ck_name])
 
         #default reload_user
         return self.reload_user()

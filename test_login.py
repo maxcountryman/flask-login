@@ -105,7 +105,7 @@ USER_TOKENS = dict((u.get_auth_token(), u) for u in USERS.values())
 
 
 class StaticTestCase(unittest.TestCase):
-    
+
     def test_static_loads_anonymous(self):
         app = Flask(__name__)
         app.static_url_path = '/static'
@@ -716,8 +716,8 @@ class LoginTestCase(unittest.TestCase):
 
     def test_user_context_processor(self):
         with self.app.test_request_context():
-            user_context_processer = self.app.context_processor(_user_context_processor)
-            self.assertEqual(user_context_processer(), {'current_user': None})
+            _ucp = self.app.context_processor(_user_context_processor)
+            self.assertEqual(_ucp(), {'current_user': None})
 
 
 class TestLoginUrlGeneration(unittest.TestCase):
