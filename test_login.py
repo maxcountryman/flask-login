@@ -527,6 +527,20 @@ class LoginTestCase(unittest.TestCase):
                 c.get('/username', headers=[('User-Agent', 'different')])
                 listener.assert_heard_one(self.app)
 
+    def test_session_protection_basic_triggers_when_remember_me(self):
+        self.app.config['SESSION_PROTECTION'] = 'basic'
+
+        with self.app.test_client() as c:
+            c.get('/login-notch-remember')
+
+            # clear session to force remember me (and remove old session id)
+            self._delete_session(c)
+
+            # should trigger protection because "_id" is missing
+            with listen_to(session_protected) as listener:
+                c.get('/username')
+                listener.assert_heard_one(self.app)
+
     def test_permanent_strong_session_protection_marks_session_unfresh(self):
         self.app.config['SESSION_PROTECTION'] = 'strong'
         with self.app.test_client() as c:
@@ -573,6 +587,21 @@ class LoginTestCase(unittest.TestCase):
             with listen_to(session_protected) as listener:
                 c.get('/username', headers=[('X-Forwarded-For', '10.1.1.2')])
                 listener.assert_heard_one(self.app)
+
+    def test_session_protection_skip_when_off_and_anonymous(self):
+        with self.app.test_client() as c:
+            # no user access
+            with listen_to(user_accessed) as user_listener:
+                results = c.get('/')
+                user_listener.assert_heard_none(self.app)
+
+            # access user with no session data
+            with listen_to(session_protected) as session_listener:
+                with listen_to(user_accessed) as user_listener:
+                    results = c.get('/username')
+                    self.assertEqual(results.data.decode('utf-8'),
+                                     u'Anonymous')
+                session_listener.assert_heard_none(self.app)
 
     #
     # Custom Token Loader

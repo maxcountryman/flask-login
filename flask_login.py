@@ -314,12 +314,19 @@ class LoginManager(object):
         sess = session._get_current_object()
         ident = _create_identifier()
 
-        if '_id' not in sess:
-            sess['_id'] = ident
-        elif ident != sess['_id']:
-            app = current_app._get_current_object()
-            mode = app.config.get('SESSION_PROTECTION',
-                                  self.session_protection)
+        app = current_app._get_current_object()
+        mode = app.config.get('SESSION_PROTECTION', self.session_protection)
+
+        #Session Protection not active,
+        # and user has no session data (i.e. anonymous)
+        # so return without modifying
+        if not mode and not sess:
+            return False
+
+        # if there is no '_id', that should just count as miss?
+        # if '_id' not in sess:
+        #     sess['_id'] = ident
+        if ident != sess.get('_id', None):
             if mode == 'basic' or sess.permanent:
                 sess['_fresh'] = False
                 session_protected.send(app)
