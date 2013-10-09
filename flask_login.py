@@ -147,7 +147,6 @@ class LoginManager(object):
         :type add_context_processor: bool
         '''
         app.login_manager = self
-        # app.before_request(self._load_user)
         app.after_request(self._update_remember_cookie)
 
         self._login_disabled = app.config.get('LOGIN_DISABLED',
