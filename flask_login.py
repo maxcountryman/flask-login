@@ -316,12 +316,6 @@ class LoginManager(object):
         app = current_app._get_current_object()
         mode = app.config.get('SESSION_PROTECTION', self.session_protection)
 
-        #Session Protection not active,
-        # and user has no session data (i.e. anonymous)
-        # so return without modifying
-        if not mode and not sess:
-            return False
-
         # if there is no '_id', that should just count as miss?
         # if '_id' not in sess:
         #     sess['_id'] = ident
@@ -335,6 +329,7 @@ class LoginManager(object):
                 sess['remember'] = 'clear'
                 session_protected.send(app)
                 return True
+
         return False
 
     def _load_from_cookie(self, cookie):
