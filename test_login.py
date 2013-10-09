@@ -670,7 +670,7 @@ class LoginTestCase(unittest.TestCase):
     #
     # Lazy Access User
     #
-    def test_loads_without_accessing_session(self):
+    def test_requests_without_accessing_session(self):
         with self.app.test_client() as c:
             c.get('/login-notch')
 
