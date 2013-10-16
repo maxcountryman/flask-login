@@ -545,16 +545,26 @@ class LoginTestCase(unittest.TestCase):
                 c.get('/username', headers=[('User-Agent', 'different')])
                 listener.assert_heard_one(self.app)
 
-    def test_session_protection_basic_triggers_when_remember_me(self):
+    def test_session_protection_basic_skips_when_remember_me(self):
         self.app.config['SESSION_PROTECTION'] = 'basic'
 
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
-
             # clear session to force remember me (and remove old session id)
             self._delete_session(c)
+            # should not trigger protection because "sess" is empty
+            with listen_to(session_protected) as listener:
+                c.get('/username')
+                listener.assert_heard_none(self.app)
 
-            # should trigger protection because "_id" is missing
+    def test_session_protection_strong_triggers_when_remember_me(self):
+        self.app.config['SESSION_PROTECTION'] = 'strong'
+
+        with self.app.test_client() as c:
+            c.get('/login-notch-remember')
+            # clear session to force remember me (and remove old session id)
+            self._delete_session(c)
+            # should not trigger protection because "sess" is empty
             with listen_to(session_protected) as listener:
                 c.get('/username')
                 listener.assert_heard_one(self.app)
@@ -607,6 +617,24 @@ class LoginTestCase(unittest.TestCase):
                 listener.assert_heard_one(self.app)
 
     def test_session_protection_skip_when_off_and_anonymous(self):
+        with self.app.test_client() as c:
+            # no user access
+            with listen_to(user_accessed) as user_listener:
+                results = c.get('/')
+                user_listener.assert_heard_none(self.app)
+
+            # access user with no session data
+            with listen_to(session_protected) as session_listener:
+                results = c.get('/username')
+                self.assertEqual(results.data.decode('utf-8'), u'Anonymous')
+                session_listener.assert_heard_none(self.app)
+
+            # verify no session data has been set
+            self.assertFalse(session)
+
+    def test_session_protection_skip_when_basic_and_anonymous(self):
+        self.app.config['SESSION_PROTECTION'] = 'basic'
+
         with self.app.test_client() as c:
             # no user access
             with listen_to(user_accessed) as user_listener:
