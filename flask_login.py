@@ -321,12 +321,12 @@ class LoginManager(object):
         is_missing_user_id = 'user_id' not in session
         if is_missing_user_id:
             remember_ck_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
+            header_name = config.get('AUTH_HEADER_NAME', AUTH_HEADER_NAME)
             has_remember_me_cookie = (remember_ck_name in request.cookies and
                                       session.get('remember', None) != 'clear')
             if has_remember_me_cookie:
                 return self._load_from_cookie(request.cookies[remember_ck_name])
             elif header_name in request.headers:
-                header_name = config.get('AUTH_HEADER_NAME', AUTH_HEADER_NAME)
                 return self._load_from_header(request.headers[header_name])
 
         #default reload_user
