@@ -223,7 +223,7 @@ class LoginTestCase(unittest.TestCase):
                 header_value = header_value.replace('Basic ', '', 1)
             try:
                 user_id = base64.b64decode(header_value)
-            except TypeError as ex:
+            except TypeError:
                 pass
             return USERS.get(int(user_id))
 
@@ -292,24 +292,26 @@ class LoginTestCase(unittest.TestCase):
         user_id = 2
         user_name = USERS[user_id].name
         with self.app.test_client() as c:
-            header_val = 'Basic %s' % bytes.decode(
-                    base64.b64encode(str(user_id))
-                    )
-            result = c.get('/username',
-                    headers=[('Authorization', header_val)]
-                    )
+            headers = [
+                (
+                    'Authorization',
+                    'Basic %s' % bytes.decode(base64.b64encode(str(user_id))),
+                )
+            ]
+            result = c.get('/username', headers=headers)
             self.assertEqual(user_name, result.data.decode('utf-8'))
 
     def test_login_invalid_user_with_header(self):
         user_id = 4
         user_name = u'Anonymous'
         with self.app.test_client() as c:
-            header_val = 'Basic %s' % bytes.decode(
-                    base64.b64encode(str(user_id))
-                    )
-            result = c.get('/username',
-                    headers=[('Authorization', header_val)]
-                    )
+            headers = [
+                (
+                    'Authorization',
+                    'Basic %s' % bytes.decode(base64.b64encode(str(user_id))),
+                )
+            ]
+            result = c.get('/username', headers=headers)
             self.assertEqual(user_name, result.data.decode('utf-8'))
 
     #
@@ -465,12 +467,15 @@ class LoginTestCase(unittest.TestCase):
         user_name = USERS[user_id].name
         with self.app.test_client() as c:
             with listen_to(user_loaded_from_header) as listener:
-                header_val = 'Basic %s' % bytes.decode(
-                        base64.b64encode(str(user_id))
-                        )
-                result = c.get('/username',
-                        headers=[('Authorization', header_val)]
-                        )
+                headers = [
+                    (
+                        'Authorization',
+                        'Basic %s' % (
+                            bytes.decode(base64.b64encode(str(user_id)))
+                        ),
+                    )
+                ]
+                result = c.get('/username', headers=headers)
                 self.assertEqual(user_name, result.data.decode('utf-8'))
                 listener.assert_heard_one(self.app, user=USERS[user_id])
 
