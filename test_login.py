@@ -292,16 +292,24 @@ class LoginTestCase(unittest.TestCase):
         user_id = 2
         user_name = USERS[user_id].name
         with self.app.test_client() as c:
-            header_val = 'Basic %s' % bytes.decode(base64.b64encode(str(user_id)))
-            result = c.get('/username', headers=[('Authorization', header_val)])
+            header_val = 'Basic %s' % bytes.decode(
+                    base64.b64encode(str(user_id))
+                    )
+            result = c.get('/username',
+                    headers=[('Authorization', header_val)]
+                    )
             self.assertEqual(user_name, result.data.decode('utf-8'))
 
     def test_login_invalid_user_with_header(self):
         user_id = 4
         user_name = u'Anonymous'
         with self.app.test_client() as c:
-            header_val = 'Basic %s' % bytes.decode(base64.b64encode(str(user_id)))
-            result = c.get('/username', headers=[('Authorization', header_val)])
+            header_val = 'Basic %s' % bytes.decode(
+                    base64.b64encode(str(user_id))
+                    )
+            result = c.get('/username',
+                    headers=[('Authorization', header_val)]
+                    )
             self.assertEqual(user_name, result.data.decode('utf-8'))
 
     #
@@ -367,7 +375,6 @@ class LoginTestCase(unittest.TestCase):
             self.assertEqual(result.status_code, 302)
             self.assertEqual(result.location,
                              'http://localhost/login?next=%2Fsecret')
-
 
     #
     # Session Persistence/Freshness
@@ -458,8 +465,12 @@ class LoginTestCase(unittest.TestCase):
         user_name = USERS[user_id].name
         with self.app.test_client() as c:
             with listen_to(user_loaded_from_header) as listener:
-                header_val = 'Basic %s' % bytes.decode(base64.b64encode(str(user_id)))
-                result = c.get('/username', headers=[('Authorization', header_val)])
+                header_val = 'Basic %s' % bytes.decode(
+                        base64.b64encode(str(user_id))
+                        )
+                result = c.get('/username',
+                        headers=[('Authorization', header_val)]
+                        )
                 self.assertEqual(user_name, result.data.decode('utf-8'))
                 listener.assert_heard_one(self.app, user=USERS[user_id])
 

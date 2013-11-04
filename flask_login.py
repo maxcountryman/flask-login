@@ -325,7 +325,9 @@ class LoginManager(object):
             has_remember_me_cookie = (remember_ck_name in request.cookies and
                                       session.get('remember', None) != 'clear')
             if has_remember_me_cookie:
-                return self._load_from_cookie(request.cookies[remember_ck_name])
+                return self._load_from_cookie(
+                    request.cookies[remember_ck_name]
+                )
             elif header_name in request.headers:
                 return self._load_from_header(request.headers[header_name])
 
