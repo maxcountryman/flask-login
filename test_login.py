@@ -4,6 +4,7 @@ try:
 except ImportError:
     import unittest
 
+import base64
 from datetime import timedelta, datetime
 from contextlib import contextmanager
 
@@ -15,6 +16,7 @@ from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
                              make_secure_token, current_user, login_user,
                              logout_user, user_logged_in, user_logged_out,
                              user_loaded_from_cookie, user_login_confirmed,
+                             user_loaded_from_header,
                              user_unauthorized, user_needs_refresh,
                              make_next_param, login_url, login_fresh,
                              login_required, session_protected,
@@ -215,6 +217,16 @@ class LoginTestCase(unittest.TestCase):
         def load_user(user_id):
             return USERS[int(user_id)]
 
+        @self.login_manager.header_loader
+        def load_user_from_header(header_value):
+            if header_value.startswith('Basic '):
+                header_value = header_value.replace('Basic ', '', 1)
+            try:
+                user_id = base64.b64decode(header_value)
+            except TypeError:
+                pass
+            return USERS.get(int(user_id))
+
         @self.app.route('/empty_session')
         def empty_session():
             return unicode(u'modified=%s' % session.modified)
@@ -275,6 +287,26 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_request_context():
             login_user(creeper, force=True)
             self.assertEqual(current_user.name, u'Creeper')
+
+    def test_login_user_with_header(self):
+        user_id = 2
+        user_name = USERS[user_id].name
+        with self.app.test_client() as c:
+            basic_fmt = 'Basic {0}'
+            decoded = bytes.decode(base64.b64encode(str.encode(str(user_id))))
+            headers = [('Authorization', basic_fmt.format(decoded))]
+            result = c.get('/username', headers=headers)
+            self.assertEqual(user_name, result.data.decode('utf-8'))
+
+    def test_login_invalid_user_with_header(self):
+        user_id = 4
+        user_name = u'Anonymous'
+        with self.app.test_client() as c:
+            basic_fmt = 'Basic {0}'
+            decoded = bytes.decode(base64.b64encode(str.encode(str(user_id))))
+            headers = [('Authorization', basic_fmt.format(decoded))]
+            result = c.get('/username', headers=headers)
+            self.assertEqual(user_name, result.data.decode('utf-8'))
 
     #
     # Logout
@@ -423,6 +455,24 @@ class LoginTestCase(unittest.TestCase):
             with listen_to(user_loaded_from_cookie) as listener:
                 c.get('/username')
                 listener.assert_heard_one(self.app, user=notch)
+
+    def test_user_loaded_from_header_fired(self):
+        user_id = 1
+        user_name = USERS[user_id].name
+        with self.app.test_client() as c:
+            with listen_to(user_loaded_from_header) as listener:
+                headers = [
+                    (
+                        'Authorization',
+                        'Basic %s' % (
+                            bytes.decode(
+                                base64.b64encode(str.encode(str(user_id))))
+                        ),
+                    )
+                ]
+                result = c.get('/username', headers=headers)
+                self.assertEqual(user_name, result.data.decode('utf-8'))
+                listener.assert_heard_one(self.app, user=USERS[user_id])
 
     def test_logout_stays_logged_out_with_remember_me(self):
         with self.app.test_client() as c:
