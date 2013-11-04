@@ -295,7 +295,8 @@ class LoginTestCase(unittest.TestCase):
             headers = [
                 (
                     'Authorization',
-                    'Basic %s' % bytes.decode(base64.b64encode(str(user_id))),
+                    'Basic %s' % bytes.decode(
+                        base64.b64encode(str.encode(str(user_id)))),
                 )
             ]
             result = c.get('/username', headers=headers)
@@ -308,7 +309,8 @@ class LoginTestCase(unittest.TestCase):
             headers = [
                 (
                     'Authorization',
-                    'Basic %s' % bytes.decode(base64.b64encode(str(user_id))),
+                    'Basic %s' % bytes.decode(
+                        base64.b64encode(str.encode(str(user_id)))),
                 )
             ]
             result = c.get('/username', headers=headers)
@@ -471,7 +473,8 @@ class LoginTestCase(unittest.TestCase):
                     (
                         'Authorization',
                         'Basic %s' % (
-                            bytes.decode(base64.b64encode(str(user_id)))
+                            bytes.decode(
+                                base64.b64encode(str.encode(str(user_id))))
                         ),
                     )
                 ]
