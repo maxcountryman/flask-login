@@ -74,6 +74,9 @@ REFRESH_MESSAGE_CATEGORY = 'message'
 #: The default attribute to retreive the unicode id of the user
 ID_ATTRIBUTE = 'get_id'
 
+#: Default name of the auth header (``Authorization``)
+AUTH_HEADER_NAME = 'Authorization'
+
 
 class LoginManager(object):
     '''
@@ -125,6 +128,8 @@ class LoginManager(object):
         self.needs_refresh_callback = None
 
         self.id_attribute = ID_ATTRIBUTE
+
+        self.header_callback = None
 
         if app is not None:
             self.init_app(app, add_context_processor)
@@ -203,6 +208,17 @@ class LoginManager(object):
         self.user_callback = callback
         return callback
 
+    def header_loader(self, callback):
+        '''
+        This sets the callback for loading a user from a header value.
+        The function you set should take an authentication token and
+        return a user object, or `None` if the user does not exist.
+
+        :param callback: The callback for retrieving a user object.
+        '''
+        self.header_callback = callback
+        return callback
+
     def token_loader(self, callback):
         '''
         This sets the callback for loading a user from an authentication
@@ -275,24 +291,27 @@ class LoginManager(object):
 
         return redirect(login_url(self.refresh_view, request.url))
 
-    def reload_user(self):
+    def reload_user(self, user=None):
         ctx = _request_ctx_stack.top
-        user_id = session.get('user_id')
 
-        if user_id is None:
-            ctx.user = None
-        else:
-            user = self.user_callback(user_id)
-            if user is None:
-                logout_user()
+        if user is None:
+            user_id = session.get('user_id')
+            if user_id is None:
+                ctx.user = None
             else:
-                ctx.user = user
+                user = self.user_callback(user_id)
+                if user is None:
+                    logout_user()
+                else:
+                    ctx.user = user
+        else:
+            ctx.user = user
 
     def _load_user(self):
         '''Loads user from session or remember_me cookie as applicable'''
         user_accessed.send(current_app._get_current_object())
 
-        #first check SESSION_PROTECTION
+        # first check SESSION_PROTECTION
         config = current_app.config
         if config.get('SESSION_PROTECTION', self.session_protection):
             deleted = self._session_protection()
@@ -301,17 +320,22 @@ class LoginManager(object):
 
         # If a remember cookie is set, and the session is not, move the
         # cookie user ID to the session.
+        #
         # However, if the session may have been set if the user has been
         # logged out on this request,'remember' would be set to clear,
-        # so we should check for that and not restore the session
-        remember_ck_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
-        has_remember_me_cookie = (remember_ck_name in request.cookies and
-                                  session.get('remember', None) != 'clear')
+        # so we should check for that and not restore the session.
         is_missing_user_id = 'user_id' not in session
-        if has_remember_me_cookie and is_missing_user_id:
-            return self._load_from_cookie(request.cookies[remember_ck_name])
+        if is_missing_user_id:
+            cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
+            header_name = config.get('AUTH_HEADER_NAME', AUTH_HEADER_NAME)
+            has_cookie = (cookie_name in request.cookies and
+                          session.get('remember') != 'clear')
+            if has_cookie:
+                return self._load_from_cookie(request.cookies[cookie_name])
+            elif header_name in request.headers:
+                return self._load_from_header(request.headers[header_name])
 
-        #default reload_user
+        # default reload_user
         return self.reload_user()
 
     def _session_protection(self):
@@ -361,6 +385,17 @@ class LoginManager(object):
             self.reload_user()
             app = current_app._get_current_object()
             user_loaded_from_cookie.send(app, user=_get_user())
+
+    def _load_from_header(self, header):
+        user = None
+        if self.header_callback:
+            user = self.header_callback(header)
+        if user is not None:
+            self.reload_user(user=user)
+            app = current_app._get_current_object()
+            user_loaded_from_header.send(app, user=_get_user())
+        else:
+            self.reload_user()
 
     def _update_remember_cookie(self, response):
         # Don't modify the session unless there's something to do.
@@ -771,6 +806,10 @@ user_logged_out = _signals.signal('logged-out')
 #: Sent when the user is loaded from the cookie. In addition to the app (which
 #: is the sender), it is passed `user`, which is the user being reloaded.
 user_loaded_from_cookie = _signals.signal('loaded-from-cookie')
+
+#: Sent when the user is loaded from the header. In addition to the app (which
+#: is the #: sender), it is passed `user`, which is the user being reloaded.
+user_loaded_from_header = _signals.signal('loaded-from-header')
 
 #: Sent when a user's login is confirmed, marking it as fresh. (It is not
 #: called for a normal login.)

@@ -159,6 +159,29 @@ If you would like to customize the process further, decorate a function with
         return a_response
 
 
+Login using Authorization header
+================================
+Sometimes you want to support Basic Auth login using the `Authorization`
+header, such as for api requests. To support login via header you will need
+to provide a `~LoginManager.header_loader` callback. This callback should behave
+the same as your `~LoginManager.user_loader` callback, except that it accepts
+a header value instead of a user id. For example::
+
+    @login_manager.header_loader
+    def load_user_from_header(header_val):
+        if header_val.startswith('Basic '):                                             
+            header_val = header_val.replace('Basic ', '', 1)                                
+        try:                                                                        
+            header_val = base64.b64decode(header_val)                                       
+        except TypeError:                                                     
+            pass
+        return User.query.filter_by(api_key=header_val).first()
+        
+By default the `Authorization` header's value is passed to your
+`~LoginManager.header_loader` callback. You can change the header used with
+the `AUTH_HEADER_NAME` configuration.
+
+
 Anonymous Users
 ===============
 By default, when a user is not actually logged in, `current_user` is set to
@@ -326,6 +349,8 @@ Configuring Login
    .. rubric:: General Configuration
    
    .. automethod:: user_loader
+   
+   .. automethod:: header_loader
    
    .. automethod:: token_loader
    
