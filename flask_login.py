@@ -145,9 +145,8 @@ class LoginManager(object):
 
     def init_app(self, app, add_context_processor=True):
         '''
-        Configures an application. This registers a `before_request` and an
-        `after_request` call, and attaches this `LoginManager` to it as
-        `app.login_manager`.
+        Configures an application. This registers an `after_request` call, and
+        attaches this `LoginManager` to it as `app.login_manager`.
 
         :param app: The :class:`flask.Flask` object to configure.
         :type app: :class:`flask.Flask`
@@ -383,6 +382,8 @@ class LoginManager(object):
                 session['_fresh'] = False
 
             self.reload_user()
+
+        if _request_ctx_stack.top.user is not None:
             app = current_app._get_current_object()
             user_loaded_from_cookie.send(app, user=_get_user())
 
