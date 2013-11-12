@@ -71,6 +71,9 @@ REFRESH_MESSAGE = u'Please reauthenticate to access this page.'
 #: reauthenticate.
 REFRESH_MESSAGE_CATEGORY = 'message'
 
+#: The default attribute to retreive the unicode id of the user
+ID_ATTRIBUTE = 'get_id'
+
 
 class LoginManager(object):
     '''
@@ -120,6 +123,8 @@ class LoginManager(object):
         self.unauthorized_callback = None
 
         self.needs_refresh_callback = None
+
+        self.id_attribute = ID_ATTRIBUTE
 
         if app is not None:
             self.init_app(app, add_context_processor)
@@ -342,7 +347,7 @@ class LoginManager(object):
         if self.token_callback:
             user = self.token_callback(cookie)
             if user is not None:
-                session['user_id'] = user.get_id()
+                session['user_id'] = getattr(user, self.id_attribute)()
                 session['_fresh'] = False
                 _request_ctx_stack.top.user = user
             else:
@@ -593,7 +598,7 @@ def login_user(user, remember=False, force=False):
     if not force and not user.is_active():
         return False
 
-    user_id = user.get_id()
+    user_id = getattr(user, current_app.login_manager.id_attribute)()
     session['user_id'] = user_id
     session['_fresh'] = True
     session['_id'] = _create_identifier()
