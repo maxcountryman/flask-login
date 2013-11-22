@@ -5,6 +5,7 @@ except ImportError:
     import unittest
 
 import base64
+import collections
 from datetime import timedelta, datetime
 from contextlib import contextmanager
 
@@ -963,6 +964,9 @@ class UserMixinTestCase(unittest.TestCase):
 
         self.assertFalse(first == u'1')
         self.assertTrue(first != u'1')
+
+    def test_hashable(self):
+        self.assertTrue(isinstance(UserMixin(), collections.Hashable))
 
 
 class AnonymousUserTestCase(unittest.TestCase):
