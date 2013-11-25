@@ -479,6 +479,11 @@ class UserMixin(object):
             return NotImplemented
         return not equal
 
+    if sys.version_info[0] != 2:  # pragma: no cover
+        # Python 3 implicitly set __hash__ to None if we override __eq__
+        # We set it back to its default implementation
+        __hash__ = object.__hash__
+
 
 class AnonymousUserMixin(object):
     '''
