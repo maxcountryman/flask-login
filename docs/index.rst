@@ -333,11 +333,12 @@ deleted.
 
 Localization
 ============
-By default, the `LoginManager` `flash`es messages when a user is required to
+By default, the `LoginManager` ``flash``es messages when a user is required to
 log in. These messages are in English. If you require localization,
-you can pass a translation function as the `localizer` argument to
-`LoginManager`, e.g. `gettext`. The `flash` messages will be run through this
-function before they are displayed.
+you can set the `localize_callback` attribute of `LoginManager` to a function
+to be called with these messages before they're ``flash``ed, e.g. ``gettext``.
+This function will be called with the message and its return value will be
+``flash``ed.
 
 
 API Documentation
