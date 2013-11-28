@@ -85,7 +85,7 @@ class LoginManager(object):
     one in the main body of your code and then bind it to your
     app in a factory function.
     '''
-    def __init__(self, app=None, add_context_processor=True, localizer=None):
+    def __init__(self, app=None, add_context_processor=True):
         #: A class or factory function that produces an anonymous user, which
         #: is used when no one is logged in.
         self.anonymous_user = AnonymousUserMixin
@@ -121,7 +121,7 @@ class LoginManager(object):
 
         #: If present, used to translate flash messages ``self.login_message``
         #: and ``self.needs_refresh_message``
-        self.localizer = localizer
+        self.localize_callback = None
 
         self.token_callback = None
 
@@ -195,8 +195,9 @@ class LoginManager(object):
             abort(401)
 
         if self.login_message:
-            if self.localizer:
-                flash(self.localizer(self.login_message), category=self.login_message_category)
+            if self.localize_callback:
+                flash(self.localize_callback(self.login_message),
+                      category=self.login_message_category)
             else:
                 flash(self.login_message, category=self.login_message_category)
 
@@ -292,12 +293,12 @@ class LoginManager(object):
         if not self.refresh_view:
             abort(403)
 
-        if self.localizer:
-            flash(self.localizer(self.needs_refresh_message),
-                category=self.needs_refresh_message_category)
+        if self.localize_callback:
+            flash(self.localize_callback(self.needs_refresh_message),
+                  category=self.needs_refresh_message_category)
         else:
             flash(self.needs_refresh_message,
-              category=self.needs_refresh_message_category)
+                  category=self.needs_refresh_message_category)
 
         return redirect(login_url(self.refresh_view, request.url))
 
