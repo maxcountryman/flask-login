@@ -363,7 +363,6 @@ class LoginTestCase(unittest.TestCase):
             self.assertEqual([expected_message], msgs)
         self.login_manager.localize_callback = None
 
-
     def test_unauthorized_uses_authorized_handler(self):
         @self.login_manager.unauthorized_handler
         def _callback():
