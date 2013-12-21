@@ -1,13 +1,17 @@
 Flask-Login Changelog
-===============
+=====================
 
 Here you can see the full list of changes between each Flask-Login release.
 
-Version 0.2.7-dev
------------
+Version 0.2.8
+-------------
 
-(release date to be announced)
+Released on December 21st 2013
 
+- Support login via authorization header. This allows login via Basic Auth, for
+  example. Useful in an API presentation context.
+- Ability to override user ID method name. This is useful if the ID getter is
+  named differently than the default.
 - Session data is now only read when the user is requested. This can be
   beneficial for cookie and caching control when differenting between
   requests that use user information for rendering and ones where all users
@@ -21,3 +25,10 @@ Version 0.2.7-dev
 - Fixes issue where order dependency of applying the login manager
   before dependent applications was required.
   see https://github.com/mattupstate/flask-principal/issues/22
+- Fixes Python 3 ``UserMixin`` hashing.
+- Fixes incorrect documentation.
+
+Previous Versions
+=================
+
+Prior to 0.2.8, no proper changelog was kept.
