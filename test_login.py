@@ -345,6 +345,24 @@ class LoginTestCase(unittest.TestCase):
             msgs = get_flashed_messages(category_filter=[expected_category])
             self.assertEqual([expected_message], msgs)
 
+    def test_unauthorized_flash_message_localized(self):
+        def _gettext(msg):
+            if msg == u'Log in!':
+                return u'Einloggen'
+
+        self.login_manager.login_view = '/login'
+        self.login_manager.localize_callback = _gettext
+        self.login_manager.login_message = u'Log in!'
+
+        expected_message = u'Einloggen'
+        expected_category = self.login_manager.login_message_category = 'login'
+
+        with self.app.test_client() as c:
+            c.get('/secret')
+            msgs = get_flashed_messages(category_filter=[expected_category])
+            self.assertEqual([expected_message], msgs)
+        self.login_manager.localize_callback = None
+
     def test_unauthorized_uses_authorized_handler(self):
         @self.login_manager.unauthorized_handler
         def _callback():
@@ -511,6 +529,25 @@ class LoginTestCase(unittest.TestCase):
             c.get('/needs-refresh')
             msgs = get_flashed_messages(category_filter=category_filter)
             self.assertIn(self.login_manager.needs_refresh_message, msgs)
+
+    def test_needs_refresh_flash_message_localized(self):
+        def _gettext(msg):
+            if msg == u'Refresh':
+                return u'Aktualisieren'
+
+        self.login_manager.refresh_view = '/refresh_view'
+        self.login_manager.localize_callback = _gettext
+
+        self.login_manager.needs_refresh_message = u'Refresh'
+        self.login_manager.needs_refresh_message_category = 'refresh'
+        category_filter = [self.login_manager.needs_refresh_message_category]
+
+        with self.app.test_client() as c:
+            c.get('/login-notch-remember')
+            c.get('/needs-refresh')
+            msgs = get_flashed_messages(category_filter=category_filter)
+            self.assertIn(u'Aktualisieren', msgs)
+        self.login_manager.localize_callback = None
 
     def test_needs_refresh_aborts_403(self):
         with self.app.test_client() as c:
