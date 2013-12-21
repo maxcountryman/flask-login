@@ -331,6 +331,16 @@ then the entire session (as well as the remember token if it exists) is
 deleted.
 
 
+Localization
+============
+By default, the `LoginManager` uses ``flash`` to display messages when a user
+is required to log in. These messages are in English. If you require
+localization, set the `localize_callback` attribute of `LoginManager` to a
+function to be called with these messages before they're sent to ``flash``,
+e.g. ``gettext``. This function will be called with the message and its return
+value will be sent to ``flash`` instead.
+
+
 API Documentation
 =================
 This documentation is automatically generated from Flask-Login's source code.
