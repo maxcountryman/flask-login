@@ -119,6 +119,10 @@ class LoginManager(object):
         #: it.
         self.session_protection = 'basic'
 
+        #: If present, used to translate flash messages ``self.login_message``
+        #: and ``self.needs_refresh_message``
+        self.localize_callback = None
+
         self.token_callback = None
 
         self.user_callback = None
@@ -191,7 +195,11 @@ class LoginManager(object):
             abort(401)
 
         if self.login_message:
-            flash(self.login_message, category=self.login_message_category)
+            if self.localize_callback is not None:
+                flash(self.localize_callback(self.login_message),
+                      category=self.login_message_category)
+            else:
+                flash(self.login_message, category=self.login_message_category)
 
         return redirect(login_url(self.login_view, request.url))
 
@@ -285,8 +293,12 @@ class LoginManager(object):
         if not self.refresh_view:
             abort(403)
 
-        flash(self.needs_refresh_message,
-              category=self.needs_refresh_message_category)
+        if self.localize_callback is not None:
+            flash(self.localize_callback(self.needs_refresh_message),
+                  category=self.needs_refresh_message_category)
+        else:
+            flash(self.needs_refresh_message,
+                  category=self.needs_refresh_message_category)
 
         return redirect(login_url(self.refresh_view, request.url))
 

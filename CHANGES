@@ -3,6 +3,15 @@ Flask-Login Changelog
 
 Here you can see the full list of changes between each Flask-Login release.
 
+
+Version 0.2.9-dev
+-----------------
+
+(release pending)
+
+- Fixes localization in Python 3.
+
+
 Version 0.2.8
 -------------
 
@@ -27,6 +36,7 @@ Released on December 21st 2013
   see https://github.com/mattupstate/flask-principal/issues/22
 - Fixes Python 3 ``UserMixin`` hashing.
 - Fixes incorrect documentation.
+
 
 Previous Versions
 =================
