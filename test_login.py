@@ -881,7 +881,7 @@ class LoginTestCase(unittest.TestCase):
     def test_user_context_processor(self):
         with self.app.test_request_context():
             _ucp = self.app.context_processor(_user_context_processor)
-            self.assertEqual(_ucp(), {'current_user': None})
+            self.assertIsInstance(_ucp()['current_user'], AnonymousUserMixin)
 
 
 class TestLoginUrlGeneration(unittest.TestCase):

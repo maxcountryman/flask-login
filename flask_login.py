@@ -43,8 +43,7 @@ _signals = Namespace()
 
 #: A proxy for the current user. If no user is logged in, this will be an
 #: anonymous user
-current_user = LocalProxy(lambda: _get_user() or
-                          current_app.login_manager.anonymous_user())
+current_user = LocalProxy(lambda: _get_user())
 
 #: The default name of the "remember me" cookie (``remember_token``)
 COOKIE_NAME = 'remember_token'
@@ -308,7 +307,7 @@ class LoginManager(object):
         if user is None:
             user_id = session.get('user_id')
             if user_id is None:
-                ctx.user = None
+                ctx.user = self.anonymous_user()
             else:
                 user = self.user_callback(user_id)
                 if user is None:
@@ -332,8 +331,8 @@ class LoginManager(object):
         # If a remember cookie is set, and the session is not, move the
         # cookie user ID to the session.
         #
-        # However, if the session may have been set if the user has been
-        # logged out on this request,'remember' would be set to clear,
+        # However, the session may have been set if the user has been
+        # logged out on this request, 'remember' would be set to clear,
         # so we should check for that and not restore the session.
         is_missing_user_id = 'user_id' not in session
         if is_missing_user_id:
@@ -346,7 +345,6 @@ class LoginManager(object):
             elif header_name in request.headers:
                 return self._load_from_header(request.headers[header_name])
 
-        # default reload_user
         return self.reload_user()
 
     def _session_protection(self):
