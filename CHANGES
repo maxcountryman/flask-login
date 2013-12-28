@@ -7,8 +7,9 @@ Here you can see the full list of changes between each Flask-Login release.
 Version 0.2.9-dev
 -----------------
 
-(release pending)
+Released on December 28th, 2013
 
+- Fixes anonymous user assignment.
 - Fixes localization in Python 3.
 
 
