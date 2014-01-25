@@ -354,9 +354,9 @@ class LoginManager(object):
         app = current_app._get_current_object()
         mode = app.config.get('SESSION_PROTECTION', self.session_protection)
 
-        # if there is no '_id', that should just count as miss?
-        # if '_id' not in sess:
-        #     sess['_id'] = ident
+        # if there is no '_id', then take the current one for good
+        if '_id' not in sess:
+            sess['_id'] = ident
 
         # if the sess is empty, it's an anonymous user, or just logged out
         #  so we can skip this, unless 'strong' protection is active,

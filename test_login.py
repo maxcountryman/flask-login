@@ -645,7 +645,7 @@ class LoginTestCase(unittest.TestCase):
                 c.get('/username')
                 listener.assert_heard_none(self.app)
 
-    def test_session_protection_strong_triggers_when_remember_me(self):
+    def test_session_protection_strong_skips_when_remember_me(self):
         self.app.config['SESSION_PROTECTION'] = 'strong'
 
         with self.app.test_client() as c:
@@ -655,7 +655,7 @@ class LoginTestCase(unittest.TestCase):
             # should not trigger protection because "sess" is empty
             with listen_to(session_protected) as listener:
                 c.get('/username')
-                listener.assert_heard_one(self.app)
+                listener.assert_heard_none(self.app)
 
     def test_permanent_strong_session_protection_marks_session_unfresh(self):
         self.app.config['SESSION_PROTECTION'] = 'strong'
