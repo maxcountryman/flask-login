@@ -18,7 +18,7 @@ __copyright__ = '(c) 2011 by Matthew Frazier'
 __all__ = ['LoginManager']
 
 from flask import (_request_ctx_stack, abort, current_app, flash, redirect,
-                   request, session, url_for)
+                   request, session, url_for, has_request_context)
 from flask.signals import Namespace
 
 from werkzeug.local import LocalProxy
@@ -764,7 +764,7 @@ def fresh_login_required(func):
 
 
 def _get_user():
-    if not hasattr(_request_ctx_stack.top, 'user'):
+    if has_request_context() and not hasattr(_request_ctx_stack.top, 'user'):
         current_app.login_manager._load_user()
 
     return getattr(_request_ctx_stack.top, 'user', None)
