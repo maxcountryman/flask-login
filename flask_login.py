@@ -76,8 +76,8 @@ ID_ATTRIBUTE = 'get_id'
 #: Default name of the auth header (``Authorization``)
 AUTH_HEADER_NAME = 'Authorization'
 
-#: Default value for multiple header value (``[]``)
-MULTIPLE_AUTH_HEADERS = []
+#: Default value for multiple header value (``False``)
+MULTIPLE_AUTH_HEADERS = False
 
 class LoginManager(object):
     '''
