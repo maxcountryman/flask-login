@@ -76,6 +76,8 @@ ID_ATTRIBUTE = 'get_id'
 #: Default name of the auth header (``Authorization``)
 AUTH_HEADER_NAME = 'Authorization'
 
+#: Default value for multiple header value (``[]``)
+MULTIPLE_AUTH_HEADERS = []
 
 class LoginManager(object):
     '''
@@ -133,6 +135,8 @@ class LoginManager(object):
         self.id_attribute = ID_ATTRIBUTE
 
         self.header_callback = None
+
+        self.multi_header_callback = None
 
         if app is not None:
             self.init_app(app, add_context_processor)
@@ -238,6 +242,18 @@ class LoginManager(object):
         self.token_callback = callback
         return callback
 
+    def multiple_headers_loader(self, callback):
+        '''
+        This sets the callback for loading a user from multiple header values.
+        The function you set should take multiple authentication tokens and
+        return a user object, or `None` if the user does not exist.
+
+        :param callback: The callback for retrieving a user object.
+        '''
+
+        self.multiple_headers_callback = callback
+        return callback
+
     def unauthorized_handler(self, callback):
         '''
         This will set the callback for the `unauthorized` method, which among
@@ -338,10 +354,13 @@ class LoginManager(object):
         if is_missing_user_id:
             cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
             header_name = config.get('AUTH_HEADER_NAME', AUTH_HEADER_NAME)
+            multiple_headers = config.get('MULTIPLE_AUTH_HEADERS', MULTIPLE_AUTH_HEADERS)
             has_cookie = (cookie_name in request.cookies and
                           session.get('remember') != 'clear')
             if has_cookie:
                 return self._load_from_cookie(request.cookies[cookie_name])
+            elif multiple_headers:
+                return self._load_from_multiple_headers(request.headers)
             elif header_name in request.headers:
                 return self._load_from_header(request.headers[header_name])
 
@@ -405,6 +424,17 @@ class LoginManager(object):
             self.reload_user(user=user)
             app = current_app._get_current_object()
             user_loaded_from_header.send(app, user=_get_user())
+        else:
+            self.reload_user()
+
+    def _load_from_multiple_headers(self, headers):
+        user = None
+        if self.multiple_headers_callback:
+            user = self.multiple_headers_callback(headers)
+        if user is not None:
+            self.reload_user(user=user)
+            app = current_app._get_current_object()
+            user_loaded_from_multiple_headers.send(app, user=_get_user())
         else:
             self.reload_user()
 
@@ -848,3 +878,8 @@ user_accessed = _signals.signal('accessed')
 #: marked non-fresh or deleted. It receives no additional arguments besides
 #: the app.
 session_protected = _signals.signal('session-protected')
+
+#: Sent when the user is loaded from multiple headers. In addition to the app (which
+#: is the #: sender), it is passed `user`, which is the user being reloaded.
+user_loaded_from_multiple_headers = _signals.signal('loaded-from-multi-headers')
+
