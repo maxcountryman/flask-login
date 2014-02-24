@@ -134,6 +134,8 @@ class LoginManager(object):
 
         self.header_callback = None
 
+        self.request_callback = None
+
         if app is not None:
             self.init_app(app, add_context_processor)
 
@@ -223,6 +225,17 @@ class LoginManager(object):
         :param callback: The callback for retrieving a user object.
         '''
         self.header_callback = callback
+        return callback
+
+    def request_loader(self, callback):
+        '''
+        This sets the callback for loading a user from a Flask request.
+        The function you set should take Flask request object and
+        return a user object, or `None` if the user does not exist.
+
+        :param callback: The callback for retrieving a user object.
+        '''
+        self.request_callback = callback
         return callback
 
     def token_loader(self, callback):
@@ -344,6 +357,8 @@ class LoginManager(object):
                 return self._load_from_cookie(request.cookies[cookie_name])
             elif header_name in request.headers:
                 return self._load_from_header(request.headers[header_name])
+            else:
+                return self._load_from_request(request)
 
         return self.reload_user()
 
@@ -405,6 +420,17 @@ class LoginManager(object):
             self.reload_user(user=user)
             app = current_app._get_current_object()
             user_loaded_from_header.send(app, user=_get_user())
+        else:
+            self.reload_user()
+
+    def _load_from_request(self, request):
+        user = None
+        if self.request_callback:
+            user = self.request_callback(request)
+        if user is not None:
+            self.reload_user(user=user)
+            app = current_app._get_current_object()
+            user_loaded_from_request.send(app, user=_get_user())
         else:
             self.reload_user()
 
@@ -534,7 +560,7 @@ def decode_cookie(cookie):
     try:
         payload, digest = cookie.rsplit(u'|', 1)
         if hasattr(digest, 'decode'):
-            digest = digest.decode('ascii')
+            digest = digest.decode('ascii')  # pragma: no cover
     except ValueError:
         return
 
@@ -789,7 +815,7 @@ def _create_identifier():
         user_agent = user_agent.encode('utf-8')
     base = '{0}|{1}'.format(_get_remote_addr(), user_agent)
     if str is bytes:
-        base = unicode(base, 'utf-8', errors='replace')
+        base = unicode(base, 'utf-8', errors='replace')  # pragma: no cover
     h = md5()
     h.update(base.encode('utf8'))
     return h.hexdigest()
@@ -826,6 +852,10 @@ user_loaded_from_cookie = _signals.signal('loaded-from-cookie')
 #: Sent when the user is loaded from the header. In addition to the app (which
 #: is the #: sender), it is passed `user`, which is the user being reloaded.
 user_loaded_from_header = _signals.signal('loaded-from-header')
+
+#: Sent when the user is loaded from the request. In addition to the app (which
+#: is the #: sender), it is passed `user`, which is the user being reloaded.
+user_loaded_from_request = _signals.signal('loaded-from-request')
 
 #: Sent when a user's login is confirmed, marking it as fresh. (It is not
 #: called for a normal login.)
