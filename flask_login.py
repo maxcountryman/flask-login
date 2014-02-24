@@ -79,6 +79,7 @@ AUTH_HEADER_NAME = 'Authorization'
 #: Default value for multiple header value (``False``)
 MULTIPLE_AUTH_HEADERS = False
 
+
 class LoginManager(object):
     '''
     This object is used to hold the settings used for logging in. Instances of
@@ -354,7 +355,8 @@ class LoginManager(object):
         if is_missing_user_id:
             cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
             header_name = config.get('AUTH_HEADER_NAME', AUTH_HEADER_NAME)
-            multiple_headers = config.get('MULTIPLE_AUTH_HEADERS', MULTIPLE_AUTH_HEADERS)
+            multiple_headers = config.get('MULTIPLE_AUTH_HEADERS',
+                                          MULTIPLE_AUTH_HEADERS)
             has_cookie = (cookie_name in request.cookies and
                           session.get('remember') != 'clear')
             if has_cookie:
@@ -879,7 +881,8 @@ user_accessed = _signals.signal('accessed')
 #: the app.
 session_protected = _signals.signal('session-protected')
 
-#: Sent when the user is loaded from multiple headers. In addition to the app (which
-#: is the #: sender), it is passed `user`, which is the user being reloaded.
-user_loaded_from_multiple_headers = _signals.signal('loaded-from-multi-headers')
-
+#: Sent when the user is loaded from multiple headers. In addition to the app
+#: (which is the #: sender), it is passed `user`, which is the user being
+#: reloaded.
+user_loaded_from_multiple_headers = _signals.signal(
+    'loaded-from-multi-headers')
