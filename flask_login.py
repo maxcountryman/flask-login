@@ -560,7 +560,7 @@ def decode_cookie(cookie):
     try:
         payload, digest = cookie.rsplit(u'|', 1)
         if hasattr(digest, 'decode'):
-            digest = digest.decode('ascii')
+            digest = digest.decode('ascii')  # pragma: no cover
     except ValueError:
         return
 
@@ -815,7 +815,7 @@ def _create_identifier():
         user_agent = user_agent.encode('utf-8')
     base = '{0}|{1}'.format(_get_remote_addr(), user_agent)
     if str is bytes:
-        base = unicode(base, 'utf-8', errors='replace')
+        base = unicode(base, 'utf-8', errors='replace')  # pragma: no cover
     h = md5()
     h.update(base.encode('utf8'))
     return h.hexdigest()
