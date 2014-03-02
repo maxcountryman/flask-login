@@ -162,8 +162,9 @@ If you would like to customize the process further, decorate a function with
 Login using Authorization header
 ================================
 
-Note: this method will be depreciated; use the `~LoginManager.request_loader`
-below instead.
+.. Caution::
+   This method will be depreciated; use the `~LoginManager.request_loader`
+   below instead.
 
 Sometimes you want to support Basic Auth login using the `Authorization`
 header, such as for api requests. To support login via header you will need
