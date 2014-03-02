@@ -187,8 +187,8 @@ By default the `Authorization` header's value is passed to your
 the `AUTH_HEADER_NAME` configuration.
 
 
-Custom Login using Request
-==========================
+Custom Login using Request Loader
+=================================
 Sometimes you want to login users without using cookies, such as using header
 values or an api key passed as a query argument. In these cases, you should use
 the `~LoginManager.request_loader` callback. This callback should behave the
