@@ -3,9 +3,25 @@ Flask-Login Changelog
 
 Here you can see the full list of changes between each Flask-Login release.
 
+Version 0.2.11-dev
+------------------
 
-Version 0.2.9-dev
------------------
+Release pending.
+
+
+Version 0.2.10
+--------------
+
+Released on March 9th, 2014
+
+- Generalized `request_loader` introduced; ability to log users in via
+  customized callback over request.
+- Fixes request context dependency by explicitly checking `has_request_context`.
+- Fixes remember me issues since lazy user loading changes.
+
+
+Version 0.2.9
+-------------
 
 Released on December 28th, 2013
 
