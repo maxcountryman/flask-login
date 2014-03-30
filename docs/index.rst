@@ -60,7 +60,7 @@ object. For example::
     from flask.ext.login import UserMixin
     
     class User(UserMixin):
-        '''Simple User class, UserMixin explain in User Class section'''
+        '''Simple User class, UserMixin will be explain in User Class section'''
         USERS = {
             # username: password
             'john': 'love mary',
