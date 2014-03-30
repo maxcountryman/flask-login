@@ -96,6 +96,7 @@ function. For example::
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
+        # About LoginForm, see http://flask.pocoo.org/snippets/64/
         form = LoginForm()
         if form.validate_on_submit():
             # login and validate the user...
