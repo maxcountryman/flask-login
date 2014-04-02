@@ -301,6 +301,7 @@ class LoginTestCase(unittest.TestCase):
     def test_login_user_with_header(self):
         user_id = 2
         user_name = USERS[user_id].name
+        self.login_manager.request_callback = None
         with self.app.test_client() as c:
             basic_fmt = 'Basic {0}'
             decoded = bytes.decode(base64.b64encode(str.encode(str(user_id))))
@@ -311,6 +312,7 @@ class LoginTestCase(unittest.TestCase):
     def test_login_invalid_user_with_header(self):
         user_id = 4
         user_name = u'Anonymous'
+        self.login_manager.request_callback = None
         with self.app.test_client() as c:
             basic_fmt = 'Basic {0}'
             decoded = bytes.decode(base64.b64encode(str.encode(str(user_id))))
@@ -503,6 +505,7 @@ class LoginTestCase(unittest.TestCase):
     def test_user_loaded_from_header_fired(self):
         user_id = 1
         user_name = USERS[user_id].name
+        self.login_manager.request_callback = None
         with self.app.test_client() as c:
             with listen_to(user_loaded_from_header) as listener:
                 headers = [
