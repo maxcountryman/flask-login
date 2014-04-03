@@ -355,10 +355,10 @@ class LoginManager(object):
                           session.get('remember') != 'clear')
             if has_cookie:
                 return self._load_from_cookie(request.cookies[cookie_name])
+            elif self.request_callback:
+                return self._load_from_request(request)
             elif header_name in request.headers:
                 return self._load_from_header(request.headers[header_name])
-            else:
-                return self._load_from_request(request)
 
         return self.reload_user()
 
