@@ -164,6 +164,7 @@ class LoginTestCase(unittest.TestCase):
         self.app.config['SECRET_KEY'] = 'deterministic'
         self.app.config['SESSION_PROTECTION'] = None
         self.app.config['TESTING'] = True
+        self.app.config['DEFAULT_LANGUAGE_CODE'] = 'sv'
         self.remember_cookie_name = 'remember'
         self.app.config['REMEMBER_COOKIE_NAME'] = self.remember_cookie_name
         self.login_manager = LoginManager()
@@ -213,6 +214,10 @@ class LoginTestCase(unittest.TestCase):
         @self.app.route('/logout')
         def logout():
             return unicode(logout_user())
+
+        @self.app.route('/<language_code>/sign-in', endpoint='intl-sign-in')
+        def international_sign_in():
+            return 'Please sign in', 200
 
         @self.login_manager.user_loader
         def load_user(user_id):
@@ -335,6 +340,30 @@ class LoginTestCase(unittest.TestCase):
             url = '/username?user_id={user_id}'.format(user_id=user_id)
             result = c.get(url)
             self.assertEqual(user_name, result.data.decode('utf-8'))
+
+    def test_login_view_url_kwargs_dictionary(self):
+
+        self.login_manager.login_view = 'intl-sign-in'
+        self.login_manager.login_view_url_kwargs = {'language_code': 'en-ca'}
+
+        with self.app.test_client() as c:
+            resp = c.get('/secret')
+            self.assertEqual(resp.status_code, 302)
+            self.assertIn('/en-ca/sign-in', resp.data)
+
+    def test_login_view_url_kwargs_callback(self):
+
+        self.login_manager.login_view = 'intl-sign-in'
+
+        @self.login_manager.login_view_url_kwargs_loader
+        def url_kwargs(current_app, next):
+            self.assertEqual(next, 'http://localhost/secret')
+            return {'language_code': self.app.config['DEFAULT_LANGUAGE_CODE']}
+
+        with self.app.test_client() as c:
+            resp = c.get('/secret')
+            self.assertEqual(resp.status_code, 302)
+            self.assertIn('/sv/sign-in', resp.data)
 
     #
     # Logout

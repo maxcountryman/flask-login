@@ -94,6 +94,11 @@ class LoginManager(object):
         #: machinery is external to your application.)
         self.login_view = None
 
+        # Kwargs to pass to url_for when building the login url. Either a
+        # dictionary or a function that will receive `current_app` and `next`
+        # URL as its first argument.
+        self.login_view_url_kwargs = None
+
         #: The message to flash when a user is redirected to the login page.
         self.login_message = LOGIN_MESSAGE
 
@@ -202,7 +207,8 @@ class LoginManager(object):
             else:
                 flash(self.login_message, category=self.login_message_category)
 
-        return redirect(login_url(self.login_view, request.url))
+        return redirect(login_url(self.login_view, request.url,
+                                  view_url_kwargs=self.login_view_url_kwargs))
 
     def user_loader(self, callback):
         '''
@@ -264,6 +270,18 @@ class LoginManager(object):
         self.unauthorized_callback = callback
         return callback
 
+    def login_view_url_kwargs_loader(self, callback):
+        '''
+        This will set the callback that returns the kwargs to give to
+        `url_for` when constructing the login url. Will receive `current_app`
+        and `next` URL.
+
+        :param callback: The callback for retreiving the login URL kwargs.
+        :type callback: dict
+        '''
+        self.login_view_url_kwargs = callback
+        return callback
+
     def needs_refresh_handler(self, callback):
         '''
         This will set the callback for the `needs_refresh` method, which among
@@ -312,7 +330,8 @@ class LoginManager(object):
             flash(self.needs_refresh_message,
                   category=self.needs_refresh_message_category)
 
-        return redirect(login_url(self.refresh_view, request.url))
+        return redirect(login_url(self.refresh_view, request.url,
+                                  view_url_kwargs=self.login_view_url_kwargs))
 
     def reload_user(self, user=None):
         ctx = _request_ctx_stack.top
@@ -587,7 +606,8 @@ def make_next_param(login_url, current_url):
     return current_url
 
 
-def login_url(login_view, next_url=None, next_field='next'):
+def login_url(login_view, next_url=None, next_field='next',
+              view_url_kwargs=None):
     '''
     Creates a URL for redirecting to a login page. If only `login_view` is
     provided, this will just return the URL for it. If `next_url` is provided,
@@ -602,11 +622,19 @@ def login_url(login_view, next_url=None, next_field='next'):
     :param next_field: What field to store the next URL in. (It defaults to
                        ``next``.)
     :type next_field: str
+    :param view_url_kwargs: kwargs to pass to `url_for` when constructing the
+                            login url
+    :type view_url_kwargs: dict
+    :type view_url_kwargs: function
     '''
     if login_view.startswith(('https://', 'http://', '/')):
         base = login_view
     else:
-        base = url_for(login_view)
+        if view_url_kwargs is None:
+            view_url_kwargs = {}
+        elif hasattr(view_url_kwargs, '__call__'):
+            view_url_kwargs = view_url_kwargs(current_app, next_url)
+        base = url_for(login_view, **view_url_kwargs)
 
     if next_url is None:
         return base
