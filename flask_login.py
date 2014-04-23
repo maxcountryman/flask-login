@@ -42,8 +42,9 @@ else:  # pragma: no cover
 _signals = Namespace()
 
 #: A proxy for the current user. If no user is logged in, this will be an
-#: anonymous user
-current_user = LocalProxy(lambda: _get_user())
+#: anonymous user. Warning: never store value of ``current_user`` in a
+#: database. Use ``get_current_user()`` for that.
+current_user = LocalProxy(lambda: get_current_user())
 
 #: The default name of the "remember me" cookie (``remember_token``)
 COOKIE_NAME = 'remember_token'
@@ -410,7 +411,7 @@ class LoginManager(object):
 
         if _request_ctx_stack.top.user is not None:
             app = current_app._get_current_object()
-            user_loaded_from_cookie.send(app, user=_get_user())
+            user_loaded_from_cookie.send(app, user=get_current_user())
 
     def _load_from_header(self, header):
         user = None
@@ -419,7 +420,7 @@ class LoginManager(object):
         if user is not None:
             self.reload_user(user=user)
             app = current_app._get_current_object()
-            user_loaded_from_header.send(app, user=_get_user())
+            user_loaded_from_header.send(app, user=get_current_user())
         else:
             self.reload_user()
 
@@ -430,7 +431,7 @@ class LoginManager(object):
         if user is not None:
             self.reload_user(user=user)
             app = current_app._get_current_object()
-            user_loaded_from_request.send(app, user=_get_user())
+            user_loaded_from_request.send(app, user=get_current_user())
         else:
             self.reload_user()
 
@@ -684,7 +685,8 @@ def login_user(user, remember=False, force=False):
         session['remember'] = 'set'
 
     _request_ctx_stack.top.user = user
-    user_logged_in.send(current_app._get_current_object(), user=_get_user())
+    current_object = current_app._get_current_object()
+    user_logged_in.send(current_object, user=get_current_user())
     return True
 
 
@@ -703,7 +705,7 @@ def logout_user():
     if cookie_name in request.cookies:
         session['remember'] = 'clear'
 
-    user = _get_user()
+    user = get_current_user()
     if user and not user.is_anonymous():
         user_logged_out.send(current_app._get_current_object(), user=user)
 
@@ -789,7 +791,9 @@ def fresh_login_required(func):
     return decorated_view
 
 
-def _get_user():
+def get_current_user():
+    """Return the current user. If no user is logged in return anonymous user.
+    """
     if has_request_context() and not hasattr(_request_ctx_stack.top, 'user'):
         current_app.login_manager._load_user()
 
@@ -822,7 +826,7 @@ def _create_identifier():
 
 
 def _user_context_processor():
-    return dict(current_user=_get_user())
+    return dict(current_user=get_current_user())
 
 
 def _secret_key(key=None):
