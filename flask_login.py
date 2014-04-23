@@ -704,7 +704,7 @@ def logout_user():
         session['remember'] = 'clear'
 
     user = _get_user()
-    if user and not user.is_anonymous():
+    if user is not None and not user.is_anonymous():
         user_logged_out.send(current_app._get_current_object(), user=user)
 
     current_app.login_manager.reload_user()
