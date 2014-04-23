@@ -445,7 +445,10 @@ Login Mechanisms
 ----------------
 .. data:: current_user
 
-   A proxy for the current user.
+   A proxy for the current user. An object of class `LocalProxy`_.
+   
+   Warning: never try pass this between contexts or save it in a database.
+   For this use `current_user._get_current_object()`
 
 .. autofunction:: login_fresh
 
@@ -454,6 +457,8 @@ Login Mechanisms
 .. autofunction:: logout_user
 
 .. autofunction:: confirm_login
+
+.. _LocalProxy: http://werkzeug.pocoo.org/docs/local/#werkzeug.local.LocalProxy
 
 
 Protecting Views
