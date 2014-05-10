@@ -211,7 +211,7 @@ class LoginManager(object):
         user object, or ``None`` if the user does not exist.
 
         :param callback: The callback for retrieving a user object.
-        :type callback: unicode
+        :type callback: function
         '''
         self.user_callback = callback
         return callback
