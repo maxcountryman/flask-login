@@ -3,10 +3,12 @@ Flask-Login Changelog
 
 Here you can see the full list of changes between each Flask-Login release.
 
-Version 0.2.11-dev
-------------------
+Version 0.2.11
+--------------
 
-Release pending.
+Release on May 19th, 2014
+
+- Fixes missing request loader invocation when authorization header exists.
 
 
 Version 0.2.10
