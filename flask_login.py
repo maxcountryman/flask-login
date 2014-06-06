@@ -369,7 +369,7 @@ class LoginManager(object):
     def _session_protection(self):
 
         if current_app.config.get('NO_SESSION', NO_SESSION):
-            return True
+            return False
 
         sess = session._get_current_object()
         ident = _create_identifier()
