@@ -76,6 +76,8 @@ ID_ATTRIBUTE = 'get_id'
 #: Default name of the auth header (``Authorization``)
 AUTH_HEADER_NAME = 'Authorization'
 
+NO_SESSION = False
+
 
 class LoginManager(object):
     '''
@@ -161,7 +163,7 @@ class LoginManager(object):
         :type add_context_processor: bool
         '''
         app.login_manager = self
-        app.after_request(self._update_remember_cookie)
+        #app.after_request(self._update_remember_cookie)
 
         self._login_disabled = app.config.get('LOGIN_DISABLED',
                                               app.config.get('TESTING', False))
@@ -363,6 +365,10 @@ class LoginManager(object):
         return self.reload_user()
 
     def _session_protection(self):
+
+        if current_app.config.get('NO_SESSION', NO_SESSION):
+            return True
+
         sess = session._get_current_object()
         ident = _create_identifier()
 
@@ -370,6 +376,7 @@ class LoginManager(object):
         mode = app.config.get('SESSION_PROTECTION', self.session_protection)
 
         # if there is no '_id', then take the current one for good
+
         if '_id' not in sess:
             sess['_id'] = ident
 
@@ -675,13 +682,14 @@ def login_user(user, remember=False, force=False):
     if not force and not user.is_active():
         return False
 
-    user_id = getattr(user, current_app.login_manager.id_attribute)()
-    session['user_id'] = user_id
-    session['_fresh'] = True
-    session['_id'] = _create_identifier()
+    if not current_app.config.get('NO_SESSION', NO_SESSION):
+        user_id = getattr(user, current_app.login_manager.id_attribute)()
+        session['user_id'] = user_id
+        session['_fresh'] = True
+        session['_id'] = _create_identifier()
 
-    if remember:
-        session['remember'] = 'set'
+        if remember:
+            session['remember'] = 'set'
 
     _request_ctx_stack.top.user = user
     user_logged_in.send(current_app._get_current_object(), user=_get_user())
@@ -716,8 +724,9 @@ def confirm_login():
     This sets the current session as fresh. Sessions become stale when they
     are reloaded from a cookie.
     '''
-    session['_fresh'] = True
-    session['_id'] = _create_identifier()
+    if not current_app.config.get('NO_SESSION', NO_SESSION):
+        session['_fresh'] = True
+        session['_id'] = _create_identifier()
     user_login_confirmed.send(current_app._get_current_object())
 
 
