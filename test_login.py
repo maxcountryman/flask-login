@@ -418,6 +418,37 @@ class LoginTestCase(unittest.TestCase):
             self.assertEqual(result.location,
                              'http://localhost/login?next=%2Fsecret')
 
+    def test_unauthorized_uses_blueprint_login_view(self):
+        self.login_manager.blueprint_login_views = {
+            None: 'login'
+        }
+
+        @self.app.route('/login')
+        def login():
+            return 'Login Form Goes Here!'
+
+        with self.app.test_client() as c:
+            result = c.get('/secret')
+            self.assertEqual(result.status_code, 302)
+            self.assertEqual(result.location,
+                             'http://localhost/login?next=%2Fsecret')
+
+    def test_unauthorized_blueprint_login_view_fallback(self):
+        self.login_manager.blueprint_login_views = {
+            'no_such_blueprint': None
+        }
+        self.login_manager.login_view = 'login'
+
+        @self.app.route('/login')
+        def login():
+            return 'Login Form Goes Here!'
+
+        with self.app.test_client() as c:
+            result = c.get('/secret')
+            self.assertEqual(result.status_code, 302)
+            self.assertEqual(result.location,
+                             'http://localhost/login?next=%2Fsecret')
+
     #
     # Session Persistence/Freshness
     #
@@ -829,12 +860,12 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             c.get('/login-notch')
 
-            #no session access
+            # no session access
             with listen_to(user_accessed) as listener:
                 c.get('/')
                 listener.assert_heard_none(self.app)
 
-            #should have a session access
+            # should have a session access
             with listen_to(user_accessed) as listener:
                 result = c.get('/username')
                 listener.assert_heard_one(self.app)
