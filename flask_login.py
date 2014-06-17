@@ -94,6 +94,11 @@ class LoginManager(object):
         #: machinery is external to your application.)
         self.login_view = None
 
+        #: Names of views to redirect to when the user needs to log in,
+        #: per blueprint. If the key value is set to None the value of
+        #: :attr:`login_view` will be used instead.
+        self.blueprint_login_views = {}
+
         #: The message to flash when a user is redirected to the login page.
         self.login_message = LOGIN_MESSAGE
 
@@ -177,9 +182,14 @@ class LoginManager(object):
 
             - Flash :attr:`LoginManager.login_message` to the user.
 
-            - Redirect the user to `login_view`. (The page they were attempting
-              to access will be passed in the ``next`` query string variable,
-              so you can redirect there if present instead of the homepage.)
+            - If the app is using blueprints find the login view for
+              the current blueprint using `blueprint_login_views`. If the app
+              is not using blueprints or the login view for the current
+              blueprint is not specified use the value of `login_view`.
+              Redirect the user to the login view. (The page they were
+              attempting to access will be passed in the ``next`` query
+              string variable, so you can redirect there if present instead
+              of the homepage.)
 
         If :attr:`LoginManager.login_view` is not defined, then it will simply
         raise a HTTP 401 (Unauthorized) error instead.
@@ -192,7 +202,12 @@ class LoginManager(object):
         if self.unauthorized_callback:
             return self.unauthorized_callback()
 
-        if not self.login_view:
+        if request.blueprint in self.blueprint_login_views:
+            login_view = self.blueprint_login_views[request.blueprint]
+        else:
+            login_view = self.login_view
+
+        if not login_view:
             abort(401)
 
         if self.login_message:
@@ -202,7 +217,7 @@ class LoginManager(object):
             else:
                 flash(self.login_message, category=self.login_message_category)
 
-        return redirect(login_url(self.login_view, request.url))
+        return redirect(login_url(login_view, request.url))
 
     def user_loader(self, callback):
         '''
