@@ -37,6 +37,7 @@ The most important part of an application that uses Flask-Login is the
 `LoginManager` class. You should create one for your application somewhere in
 your code, like this::
 
+    from flask.ext.login import LoginManager
     login_manager = LoginManager()
 
 The login manager contains the code that lets your application and Flask-Login
@@ -56,6 +57,32 @@ is used to reload the user object from the user ID stored in the session. It
 should take the `unicode` ID of a user, and return the corresponding user
 object. For example::
 
+    from flask.ext.login import UserMixin
+    
+    class User(UserMixin):
+        '''Simple User class, UserMixin will be explain in User Class section'''
+        USERS = {
+            # username: password
+            'john': 'love mary',
+            'mary': 'love peter'
+        }
+        
+        def __init__(self, id):
+            if not id in self.USERS.keys():
+                raise UserNotFoundError()
+            self.id = id
+            self.password = self.USERS[id]
+        
+        @classmethod
+        def get(cls, id):
+            '''Return user instance of id, return None if not exist'''
+            try:
+                return cls(id)
+            except UserNotFoundError:
+                # Should return None if the ID is not valid
+                return None
+        
+    
     @login_manager.user_loader
     def load_user(userid):
         return User.get(userid)
@@ -69,6 +96,7 @@ function. For example::
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
+        # About LoginForm, see http://flask.pocoo.org/snippets/64/
         form = LoginForm()
         if form.validate_on_submit():
             # login and validate the user...
