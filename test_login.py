@@ -153,7 +153,7 @@ class InitializationTestCase(unittest.TestCase):
 
     def test_login_disabled_is_set(self):
         login_manager = LoginManager(self.app, add_context_processor=True)
-        self.assertTrue(login_manager._login_disabled)
+        self.assertFalse(login_manager._login_disabled)
 
 
 class LoginTestCase(unittest.TestCase):
