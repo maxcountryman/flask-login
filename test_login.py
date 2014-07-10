@@ -11,7 +11,7 @@ from contextlib import contextmanager
 
 
 from werkzeug import __version__ as werkzeug_version
-from flask import Flask, Response, session, get_flashed_messages
+from flask import Flask, Response, session, get_flashed_messages, _request_ctx_stack
 
 from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
                              make_secure_token, current_user, login_user,
@@ -348,6 +348,9 @@ class LoginTestCase(unittest.TestCase):
     def test_logout_emits_signal(self):
         with self.app.test_request_context():
             login_user(notch)
+            # delete the cached request.user, as if this was a fresh
+            # new request on which _load_user hadn't been called yet
+            del _request_ctx_stack.top.user
             with listen_to(user_logged_out) as listener:
                 logout_user()
                 listener.assert_heard_one(self.app, user=notch)
