@@ -76,14 +76,18 @@ ID_ATTRIBUTE = 'get_id'
 #: Default name of the auth header (``Authorization``)
 AUTH_HEADER_NAME = 'Authorization'
 
+NO_SESSION = False
+
 
 class LoginManager(object):
+
     '''
     This object is used to hold the settings used for logging in. Instances of
     :class:`LoginManager` are *not* bound to specific apps, so you can create
     one in the main body of your code and then bind it to your
     app in a factory function.
     '''
+
     def __init__(self, app=None, add_context_processor=True):
         #: A class or factory function that produces an anonymous user, which
         #: is used when no one is logged in.
@@ -379,6 +383,10 @@ class LoginManager(object):
         return self.reload_user()
 
     def _session_protection(self):
+
+        if current_app.config.get('NO_SESSION', NO_SESSION):
+            return False
+
         sess = session._get_current_object()
         ident = _create_identifier()
 
@@ -495,10 +503,12 @@ class LoginManager(object):
 
 
 class UserMixin(object):
+
     '''
     This provides default implementations for the methods that Flask-Login
     expects user objects to have.
     '''
+
     def is_active(self):
         return True
 
@@ -538,9 +548,11 @@ class UserMixin(object):
 
 
 class AnonymousUserMixin(object):
+
     '''
     This is the default object for representing an anonymous user.
     '''
+
     def is_authenticated(self):
         return False
 
@@ -691,13 +703,14 @@ def login_user(user, remember=False, force=False):
     if not force and not user.is_active():
         return False
 
-    user_id = getattr(user, current_app.login_manager.id_attribute)()
-    session['user_id'] = user_id
-    session['_fresh'] = True
-    session['_id'] = _create_identifier()
+    if current_app.config.get('NO_SESSION', NO_SESSION) is False:
+        user_id = getattr(user, current_app.login_manager.id_attribute)()
+        session['user_id'] = user_id
+        session['_fresh'] = True
+        session['_id'] = _create_identifier()
 
-    if remember:
-        session['remember'] = 'set'
+        if remember:
+            session['remember'] = 'set'
 
     _request_ctx_stack.top.user = user
     user_logged_in.send(current_app._get_current_object(), user=_get_user())
@@ -732,8 +745,9 @@ def confirm_login():
     This sets the current session as fresh. Sessions become stale when they
     are reloaded from a cookie.
     '''
-    session['_fresh'] = True
-    session['_id'] = _create_identifier()
+    if current_app.config.get('NO_SESSION', NO_SESSION) is False:
+        session['_fresh'] = True
+        session['_id'] = _create_identifier()
     user_login_confirmed.send(current_app._get_current_object())
 
 
@@ -866,11 +880,11 @@ user_logged_out = _signals.signal('logged-out')
 user_loaded_from_cookie = _signals.signal('loaded-from-cookie')
 
 #: Sent when the user is loaded from the header. In addition to the app (which
-#: is the #: sender), it is passed `user`, which is the user being reloaded.
+# : is the #: sender), it is passed `user`, which is the user being reloaded.
 user_loaded_from_header = _signals.signal('loaded-from-header')
 
 #: Sent when the user is loaded from the request. In addition to the app (which
-#: is the #: sender), it is passed `user`, which is the user being reloaded.
+# : is the #: sender), it is passed `user`, which is the user being reloaded.
 user_loaded_from_request = _signals.signal('loaded-from-request')
 
 #: Sent when a user's login is confirmed, marking it as fresh. (It is not
