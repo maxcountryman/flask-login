@@ -42,7 +42,10 @@ else:  # pragma: no cover
 _signals = Namespace()
 
 #: A proxy for the current user. If no user is logged in, this will be an
-#: anonymous user
+#: anonymous user. This is ``werkzeug.local.LocalProxy`` object. Please
+#: refer to it's documentation. Warning: don't try to keep this between
+#: contexts or save to a database. Use `current_user._get_current_object()`
+#: instead.
 current_user = LocalProxy(lambda: _get_user())
 
 #: The default name of the "remember me" cookie (``remember_token``)
