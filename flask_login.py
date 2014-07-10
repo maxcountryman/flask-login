@@ -10,7 +10,7 @@
     :license: MIT/X11, see LICENSE for more details.
 '''
 
-__version_info__ = ('0', '2', '11')
+__version_info__ = ('0', '3', '0')
 __version__ = '.'.join(__version_info__)
 __author__ = 'Matthew Frazier'
 __license__ = 'MIT/X11'
@@ -226,7 +226,7 @@ class LoginManager(object):
         user object, or ``None`` if the user does not exist.
 
         :param callback: The callback for retrieving a user object.
-        :type callback: unicode
+        :type callback: callable
         '''
         self.user_callback = callback
         return callback
@@ -238,6 +238,7 @@ class LoginManager(object):
         return a user object, or `None` if the user does not exist.
 
         :param callback: The callback for retrieving a user object.
+        :type callback: callable
         '''
         self.header_callback = callback
         return callback
@@ -249,6 +250,7 @@ class LoginManager(object):
         return a user object, or `None` if the user does not exist.
 
         :param callback: The callback for retrieving a user object.
+        :type callback: callable
         '''
         self.request_callback = callback
         return callback
@@ -261,7 +263,7 @@ class LoginManager(object):
         return a user object, or ``None`` if the user does not exist.
 
         :param callback: The callback for retrieving a user object.
-        :type callback: unicode
+        :type callback: callable
         '''
         self.token_callback = callback
         return callback
@@ -274,7 +276,7 @@ class LoginManager(object):
         normal view.
 
         :param callback: The callback for unauthorized users.
-        :type callback: function
+        :type callback: callable
         '''
         self.unauthorized_callback = callback
         return callback
@@ -287,7 +289,7 @@ class LoginManager(object):
         normal view.
 
         :param callback: The callback for unauthorized users.
-        :type callback: function
+        :type callback: callable
         '''
         self.needs_refresh_callback = callback
         return callback
