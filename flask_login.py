@@ -168,8 +168,7 @@ class LoginManager(object):
         app.login_manager = self
         app.after_request(self._update_remember_cookie)
 
-        self._login_disabled = app.config.get('LOGIN_DISABLED',
-                                              app.config.get('TESTING', False))
+        self._login_disabled = app.config.get('LOGIN_DISABLED', False)
 
         if add_context_processor:
             app.context_processor(_user_context_processor)
