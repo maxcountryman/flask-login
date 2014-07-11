@@ -468,19 +468,21 @@ class LoginTestCase(unittest.TestCase):
 
                 result = c.get('/protected')
                 self.assertEqual(result.status_code, 302)
-                self.assertEqual(result.location,
-                             'http://localhost/app_login?next=%2Fprotected')
+                expected = ('http://localhost/'
+                            'app_login?next=%2Fprotected')
+                self.assertEqual(result.location, expected)
 
                 result = c.get('/first/protected')
                 self.assertEqual(result.status_code, 302)
-                self.assertEqual(result.location,
-                             'http://localhost/first_login?next=%2Ffirst%2Fprotected')
+                expected = ('http://localhost/'
+                            'first_login?next=%2Ffirst%2Fprotected')
+                self.assertEqual(result.location, expected)
 
                 result = c.get('/second/protected')
                 self.assertEqual(result.status_code, 302)
-                self.assertEqual(result.location,
-                             'http://localhost/second_login?next=%2Fsecond%2Fprotected')
-
+                expected = ('http://localhost/'
+                            'second_login?next=%2Fsecond%2Fprotected')
+                self.assertEqual(result.location, expected)
 
     def test_set_login_view_without_blueprints(self):
         with self.app.app_context():
@@ -500,8 +502,8 @@ class LoginTestCase(unittest.TestCase):
 
                 result = c.get('/protected')
                 self.assertEqual(result.status_code, 302)
-                self.assertEqual(result.location,
-                             'http://localhost/app_login?next=%2Fprotected')
+                expected = 'http://localhost/app_login?next=%2Fprotected'
+                self.assertEqual(result.location, expected)
 
     #
     # Session Persistence/Freshness
