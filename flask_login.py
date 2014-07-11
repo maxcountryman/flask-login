@@ -814,7 +814,7 @@ def set_login_view(login_view, blueprint=None):
     :type login_view: str
     :param blueprint: The blueprint which this login view should be set on.
         Defaults to ``None``.
-    :type blueprint: flask.Blueprint
+    :type blueprint: object
     '''
     if blueprint is not None or len(current_app.login_manager.blueprint_login_views) != 0:
         current_app.login_manager.blueprint_login_views[blueprint.name] = login_view
