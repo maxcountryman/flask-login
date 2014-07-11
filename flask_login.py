@@ -805,6 +805,36 @@ def fresh_login_required(func):
     return decorated_view
 
 
+def set_login_view(login_view, blueprint=None):
+    '''
+    Sets the login view for the app or blueprint. If a blueprint is passed,
+    the login view is set for this blueprint on ``blueprint_login_views``.
+
+    :param login_view: The user object to log in.
+    :type login_view: str
+    :param blueprint: The blueprint which this login view should be set on.
+        Defaults to ``None``.
+    :type blueprint: object
+    '''
+
+    num_login_views = len(current_app.login_manager.blueprint_login_views)
+    if blueprint is not None or num_login_views != 0:
+
+        (current_app.login_manager
+            .blueprint_login_views[blueprint.name]) = login_view
+
+        if (current_app.login_manager.login_view is not None and
+                None not in current_app.login_manager.blueprint_login_views):
+
+            (current_app.login_manager
+                .blueprint_login_views[None]) = (current_app.login_manager
+                                                 .login_view)
+
+        current_app.login_manager.login_view = None
+    else:
+        current_app.login_manager.login_view = login_view
+
+
 def _get_user():
     if has_request_context() and not hasattr(_request_ctx_stack.top, 'user'):
         current_app.login_manager._load_user()

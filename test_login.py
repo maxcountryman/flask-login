@@ -11,7 +11,13 @@ from contextlib import contextmanager
 
 
 from werkzeug import __version__ as werkzeug_version
-from flask import Flask, Response, session, get_flashed_messages
+from flask import (
+    Flask,
+    Blueprint,
+    Response,
+    session,
+    get_flashed_messages,
+)
 
 from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
                              make_secure_token, current_user, login_user,
@@ -22,7 +28,7 @@ from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
                              make_next_param, login_url, login_fresh,
                              login_required, session_protected,
                              fresh_login_required, confirm_login,
-                             encode_cookie, decode_cookie,
+                             encode_cookie, decode_cookie, set_login_view,
                              _secret_key, _user_context_processor,
                              user_accessed)
 
@@ -419,35 +425,85 @@ class LoginTestCase(unittest.TestCase):
                              'http://localhost/login?next=%2Fsecret')
 
     def test_unauthorized_uses_blueprint_login_view(self):
-        self.login_manager.blueprint_login_views = {
-            None: 'login'
-        }
+        with self.app.app_context():
 
-        @self.app.route('/login')
-        def login():
-            return 'Login Form Goes Here!'
+            first = Blueprint('first', 'first')
+            second = Blueprint('second', 'second')
 
-        with self.app.test_client() as c:
-            result = c.get('/secret')
-            self.assertEqual(result.status_code, 302)
-            self.assertEqual(result.location,
-                             'http://localhost/login?next=%2Fsecret')
+            @self.app.route('/app_login')
+            def app_login():
+                return 'Login Form Goes Here!'
 
-    def test_unauthorized_blueprint_login_view_fallback(self):
-        self.login_manager.blueprint_login_views = {
-            'no_such_blueprint': None
-        }
-        self.login_manager.login_view = 'login'
+            @self.app.route('/first_login')
+            def first_login():
+                return 'Login Form Goes Here!'
 
-        @self.app.route('/login')
-        def login():
-            return 'Login Form Goes Here!'
+            @self.app.route('/second_login')
+            def second_login():
+                return 'Login Form Goes Here!'
 
-        with self.app.test_client() as c:
-            result = c.get('/secret')
-            self.assertEqual(result.status_code, 302)
-            self.assertEqual(result.location,
-                             'http://localhost/login?next=%2Fsecret')
+            @self.app.route('/protected')
+            @login_required
+            def protected():
+                return u'Access Granted'
+
+            @first.route('/protected')
+            @login_required
+            def first_protected():
+                return u'Access Granted'
+
+            @second.route('/protected')
+            @login_required
+            def second_protected():
+                return u'Access Granted'
+
+            self.app.register_blueprint(first, url_prefix='/first')
+            self.app.register_blueprint(second, url_prefix='/second')
+
+            set_login_view('app_login')
+            set_login_view('first_login', blueprint=first)
+            set_login_view('second_login', blueprint=second)
+
+            with self.app.test_client() as c:
+
+                result = c.get('/protected')
+                self.assertEqual(result.status_code, 302)
+                expected = ('http://localhost/'
+                            'app_login?next=%2Fprotected')
+                self.assertEqual(result.location, expected)
+
+                result = c.get('/first/protected')
+                self.assertEqual(result.status_code, 302)
+                expected = ('http://localhost/'
+                            'first_login?next=%2Ffirst%2Fprotected')
+                self.assertEqual(result.location, expected)
+
+                result = c.get('/second/protected')
+                self.assertEqual(result.status_code, 302)
+                expected = ('http://localhost/'
+                            'second_login?next=%2Fsecond%2Fprotected')
+                self.assertEqual(result.location, expected)
+
+    def test_set_login_view_without_blueprints(self):
+        with self.app.app_context():
+
+            @self.app.route('/app_login')
+            def app_login():
+                return 'Login Form Goes Here!'
+
+            @self.app.route('/protected')
+            @login_required
+            def protected():
+                return u'Access Granted'
+
+            set_login_view('app_login')
+
+            with self.app.test_client() as c:
+
+                result = c.get('/protected')
+                self.assertEqual(result.status_code, 302)
+                expected = 'http://localhost/app_login?next=%2Fprotected'
+                self.assertEqual(result.location, expected)
 
     #
     # Session Persistence/Freshness
