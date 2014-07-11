@@ -17,7 +17,6 @@ from flask import (
     Response,
     session,
     get_flashed_messages,
-    url_for,
 )
 
 from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
