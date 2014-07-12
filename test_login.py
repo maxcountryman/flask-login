@@ -8,6 +8,7 @@ import base64
 import collections
 from datetime import timedelta, datetime
 from contextlib import contextmanager
+from mock import ANY
 
 
 from werkzeug import __version__ as werkzeug_version
@@ -71,8 +72,8 @@ def listen_to(signal):
                 raise AssertionError(msg)
             elif self.heard[0] != (args, kwargs):
                 msg = 'One signal was heard, but with incorrect arguments: '\
-                    '({0}, {1})'
-                raise AssertionError(msg.format(args, kwargs))
+                    'Got ({0}) expected ({1}, {2})'
+                raise AssertionError(msg.format(self.heard[0], args, kwargs))
 
         def assert_heard_none(self, *args, **kwargs):
             ''' The signal fired no times '''
@@ -357,6 +358,14 @@ class LoginTestCase(unittest.TestCase):
             with listen_to(user_logged_out) as listener:
                 logout_user()
                 listener.assert_heard_one(self.app, user=notch)
+
+    def test_logout_without_current_user(self):
+        with self.app.test_request_context():
+            login_user(notch)
+            del session['user_id']
+            with listen_to(user_logged_out) as listener:
+                logout_user()
+                listener.assert_heard_one(self.app, user=ANY)
 
     #
     # Unauthorized

@@ -340,7 +340,7 @@ class LoginManager(object):
             else:
                 user = self.user_callback(user_id)
                 if user is None:
-                    logout_user()
+                    ctx.user = self.anonymous_user()
                 else:
                     ctx.user = user
         else:
@@ -709,6 +709,9 @@ def logout_user():
     Logs a user out. (You do not need to pass the actual user.) This will
     also clean up the remember me cookie if it exists.
     '''
+
+    user = _get_user()
+
     if 'user_id' in session:
         session.pop('user_id')
 
@@ -719,9 +722,7 @@ def logout_user():
     if cookie_name in request.cookies:
         session['remember'] = 'clear'
 
-    user = _get_user()
-    if user is not None and not user.is_anonymous():
-        user_logged_out.send(current_app._get_current_object(), user=user)
+    user_logged_out.send(current_app._get_current_object(), user=user)
 
     current_app.login_manager.reload_user()
     return True
