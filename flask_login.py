@@ -776,6 +776,26 @@ def login_required(func):
     return decorated_view
 
 
+def blueprint_login_required():
+    '''
+    If you set a before_request with this, it will ensure that the current
+    user is logged in and authenticated before calling any view from this
+    blueprint. (If they are not, it calls the
+    :attr:`LoginManager.unauthorized` callback.) For example::
+
+        secure_blueprint = Blueprint('secure_blueprint', __name__)
+        secure_blueprint.before_request(blueprint_login_required)
+
+    It can be convenient to globally turn off authentication when unit
+    testing. To enable this, if either of the application
+    configuration variables `LOGIN_DISABLED` or `TESTING` is set to
+    `True`, this decorator will be ignored.
+    '''
+    if (not current_app.login_manager._login_disabled and
+            not current_user.is_authenticated()):
+        return current_app.login_manager.unauthorized()
+
+
 def fresh_login_required(func):
     '''
     If you decorate a view with this, it will ensure that the current user's
