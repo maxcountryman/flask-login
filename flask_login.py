@@ -491,7 +491,7 @@ class LoginManager(object):
         config = current_app.config
         cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
         domain = config.get('REMEMBER_COOKIE_DOMAIN')
-        response.delete_cookie(cookie_name, domain=domain)
+        response.delete_cookie(cookie_name)
 
 
 class UserMixin(object):
