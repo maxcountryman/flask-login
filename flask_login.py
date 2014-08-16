@@ -806,6 +806,15 @@ def fresh_login_required(func):
     return decorated_view
 
 
+def not_login(func, redirect_to=''):
+    @wraps(func)
+    def decorated_view(*args, **kwargs):
+        if not current_user.is_authenticated():
+            return func(*args, **kwargs)
+        else:
+            return redirect(url_for(redirect_to))
+    return decorated_view
+
 def set_login_view(login_view, blueprint=None):
     '''
     Sets the login view for the app or blueprint. If a blueprint is passed,
