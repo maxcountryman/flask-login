@@ -526,8 +526,8 @@ class LoginTestCase(unittest.TestCase):
 
         with self.app.test_client() as c:
             result = c.get('/not-login')
-            expected = b'not-login'
-            self.assertEqual(result.data, expected)
+            expected = u'not-login'
+            self.assertEqual(result.data.decode('utf-8'), expected)
             c.get('/login-notch')
             result = c.get('/not-login')
             expected = 'http://localhost/private'
