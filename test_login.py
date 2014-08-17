@@ -17,7 +17,7 @@ from flask import (
     Blueprint,
     Response,
     session,
-    get_flashed_messages,
+    get_flashed_messages
 )
 
 from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
@@ -510,7 +510,6 @@ class LoginTestCase(unittest.TestCase):
             with self.app.test_client() as c:
 
                 result = c.get('/protected')
-                print('Resultado: ', result)
                 self.assertEqual(result.status_code, 302)
                 expected = 'http://localhost/app_login?next=%2Fprotected'
                 self.assertEqual(result.location, expected)
