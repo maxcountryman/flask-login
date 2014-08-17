@@ -526,7 +526,7 @@ class LoginTestCase(unittest.TestCase):
 
         with self.app.test_client() as c:
             result = c.get('/not-login')
-            expected = 'not-login'
+            expected = b'not-login'
             self.assertEqual(result.data, expected)
             c.get('/login-notch')
             result = c.get('/not-login')
