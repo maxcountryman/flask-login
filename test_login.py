@@ -31,7 +31,7 @@ from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
                              fresh_login_required, confirm_login,
                              encode_cookie, decode_cookie, set_login_view,
                              _secret_key, _user_context_processor,
-                             user_accessed, not_login)
+                             user_accessed, is_logged)
 
 
 # be compatible with py3k
@@ -516,13 +516,13 @@ class LoginTestCase(unittest.TestCase):
                 self.assertEqual(result.location, expected)
 
     def test_not_login(self):
-        @self.app.route('/public')
-        def public_view():
+        @self.app.route('/private')
+        def private_view():
             return u'am public'
 
         @self.app.route('/not-login')
-        @not_login(redirect_to='/public')
-        def not_login_view():
+        @is_logged(redirect_to='/private')
+        def is_logged_view():
             return 'not-login'
 
         with self.app.test_client() as c:
@@ -531,7 +531,7 @@ class LoginTestCase(unittest.TestCase):
             self.assertEqual(result.data, expected)
             c.get('/login-notch')
             result = c.get('/not-login')
-            expected = 'http://localhost/public'
+            expected = 'http://localhost/private'
             self.assertEquals(result.location, expected)
 
     #
