@@ -17,7 +17,7 @@ from flask import (
     Blueprint,
     Response,
     session,
-    get_flashed_messages,
+    get_flashed_messages
 )
 
 from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
@@ -31,7 +31,7 @@ from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
                              fresh_login_required, confirm_login,
                              encode_cookie, decode_cookie, set_login_view,
                              _secret_key, _user_context_processor,
-                             user_accessed)
+                             user_accessed, is_logged)
 
 
 # be compatible with py3k
@@ -513,6 +513,25 @@ class LoginTestCase(unittest.TestCase):
                 self.assertEqual(result.status_code, 302)
                 expected = 'http://localhost/app_login?next=%2Fprotected'
                 self.assertEqual(result.location, expected)
+
+    def test_not_login(self):
+        @self.app.route('/private')
+        def private_view():
+            return u'am public'
+
+        @self.app.route('/not-login')
+        @is_logged(redirect_to='/private')
+        def is_logged_view():
+            return 'not-login'
+
+        with self.app.test_client() as c:
+            result = c.get('/not-login')
+            expected = u'not-login'
+            self.assertEqual(result.data.decode('utf-8'), expected)
+            c.get('/login-notch')
+            result = c.get('/not-login')
+            expected = 'http://localhost/private'
+            self.assertEquals(result.location, expected)
 
     #
     # Session Persistence/Freshness
