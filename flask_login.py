@@ -806,8 +806,8 @@ def fresh_login_required(func):
     return decorated_view
 
 
-def not_login(redirect_to=''):
-    def not_login_decorator(func):
+def is_logged(redirect_to=''):
+    def is_logged_decorator(func):
         @wraps(func)
         def decorated_view(*args, **kwargs):
             if current_user.is_authenticated():
@@ -815,7 +815,7 @@ def not_login(redirect_to=''):
             else:
                 return func(*args, **kwargs)
         return decorated_view
-    return not_login_decorator
+    return is_logged_decorator
 
 def set_login_view(login_view, blueprint=None):
     '''
