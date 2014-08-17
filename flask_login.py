@@ -808,14 +808,14 @@ def fresh_login_required(func):
 
 def is_logged(redirect_to='/'):
     '''
-        If you decorate a view with this, it will ensure that if
-        current user is logged in and calling the view, the decorator
-        redirect to another view, and if not is logged in, show the
-        current content for that view decorated.
+    If you decorate a view with this, it will ensure that if
+    current user is logged in and calling the view, the decorator
+    redirect to another view, and if not is logged in, show the
+    current content for that view decorated.
 
-        :param func: The view function to decorate.
-        :type func: function
-        '''
+    :param func: The view function to decorate.
+    :type func: function
+    '''
     def is_logged_decorator(func):
         @wraps(func)
         def decorated_view(*args, **kwargs):
