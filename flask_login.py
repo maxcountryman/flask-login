@@ -476,7 +476,7 @@ class LoginManager(object):
         if self.token_callback:
             data = current_user.get_auth_token()
         else:
-            data = encode_cookie(str(session['user_id']))
+            data = encode_cookie(unicode(session['user_id']))
         expires = datetime.utcnow() + duration
 
         # actually set it
