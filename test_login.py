@@ -109,8 +109,9 @@ class User(UserMixin):
 notch = User(u'Notch', 1)
 steve = User(u'Steve', 2)
 creeper = User(u'Creeper', 3, False)
+germanjapanese = User(u'Müller', u'佐藤')  # Unicode user_id
 
-USERS = {1: notch, 2: steve, 3: creeper}
+USERS = {1: notch, 2: steve, 3: creeper, u'佐藤': germanjapanese}
 USER_TOKENS = dict((u.get_auth_token(), u) for u in USERS.values())
 
 
@@ -317,7 +318,7 @@ class LoginTestCase(unittest.TestCase):
             self.assertEqual(user_name, result.data.decode('utf-8'))
 
     def test_login_invalid_user_with_header(self):
-        user_id = 4
+        user_id = 9000
         user_name = u'Anonymous'
         self.login_manager.request_callback = None
         with self.app.test_client() as c:
@@ -336,7 +337,7 @@ class LoginTestCase(unittest.TestCase):
             self.assertEqual(user_name, result.data.decode('utf-8'))
 
     def test_login_invalid_user_with_request(self):
-        user_id = 4
+        user_id = 9000
         user_name = u'Anonymous'
         with self.app.test_client() as c:
             url = '/username?user_id={user_id}'.format(user_id=user_id)
@@ -1149,3 +1150,72 @@ class AnonymousUserTestCase(unittest.TestCase):
         self.assertFalse(user.is_authenticated())
         self.assertTrue(user.is_anonymous())
         self.assertIsNone(user.get_id())
+
+
+class UnicodeCookieUserIDTestCase(unittest.TestCase):
+    def setUp(self):
+        self.app = Flask(__name__)
+        self.app.config['SECRET_KEY'] = 'deterministic'
+        self.app.config['SESSION_PROTECTION'] = None
+        self.app.config['TESTING'] = True
+        self.remember_cookie_name = 'remember'
+        self.app.config['REMEMBER_COOKIE_NAME'] = self.remember_cookie_name
+        self.login_manager = LoginManager()
+        self.login_manager.init_app(self.app)
+        self.login_manager._login_disabled = False
+
+        @self.app.route('/')
+        def index():
+            return u'Welcome!'
+
+        @self.app.route('/login-germanjapanese-remember')
+        def login_germanjapanese_remember():
+            return unicode(login_user(germanjapanese, remember=True))
+
+        @self.app.route('/username')
+        def username():
+            if current_user.is_authenticated():
+                return current_user.name
+            return u'Anonymous'
+
+        @self.app.route('/userid')
+        def user_id():
+            if current_user.is_authenticated():
+                return current_user.id
+            return u'wrong_id'
+
+        @self.login_manager.user_loader
+        def load_user(user_id):
+            return USERS[unicode(user_id)]
+
+        # This will help us with the possibility of typoes in the tests. Now
+        # we shouldn't have to check each response to help us set up state
+        # (such as login pages) to make sure it worked: we will always
+        # get an exception raised (rather than return a 404 response)
+        @self.app.errorhandler(404)
+        def handle_404(e):
+            raise e
+
+        unittest.TestCase.setUp(self)
+
+    def _delete_session(self, c):
+        # Helper method to cause the session to be deleted
+        # as if the browser was closed. This will remove
+        # the session regardless of the permament flag
+        # on the session!
+        with c.session_transaction() as sess:
+            sess.clear()
+
+    def test_remember_me_username(self):
+        with self.app.test_client() as c:
+            c.get('/login-germanjapanese-remember')
+            self._delete_session(c)
+            result = c.get('/username')
+            self.assertEqual(u'Müller', result.data.decode('utf-8'))
+
+    def test_remember_me_user_id(self):
+        with self.app.test_client() as c:
+            c.get('/login-germanjapanese-remember')
+            self._delete_session(c)
+            result = c.get('/userid')
+            self.assertEqual(u'佐藤', result.data.decode('utf-8'))
