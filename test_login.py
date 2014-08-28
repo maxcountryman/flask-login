@@ -109,7 +109,7 @@ class User(UserMixin):
 notch = User(u'Notch', 1)
 steve = User(u'Steve', 2)
 creeper = User(u'Creeper', 3, False)
-germanjapanese = User(u'Müller', u'佐藤') # Unicode user_id
+germanjapanese = User(u'Müller', u'佐藤')  # Unicode user_id
 
 USERS = {1: notch, 2: steve, 3: creeper, u'佐藤': germanjapanese}
 USER_TOKENS = dict((u.get_auth_token(), u) for u in USERS.values())
@@ -1150,6 +1150,7 @@ class AnonymousUserTestCase(unittest.TestCase):
         self.assertFalse(user.is_authenticated())
         self.assertTrue(user.is_anonymous())
         self.assertIsNone(user.get_id())
+
 
 class UnicodeCookieUserIDTestCase(unittest.TestCase):
     def setUp(self):
