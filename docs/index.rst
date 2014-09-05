@@ -226,11 +226,11 @@ using the `Authorization` header::
 Anonymous Users
 ===============
 By default, when a user is not actually logged in, `current_user` is set to
-an `AnonymousUserMixin` object. It has the following properties:
+an `AnonymousUserMixin` object. It has the following methods:
 
-- `is_active` and `is_authenticated` return `False`
-- `is_anonymous` returns `True`
-- `get_id` returns `None`
+- `is_active()` and `is_authenticated()` return `False`
+- `is_anonymous()` returns `True`
+- `get_id()` returns `None`
 
 If you have custom requirements for anonymous users (for example, they need
 to have a permissions field), you can provide a callable (either a class or
