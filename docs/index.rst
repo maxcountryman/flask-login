@@ -163,7 +163,7 @@ Login using Authorization header
 ================================
 
 .. Caution::
-   This method will be depreciated; use the `~LoginManager.request_loader`
+   This method will be deprecated; use the `~LoginManager.request_loader`
    below instead.
 
 Sometimes you want to support Basic Auth login using the `Authorization`
