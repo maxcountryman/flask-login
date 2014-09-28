@@ -385,16 +385,10 @@ class LoginManager(object):
         app = current_app._get_current_object()
         mode = app.config.get('SESSION_PROTECTION', self.session_protection)
 
-        # if there is no '_id', then take the current one for good
-        if '_id' not in sess:
-            sess['_id'] = ident
+        # if the sess is empty, it's an anonymous user or just logged out
+        # so we can skip this
 
-        # if the sess is empty, it's an anonymous user, or just logged out
-        #  so we can skip this, unless 'strong' protection is active,
-        #  in which case we need to double check for the remember me token
-        check_protection = sess or mode == 'strong'
-
-        if check_protection and ident != sess.get('_id', None):
+        if sess and ident != sess.get('_id', None):
             if mode == 'basic' or sess.permanent:
                 sess['_fresh'] = False
                 session_protected.send(app)
