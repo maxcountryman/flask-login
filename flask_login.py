@@ -670,7 +670,7 @@ def login_fresh():
     return session.get('_fresh', False)
 
 
-def login_user(user, remember=False, force=False):
+def login_user(user, remember=False, force=False, fresh=True):
     '''
     Logs a user in. You should pass the actual user object to this. If the
     user's `is_active` method returns ``False``, they will not be logged in
@@ -693,7 +693,7 @@ def login_user(user, remember=False, force=False):
 
     user_id = getattr(user, current_app.login_manager.id_attribute)()
     session['user_id'] = user_id
-    session['_fresh'] = True
+    session['_fresh'] = fresh
     session['_id'] = _create_identifier()
 
     if remember:
