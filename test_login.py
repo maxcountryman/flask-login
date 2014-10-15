@@ -289,6 +289,13 @@ class LoginTestCase(unittest.TestCase):
             self.assertTrue(result)
             self.assertEqual(current_user.name, u'Notch')
 
+    def test_login_user_not_fresh(self):
+        with self.app.test_request_context():
+            result = login_user(notch, fresh=False)
+            self.assertTrue(result)
+            self.assertEqual(current_user.name, u'Notch')
+            self.assertIs(login_fresh(), False)
+
     def test_login_user_emits_signal(self):
         with self.app.test_request_context():
             with listen_to(user_logged_in) as listener:

@@ -670,7 +670,7 @@ def login_fresh():
     return session.get('_fresh', False)
 
 
-def login_user(user, remember=False, force=False):
+def login_user(user, remember=False, force=False, fresh=True):
     '''
     Logs a user in. You should pass the actual user object to this. If the
     user's `is_active` method returns ``False``, they will not be logged in
@@ -687,13 +687,16 @@ def login_user(user, remember=False, force=False):
     :param force: If the user is inactive, setting this to ``True`` will log
         them in regardless. Defaults to ``False``.
     :type force: bool
+    :param fresh: setting this to ``False`` will log in the user with a session
+    marked as not "fresh". Defaults to ``True``.
+    :type fresh: bool
     '''
     if not force and not user.is_active():
         return False
 
     user_id = getattr(user, current_app.login_manager.id_attribute)()
     session['user_id'] = user_id
-    session['_fresh'] = True
+    session['_fresh'] = fresh
     session['_id'] = _create_identifier()
 
     if remember:
