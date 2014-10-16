@@ -45,6 +45,10 @@ _signals = Namespace()
 #: anonymous user
 current_user = LocalProxy(lambda: _get_user())
 
+#: The blueprints where the remember me cookie will be set. If you don't set
+#: this, it will be enabled for the whole app; defaults to ``[]``
+COOKIE_BLUEPRINTS = []
+
 #: The default name of the "remember me" cookie (``remember_token``)
 COOKIE_NAME = 'remember_token'
 
@@ -166,7 +170,11 @@ class LoginManager(object):
         :type add_context_processor: bool
         '''
         app.login_manager = self
-        app.after_request(self._update_remember_cookie)
+
+        for blueprint in app.config.get('COOKIE_BLUEPRINTS', []):
+            app.blueprints.get(blueprint).after_request(self._update_remember_cookie)
+        else:
+            app.after_request(self._update_remember_cookie)
 
         self._login_disabled = app.config.get('LOGIN_DISABLED', False)
 
