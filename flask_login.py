@@ -687,6 +687,9 @@ def login_user(user, remember=False, force=False, fresh=True):
     :param force: If the user is inactive, setting this to ``True`` will log
         them in regardless. Defaults to ``False``.
     :type force: bool
+    :param fresh: setting this to ``False`` will log in the user with a session
+    marked as not "fresh". Defaults to ``True``.
+    :type fresh: bool
     '''
     if not force and not user.is_active():
         return False
