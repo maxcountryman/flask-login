@@ -172,7 +172,8 @@ class LoginManager(object):
         app.login_manager = self
 
         for blueprint in app.config.get('COOKIE_BLUEPRINTS', []):
-            app.blueprints.get(blueprint).after_request(self._update_remember_cookie)
+            app.blueprints.get(blueprint).after_request(
+                self._update_remember_cookie)
         else:
             app.after_request(self._update_remember_cookie)
 
