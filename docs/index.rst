@@ -331,6 +331,8 @@ The details of the cookie can be customized in the application settings.
                             would allow the cookie to be used on all
                             subdomains of ``example.com``).
                             **Default:** `None`
+`REMEMBER_COOKIE_PATH`      Limits the "Remember Me" cookie to a certain path.
+                            **Default:** ``/``
 =========================== =================================================
 
 

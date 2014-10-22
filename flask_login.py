@@ -468,6 +468,7 @@ class LoginManager(object):
         cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
         duration = config.get('REMEMBER_COOKIE_DURATION', COOKIE_DURATION)
         domain = config.get('REMEMBER_COOKIE_DOMAIN')
+        path = config.get('REMEMBER_COOKIE_PATH', '/')
 
         secure = config.get('REMEMBER_COOKIE_SECURE', COOKIE_SECURE)
         httponly = config.get('REMEMBER_COOKIE_HTTPONLY', COOKIE_HTTPONLY)
@@ -484,6 +485,7 @@ class LoginManager(object):
                             value=data,
                             expires=expires,
                             domain=domain,
+                            path=path,
                             secure=secure,
                             httponly=httponly)
 
@@ -491,7 +493,8 @@ class LoginManager(object):
         config = current_app.config
         cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
         domain = config.get('REMEMBER_COOKIE_DOMAIN')
-        response.delete_cookie(cookie_name, domain=domain)
+        path = config.get('REMEMBER_COOKIE_PATH', '/')
+        response.delete_cookie(cookie_name, domain=domain, path=path)
 
 
 class UserMixin(object):

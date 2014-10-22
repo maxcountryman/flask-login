@@ -563,6 +563,7 @@ class LoginTestCase(unittest.TestCase):
         name = self.app.config['REMEMBER_COOKIE_NAME'] = 'myname'
         duration = self.app.config['REMEMBER_COOKIE_DURATION'] = \
             timedelta(days=2)
+        path = self.app.config['REMEMBER_COOKIE_PATH'] = '/mypath'
         domain = self.app.config['REMEMBER_COOKIE_DOMAIN'] = '.localhost.local'
 
         with self.app.test_client() as c:
@@ -572,9 +573,12 @@ class LoginTestCase(unittest.TestCase):
             self.assertTrue(domain in c.cookie_jar._cookies,
                             'Custom domain not found as cookie domain')
             domain_cookie = c.cookie_jar._cookies[domain]
-            self.assertTrue(name in domain_cookie['/'],
+            self.assertTrue(path in domain_cookie,
+                            'Custom path not found as cookie path')
+            path_cookie = domain_cookie[path]
+            self.assertTrue(name in path_cookie,
                             'Custom name not found as cookie name')
-            cookie = domain_cookie['/'][name]
+            cookie = path_cookie[name]
 
             expiration_date = datetime.fromtimestamp(cookie.expires)
             expected_date = datetime.now() + duration
