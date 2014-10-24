@@ -491,6 +491,9 @@ class LoginManager(object):
         config = current_app.config
         cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
         domain = config.get('REMEMBER_COOKIE_DOMAIN')
+
+        # for multi-domain cookie, domain field should be None
+        response.delete_cookie(cookie_name)
         response.delete_cookie(cookie_name, domain=domain)
 
 
