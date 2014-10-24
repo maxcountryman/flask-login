@@ -580,8 +580,8 @@ class LoginTestCase(unittest.TestCase):
                           'Custom name not found as cookie name')
             cookie = path_cookie[name]
 
-            expiration_date = datetime.fromtimestamp(cookie.expires)
-            expected_date = datetime.now() + duration
+            expiration_date = datetime.utcfromtimestamp(cookie.expires)
+            expected_date = datetime.utcnow() + duration
             difference = expected_date - expiration_date
 
             fail_msg = 'The expiration date {0} was far from the expected {1}'
