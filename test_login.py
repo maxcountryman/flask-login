@@ -570,14 +570,14 @@ class LoginTestCase(unittest.TestCase):
             c.get('/login-notch-remember')
 
             # TODO: Is there a better way to test this?
-            self.assertTrue(domain in c.cookie_jar._cookies,
-                            'Custom domain not found as cookie domain')
+            self.assertIn(domain, c.cookie_jar._cookies,
+                          'Custom domain not found as cookie domain')
             domain_cookie = c.cookie_jar._cookies[domain]
-            self.assertTrue(path in domain_cookie,
-                            'Custom path not found as cookie path')
+            self.assertIn(path, domain_cookie,
+                          'Custom path not found as cookie path')
             path_cookie = domain_cookie[path]
-            self.assertTrue(name in path_cookie,
-                            'Custom name not found as cookie name')
+            self.assertIn(name, path_cookie,
+                          'Custom name not found as cookie name')
             cookie = path_cookie[name]
 
             expiration_date = datetime.fromtimestamp(cookie.expires)
