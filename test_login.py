@@ -570,21 +570,25 @@ class LoginTestCase(unittest.TestCase):
         name = self.app.config['REMEMBER_COOKIE_NAME'] = 'myname'
         duration = self.app.config['REMEMBER_COOKIE_DURATION'] = \
             timedelta(days=2)
+        path = self.app.config['REMEMBER_COOKIE_PATH'] = '/mypath'
         domain = self.app.config['REMEMBER_COOKIE_DOMAIN'] = '.localhost.local'
 
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
 
             # TODO: Is there a better way to test this?
-            self.assertTrue(domain in c.cookie_jar._cookies,
-                            'Custom domain not found as cookie domain')
+            self.assertIn(domain, c.cookie_jar._cookies,
+                          'Custom domain not found as cookie domain')
             domain_cookie = c.cookie_jar._cookies[domain]
-            self.assertTrue(name in domain_cookie['/'],
-                            'Custom name not found as cookie name')
-            cookie = domain_cookie['/'][name]
+            self.assertIn(path, domain_cookie,
+                          'Custom path not found as cookie path')
+            path_cookie = domain_cookie[path]
+            self.assertIn(name, path_cookie,
+                          'Custom name not found as cookie name')
+            cookie = path_cookie[name]
 
-            expiration_date = datetime.fromtimestamp(cookie.expires)
-            expected_date = datetime.now() + duration
+            expiration_date = datetime.utcfromtimestamp(cookie.expires)
+            expected_date = datetime.utcnow() + duration
             difference = expected_date - expiration_date
 
             fail_msg = 'The expiration date {0} was far from the expected {1}'
