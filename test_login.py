@@ -99,6 +99,7 @@ class User(UserMixin):
     def get_id(self):
         return self.id
 
+    @property
     def is_active(self):
         return self.active
 
@@ -126,7 +127,7 @@ class StaticTestCase(unittest.TestCase):
 
         with app.test_client() as c:
             c.get('/static/favicon.ico')
-            self.assertTrue(current_user.is_anonymous())
+            self.assertTrue(current_user.is_anonymous)
 
     def test_static_loads_without_accessing_session(self):
         app = Flask(__name__)
@@ -210,7 +211,7 @@ class LoginTestCase(unittest.TestCase):
 
         @self.app.route('/username')
         def username():
-            if current_user.is_authenticated():
+            if current_user.is_authenticated:
                 return current_user.name
             return u'Anonymous'
 
@@ -276,7 +277,7 @@ class LoginTestCase(unittest.TestCase):
     #
     def test_test_request_context_users_are_anonymous(self):
         with self.app.test_request_context():
-            self.assertTrue(current_user.is_anonymous())
+            self.assertTrue(current_user.is_anonymous)
 
     def test_defaults_anonymous(self):
         with self.app.test_client() as c:
@@ -305,7 +306,7 @@ class LoginTestCase(unittest.TestCase):
     def test_login_inactive_user(self):
         with self.app.test_request_context():
             result = login_user(creeper)
-            self.assertTrue(current_user.is_anonymous())
+            self.assertTrue(current_user.is_anonymous)
             self.assertFalse(result)
 
     def test_login_inactive_user_forced(self):
@@ -358,7 +359,7 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_request_context():
             login_user(notch)
             logout_user()
-            self.assertTrue(current_user.is_anonymous())
+            self.assertTrue(current_user.is_anonymous)
 
     def test_logout_emits_signal(self):
         with self.app.test_request_context():
@@ -1123,9 +1124,9 @@ class ExplicitIdUser(UserMixin):
 class UserMixinTestCase(unittest.TestCase):
     def test_default_values(self):
         user = ImplicitIdUser(1)
-        self.assertTrue(user.is_active())
-        self.assertTrue(user.is_authenticated())
-        self.assertFalse(user.is_anonymous())
+        self.assertTrue(user.is_active)
+        self.assertTrue(user.is_authenticated)
+        self.assertFalse(user.is_anonymous)
 
     def test_get_id_from_id_attribute(self):
         user = ImplicitIdUser(1)
@@ -1157,9 +1158,9 @@ class AnonymousUserTestCase(unittest.TestCase):
     def test_values(self):
         user = AnonymousUserMixin()
 
-        self.assertFalse(user.is_active())
-        self.assertFalse(user.is_authenticated())
-        self.assertTrue(user.is_anonymous())
+        self.assertFalse(user.is_active)
+        self.assertFalse(user.is_authenticated)
+        self.assertTrue(user.is_anonymous)
         self.assertIsNone(user.get_id())
 
 
@@ -1185,13 +1186,13 @@ class UnicodeCookieUserIDTestCase(unittest.TestCase):
 
         @self.app.route('/username')
         def username():
-            if current_user.is_authenticated():
+            if current_user.is_authenticated:
                 return current_user.name
             return u'Anonymous'
 
         @self.app.route('/userid')
         def user_id():
-            if current_user.is_authenticated():
+            if current_user.is_authenticated:
                 return current_user.id
             return u'wrong_id'
 

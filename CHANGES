@@ -3,6 +3,13 @@ Flask-Login Changelog
 
 Here you can see the full list of changes between each Flask-Login release.
 
+Version -.-.--
+--------------
+
+- The `is_authenticated`, `is_active`, and `is_anonymous` members of the user
+  class are now properties, not methods. Applications should update their user
+  classes accordingly.
+
 Version 0.2.11
 --------------
 

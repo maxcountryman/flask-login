@@ -99,20 +99,21 @@ They will be logged out, and any cookies for their session will be cleaned up.
 
 Your User Class
 ===============
-The class that you use to represent users needs to implement these methods:
+The class that you use to represent users needs to implement these properties
+and methods:
 
-`is_authenticated()`
+`is_authenticated`
     Returns `True` if the user is authenticated, i.e. they have provided
     valid credentials. (Only authenticated users will fulfill the criteria
     of `login_required`.)
 
-`is_active()`
+`is_active`
     Returns `True` if this is an active user - in addition to being
     authenticated, they also have activated their account, not been suspended,
     or any condition your application has for rejecting an account. Inactive
     accounts may not log in (without being forced of course).
 
-`is_anonymous()`
+`is_anonymous`
     Returns `True` if this is an anonymous user. (Actual users should return
     `False` instead.)
 
@@ -226,10 +227,10 @@ using the `Authorization` header::
 Anonymous Users
 ===============
 By default, when a user is not actually logged in, `current_user` is set to
-an `AnonymousUserMixin` object. It has the following methods:
+an `AnonymousUserMixin` object. It has the following properties and methods:
 
-- `is_active()` and `is_authenticated()` return `False`
-- `is_anonymous()` returns `True`
+- `is_active` and `is_authenticated` are `False`
+- `is_anonymous` is `True`
 - `get_id()` returns `None`
 
 If you have custom requirements for anonymous users (for example, they need

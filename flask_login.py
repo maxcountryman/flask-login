@@ -502,12 +502,15 @@ class UserMixin(object):
     This provides default implementations for the methods that Flask-Login
     expects user objects to have.
     '''
+    @property
     def is_active(self):
         return True
 
+    @property
     def is_authenticated(self):
         return True
 
+    @property
     def is_anonymous(self):
         return False
 
@@ -544,12 +547,15 @@ class AnonymousUserMixin(object):
     '''
     This is the default object for representing an anonymous user.
     '''
+    @property
     def is_authenticated(self):
         return False
 
+    @property
     def is_active(self):
         return False
 
+    @property
     def is_anonymous(self):
         return True
 
@@ -676,7 +682,7 @@ def login_fresh():
 def login_user(user, remember=False, force=False, fresh=True):
     '''
     Logs a user in. You should pass the actual user object to this. If the
-    user's `is_active` method returns ``False``, they will not be logged in
+    user's `is_active` property is ``False``, they will not be logged in
     unless `force` is ``True``.
 
     This will return ``True`` if the log in attempt succeeds, and ``False`` if
@@ -694,7 +700,7 @@ def login_user(user, remember=False, force=False, fresh=True):
     marked as not "fresh". Defaults to ``True``.
     :type fresh: bool
     '''
-    if not force and not user.is_active():
+    if not force and not user.is_active:
         return False
 
     user_id = getattr(user, current_app.login_manager.id_attribute)()
@@ -759,7 +765,7 @@ def login_required(func):
     If there are only certain times you need to require that your user is
     logged in, you can do so with::
 
-        if not current_user.is_authenticated():
+        if not current_user.is_authenticated:
             return current_app.login_manager.unauthorized()
 
     ...which is essentially the code that this function adds to your views.
@@ -776,7 +782,7 @@ def login_required(func):
     def decorated_view(*args, **kwargs):
         if current_app.login_manager._login_disabled:
             return func(*args, **kwargs)
-        elif not current_user.is_authenticated():
+        elif not current_user.is_authenticated:
             return current_app.login_manager.unauthorized()
         return func(*args, **kwargs)
     return decorated_view
@@ -804,7 +810,7 @@ def fresh_login_required(func):
     def decorated_view(*args, **kwargs):
         if current_app.login_manager._login_disabled:
             return func(*args, **kwargs)
-        elif not current_user.is_authenticated():
+        elif not current_user.is_authenticated:
             return current_app.login_manager.unauthorized()
         elif not login_fresh():
             return current_app.login_manager.needs_refresh()
