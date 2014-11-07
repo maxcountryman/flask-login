@@ -374,7 +374,7 @@ class LoginManager(object):
             elif self.request_callback:
                 return self._load_from_request(request)
             elif header_name in request.headers:
-                return self._load_from_header(request.headers[header_name])
+                return self._load_from_header(request.headers[header_name])s
 
         return self.reload_user()
 
