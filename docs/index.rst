@@ -78,7 +78,13 @@ function. For example::
         return render_template("login.html", form=form)
 
 It's that simple. You can then access the logged-in user with the
-`current_user` proxy. Views that require your users to be logged in can be
+`current_user` proxy, which is available in every template::
+
+    {% if current_user.is_authenticated() %}
+      Hi {{ current_user.name }}!
+    {% endif %}
+
+Views that require your users to be logged in can be
 decorated with the `login_required` decorator::
 
     @app.route("/settings")
