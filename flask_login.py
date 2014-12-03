@@ -27,7 +27,7 @@ from werkzeug.urls import url_decode, url_encode
 
 from datetime import datetime, timedelta
 from functools import wraps
-from hashlib import sha1, md5
+from hashlib import sha1
 
 import hmac
 import warnings
@@ -875,7 +875,7 @@ def _create_identifier():
     base = '{0}|{1}'.format(_get_remote_addr(), user_agent)
     if str is bytes:
         base = unicode(base, 'utf-8', errors='replace')  # pragma: no cover
-    h = md5()
+    h = sha1()
     h.update(base.encode('utf8'))
     return h.hexdigest()
 
