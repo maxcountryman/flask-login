@@ -27,7 +27,7 @@ from werkzeug.urls import url_decode, url_encode
 
 from datetime import datetime, timedelta
 from functools import wraps
-from hashlib import sha1
+from hashlib import sha512
 
 import hmac
 import warnings
@@ -664,7 +664,7 @@ def make_secure_token(*args, **options):
 
     payload = b'\0'.join(l)
 
-    token_value = hmac.new(key, payload, sha1).hexdigest()
+    token_value = hmac.new(key, payload, sha512).hexdigest()
 
     if hasattr(token_value, 'decode'):  # pragma: no cover
         token_value = token_value.decode('utf-8')  # ensure bytes
@@ -858,7 +858,7 @@ def _get_user():
 def _cookie_digest(payload, key=None):
     key = _secret_key(key)
 
-    return hmac.new(key, payload.encode('utf-8'), sha1).hexdigest()
+    return hmac.new(key, payload.encode('utf-8'), sha512).hexdigest()
 
 
 def _get_remote_addr():
@@ -875,7 +875,7 @@ def _create_identifier():
     base = '{0}|{1}'.format(_get_remote_addr(), user_agent)
     if str is bytes:
         base = unicode(base, 'utf-8', errors='replace')  # pragma: no cover
-    h = sha1()
+    h = sha512()
     h.update(base.encode('utf8'))
     return h.hexdigest()
 

@@ -1022,9 +1022,12 @@ class LoginTestCase(unittest.TestCase):
             self.assertEqual(response.data.decode('utf-8'), u'Welcome!')
 
     def test_make_secure_token_default_key(self):
+        # Old test: 0f05743a2b617b2625362ab667c0dbdf4c9ec13a
+        # New test with sha512:
+        h1 = "47bec94a46a5d3939ca0671b01bafd5d7d5353941791734ec1e4734de40e5ce0"
+        h2 = "a45c05c17cd33b8a18840991bb1cc154fa4ee8ef2f80a572b5a6a24b3a3afc20"
         with self.app.test_request_context():
-            self.assertEqual(make_secure_token('foo'),
-                             '0f05743a2b617b2625362ab667c0dbdf4c9ec13a')
+            self.assertEqual(make_secure_token('foo'), h1 + h2)
 
     def test_user_context_processor(self):
         with self.app.test_request_context():
@@ -1084,7 +1087,13 @@ class CookieEncodingTestCase(unittest.TestCase):
         app = Flask(__name__)
         app.config['SECRET_KEY'] = 'deterministic'
 
-        COOKIE = u'1|7d276051c1eec578ed86f6b8478f7f7d803a7970'
+        # COOKIE = u'1|7d276051c1eec578ed86f6b8478f7f7d803a7970'
+
+        # Due to the restriction of 80 chars I have to break up the hash in two
+        h1 = u'0e9e6e9855fbe6df7906ec4737578a1d491b38d3fd5246c1561016e189d6516'
+        h2 = u'043286501ca43257c938e60aad77acec5ce916b94ca9d00c0bb6f9883ae4b82'
+        h3 = u'ae'
+        COOKIE = u'1|' + h1 + h2 + h3
 
         with app.test_request_context():
             self.assertEqual(COOKIE, encode_cookie(u'1'))
