@@ -204,6 +204,11 @@ class LoginTestCase(unittest.TestCase):
         def needs_refresh():
             return self.login_manager.needs_refresh()
 
+        @self.app.route('/needs-refresh-custom')
+        def needs_refresh_custom():
+            return self.login_manager.needs_refresh(
+                message=u'needs-refresh-custom')
+
         @self.app.route('/confirm-login')
         def _confirm_login():
             confirm_login()
@@ -393,6 +398,22 @@ class LoginTestCase(unittest.TestCase):
 
         with self.app.test_client() as c:
             c.get('/secret')
+            msgs = get_flashed_messages(category_filter=[expected_category])
+            self.assertEqual([expected_message], msgs)
+
+    def test_unauthorized_flashes_custom_message_with_login_view(self):
+        self.login_manager.login_view = '/login'
+
+        expected_message = u'Custom message'
+        expected_category = self.login_manager.login_message_category = 'login'
+
+        @self.app.route('/protected-custom')
+        @login_required(message=expected_message)
+        def protected():
+            return u'Access Granted'
+
+        with self.app.test_client() as c:
+            c.get('/protected-custom')
             msgs = get_flashed_messages(category_filter=[expected_category])
             self.assertEqual([expected_message], msgs)
 
@@ -694,6 +715,20 @@ class LoginTestCase(unittest.TestCase):
             c.get('/needs-refresh')
             msgs = get_flashed_messages(category_filter=category_filter)
             self.assertIn(u'Aktualisieren', msgs)
+        self.login_manager.localize_callback = None
+
+    def test_needs_refresh_flash_custom_message(self):
+        expected_message = u'needs-refresh-custom'
+
+        self.login_manager.refresh_view = '/refresh_view'
+        self.login_manager.needs_refresh_message_category = 'refresh'
+        category_filter = [self.login_manager.needs_refresh_message_category]
+
+        with self.app.test_client() as c:
+            c.get('/login-notch-remember')
+            c.get('/needs-refresh-custom')
+            msgs = get_flashed_messages(category_filter=category_filter)
+            self.assertIn(expected_message, msgs)
         self.login_manager.localize_callback = None
 
     def test_needs_refresh_aborts_403(self):
@@ -1002,6 +1037,25 @@ class LoginTestCase(unittest.TestCase):
             refreshed_result = c.get('/very-protected')
             self.assertEqual(u'Access Granted',
                              refreshed_result.data.decode('utf-8'))
+
+    def test_fresh_login_required_custom_message_decorator(self):
+        self.login_manager.refresh_view = '/refresh_view'
+        expected_message = 'Custom fresh login message!'
+        expected_category = \
+            self.login_manager.needs_refresh_message_category = 'refresh'
+
+        @self.app.route('/very-protected')
+        @fresh_login_required(message=expected_message)
+        def very_protected():
+            return 'Access Granted'
+
+        with self.app.test_client() as c:
+            c.get('/login-notch-remember')
+            self._delete_session(c)
+            c.get('/very-protected')
+
+            msgs = get_flashed_messages(category_filter=[expected_category])
+            self.assertIn(expected_message, msgs)
 
     #
     # Misc
