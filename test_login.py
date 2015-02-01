@@ -172,7 +172,8 @@ class InitializationTestCase(unittest.TestCase):
             with self.assertRaises(Exception) as cm:
                 login_manager.reload_user()
             expected_exception_message = 'No user_loader has been installed'
-            self.assertIn(expected_exception_message, str(cm.exception))
+            self.assertTrue(
+                str(cm.exception).startswith(expected_exception_message))
 
 
 class LoginTestCase(unittest.TestCase):
