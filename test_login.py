@@ -148,6 +148,7 @@ class InitializationTestCase(unittest.TestCase):
     def setUp(self):
         self.app = Flask(__name__)
         self.app.config['TESTING'] = True
+        self.app.config['SECRET_KEY'] = '1234'
 
     def test_init_app(self):
         login_manager = LoginManager()
@@ -163,6 +164,16 @@ class InitializationTestCase(unittest.TestCase):
     def test_login_disabled_is_set(self):
         login_manager = LoginManager(self.app, add_context_processor=True)
         self.assertFalse(login_manager._login_disabled)
+
+    def test_no_user_loader_raises(self):
+        login_manager = LoginManager(self.app, add_context_processor=True)
+        with self.app.test_request_context():
+            session['user_id'] = '2'
+            with self.assertRaises(Exception) as cm:
+                login_manager.reload_user()
+            expected_exception_message = 'No user_loader has been installed'
+            self.assertTrue(
+                str(cm.exception).startswith(expected_exception_message))
 
 
 class LoginTestCase(unittest.TestCase):
