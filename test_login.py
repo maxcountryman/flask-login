@@ -893,9 +893,8 @@ class LoginTestCase(unittest.TestCase):
                 self.assertEqual(results.data.decode('utf-8'), u'Anonymous')
                 session_listener.assert_heard_none(self.app)
 
-            # verify no session data has been set other than '_id'
-            self.assertIsNotNone(session.get('_id'))
-            self.assertTrue(len(session) == 1)
+            # verify no session data has been set
+            self.assertFalse(session)
 
     #
     # Custom Token Loader
