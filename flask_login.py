@@ -173,7 +173,7 @@ class LoginManager(object):
         if add_context_processor:
             app.context_processor(_user_context_processor)
 
-    def unauthorized(self):
+    def unauthorized(self, message=None):
         '''
         This is called when the user is required to log in. If you register a
         callback with :meth:`LoginManager.unauthorized_handler`, then it will
@@ -209,7 +209,9 @@ class LoginManager(object):
         if not login_view:
             abort(401)
 
-        if self.login_message:
+        if message:
+            flash(message, category=self.login_message_category)
+        elif self.login_message:
             if self.localize_callback is not None:
                 flash(self.localize_callback(self.login_message),
                       category=self.login_message_category)
@@ -293,7 +295,7 @@ class LoginManager(object):
         self.needs_refresh_callback = callback
         return callback
 
-    def needs_refresh(self):
+    def needs_refresh(self, message=None):
         '''
         This is called when the user is logged in, but they need to be
         reauthenticated because their session is stale. If you register a
@@ -321,7 +323,9 @@ class LoginManager(object):
         if not self.refresh_view:
             abort(403)
 
-        if self.localize_callback is not None:
+        if message:
+            flash(message, category=self.needs_refresh_message_category)
+        elif self.localize_callback is not None:
             flash(self.localize_callback(self.needs_refresh_message),
                   category=self.needs_refresh_message_category)
         else:
@@ -749,7 +753,7 @@ def confirm_login():
     user_login_confirmed.send(current_app._get_current_object())
 
 
-def login_required(func):
+def login_required(*args, **kwargs):
     '''
     If you decorate a view with this, it will ensure that the current user is
     logged in and authenticated before calling the actual view. (If they are
@@ -777,17 +781,25 @@ def login_required(func):
     :param func: The view function to decorate.
     :type func: function
     '''
-    @wraps(func)
-    def decorated_view(*args, **kwargs):
-        if current_app.login_manager._login_disabled:
+    message = kwargs.get('message')
+
+    def __login_required(func):
+        @wraps(func)
+        def decorated_view(*args, **kwargs):
+            if current_app.login_manager._login_disabled:
+                return func(*args, **kwargs)
+            elif not current_user.is_authenticated:
+                return current_app.login_manager.unauthorized(message=message)
             return func(*args, **kwargs)
-        elif not current_user.is_authenticated:
-            return current_app.login_manager.unauthorized()
-        return func(*args, **kwargs)
-    return decorated_view
+        return decorated_view
+
+    if len(args) == 1 and not kwargs and callable(args[0]):
+        return __login_required(args[0])
+    else:
+        return __login_required
 
 
-def fresh_login_required(func):
+def fresh_login_required(*args, **kwargs):
     '''
     If you decorate a view with this, it will ensure that the current user's
     login is fresh - i.e. there session was not restored from a 'remember me'
@@ -805,16 +817,24 @@ def fresh_login_required(func):
     :param func: The view function to decorate.
     :type func: function
     '''
-    @wraps(func)
-    def decorated_view(*args, **kwargs):
-        if current_app.login_manager._login_disabled:
+    message = kwargs.get('message')
+
+    def __fresh_login_required(func):
+        @wraps(func)
+        def decorated_view(*args, **kwargs):
+            if current_app.login_manager._login_disabled:
+                return func(*args, **kwargs)
+            elif not current_user.is_authenticated:
+                return current_app.login_manager.unauthorized(message=message)
+            elif not login_fresh():
+                return current_app.login_manager.needs_refresh(message=message)
             return func(*args, **kwargs)
-        elif not current_user.is_authenticated:
-            return current_app.login_manager.unauthorized()
-        elif not login_fresh():
-            return current_app.login_manager.needs_refresh()
-        return func(*args, **kwargs)
-    return decorated_view
+        return decorated_view
+
+    if len(args) == 1 and not kwargs and callable(args[0]):
+        return __fresh_login_required(args[0])
+    else:
+        return __fresh_login_required
 
 
 def set_login_view(login_view, blueprint=None):
