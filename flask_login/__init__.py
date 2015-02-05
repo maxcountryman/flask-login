@@ -33,6 +33,18 @@ from .utils import (current_user, _get_user, login_url, make_secure_token,
                     _create_identifier, _user_context_processor,
                     encode_cookie, decode_cookie)
 
+# we have to use these imports so pyflakes doesn't fail from unused imports
+assert (UserMixin, AnonymousUserMixin)
+assert (user_logged_in, user_logged_out, user_loaded_from_cookie,
+        user_loaded_from_header, user_loaded_from_request,
+        user_login_confirmed, user_unauthorized,
+        user_needs_refresh, user_accessed, session_protected)
+assert (current_user, _get_user, login_url, make_secure_token,
+        login_fresh, login_user, logout_user, confirm_login,
+        login_required, fresh_login_required, set_login_view,
+        _create_identifier, _user_context_processor,
+        encode_cookie, decode_cookie)
+
 
 class LoginManager(object):
     '''

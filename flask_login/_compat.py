@@ -12,7 +12,7 @@ import sys
 PY2 = sys.version_info[0] == 2
 
 
-if PY2: # pragma: nocover
+if PY2:  # pragma: nocover
     def iteritems(d):
         return d.iteritems()
 
@@ -23,7 +23,7 @@ if PY2: # pragma: nocover
 
     string_types = (unicode, bytes)
 
-else: # pragma: nocover
+else:  # pragma: nocover
     def iteritems(d):
         return iter(d.items())
 
