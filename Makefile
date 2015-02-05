@@ -17,10 +17,10 @@ clean_coverage:
 
 pep8:
 	@echo 'Checking pep8 compliance...'
-	@pep8 flask_login.py test_login.py
+	@pep8 flask_login/* test_login.py
 
 pyflakes:
 	@echo 'Running pyflakes...'
-	@pyflakes flask_login.py test_login.py
+	@pyflakes flask_login/* test_login.py
 
 check: pep8 pyflakes test
