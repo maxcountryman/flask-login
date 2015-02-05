@@ -13,7 +13,7 @@ PY2 = sys.version_info[0] == 2
 
 
 if not PY2:  # pragma: no cover
-    unicode = str
+    unicode = str  # needed for pyflakes in py3
 
 
 if PY2:  # pragma: nocover
