@@ -21,6 +21,7 @@ if PY2:  # pragma: nocover
 
     xrange = xrange
 
+    text_type = unicode
     string_types = (unicode, bytes)
 
 else:  # pragma: nocover
@@ -32,4 +33,5 @@ else:  # pragma: nocover
 
     xrange = range
 
+    text_type = str
     string_types = (str, )

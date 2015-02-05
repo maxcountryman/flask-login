@@ -18,6 +18,7 @@ from datetime import datetime
 from flask import (_request_ctx_stack, abort, current_app, flash, redirect,
                    request, session)
 
+from ._compat import text_type
 from .config import (COOKIE_NAME, COOKIE_DURATION, COOKIE_SECURE,
                      COOKIE_HTTPONLY, LOGIN_MESSAGE, LOGIN_MESSAGE_CATEGORY,
                      REFRESH_MESSAGE, REFRESH_MESSAGE_CATEGORY, ID_ATTRIBUTE,
@@ -445,7 +446,7 @@ class LoginManager(object):
         if self.token_callback:
             data = current_user.get_auth_token()
         else:
-            data = encode_cookie(unicode(session['user_id']))
+            data = encode_cookie(text_type(session['user_id']))
         expires = datetime.utcnow() + duration
 
         # actually set it

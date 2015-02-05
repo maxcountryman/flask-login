@@ -6,7 +6,7 @@
 '''
 
 
-from ._compat import PY2
+from ._compat import PY2, text_type
 
 
 class UserMixin(object):
@@ -34,7 +34,7 @@ class UserMixin(object):
 
     def get_id(self):
         try:
-            return unicode(self.id)
+            return text_type(self.id)
         except AttributeError:
             raise NotImplementedError('No `id` attribute - override `get_id`')
 

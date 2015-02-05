@@ -16,7 +16,7 @@ from werkzeug.urls import url_decode, url_encode
 from flask import (_request_ctx_stack, current_app, request, session, url_for,
                    has_request_context)
 
-from ._compat import PY2
+from ._compat import PY2, text_type
 from .config import COOKIE_NAME
 from .signals import user_logged_in, user_logged_out, user_login_confirmed
 
@@ -24,7 +24,6 @@ if PY2:  # pragma: no cover
     from urlparse import urlparse, urlunparse
 else:  # pragma: no cover
     from urllib.parse import urlparse, urlunparse
-    unicode = str
 
 
 #: A proxy for the current user. If no user is logged in, this will be an
@@ -343,7 +342,7 @@ def _create_identifier():
         user_agent = user_agent.encode('utf-8')
     base = '{0}|{1}'.format(_get_remote_addr(), user_agent)
     if str is bytes:
-        base = unicode(base, 'utf-8', errors='replace')  # pragma: no cover
+        base = text_type(base, 'utf-8', errors='replace')  # pragma: no cover
     h = sha512()
     h.update(base.encode('utf8'))
     return h.hexdigest()
@@ -357,7 +356,7 @@ def _secret_key(key=None):
     if key is None:
         key = current_app.config['SECRET_KEY']
 
-    if isinstance(key, unicode):  # pragma: no cover
+    if isinstance(key, text_type):  # pragma: no cover
         key = key.encode('latin1')  # ensure bytes
 
     return key
