@@ -16,14 +16,9 @@ from werkzeug.urls import url_decode, url_encode
 from flask import (_request_ctx_stack, current_app, request, session, url_for,
                    has_request_context)
 
-from ._compat import PY2, text_type
+from ._compat import text_type, urlparse, urlunparse
 from .config import COOKIE_NAME
 from .signals import user_logged_in, user_logged_out, user_login_confirmed
-
-if PY2:  # pragma: no cover
-    from urlparse import urlparse, urlunparse
-else:  # pragma: no cover
-    from urllib.parse import urlparse, urlunparse
 
 
 #: A proxy for the current user. If no user is logged in, this will be an
