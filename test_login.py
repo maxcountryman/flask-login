@@ -20,23 +20,19 @@ from flask import (
     get_flashed_messages,
 )
 
+from flask.ext.login._compat import text_type
 from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
                              make_secure_token, current_user, login_user,
                              logout_user, user_logged_in, user_logged_out,
                              user_loaded_from_cookie, user_login_confirmed,
                              user_loaded_from_header, user_loaded_from_request,
                              user_unauthorized, user_needs_refresh,
-                             make_next_param, login_url, login_fresh,
-                             login_required, session_protected,
-                             fresh_login_required, confirm_login,
-                             encode_cookie, decode_cookie, set_login_view,
-                             _secret_key, _user_context_processor,
-                             user_accessed)
-
-
-# be compatible with py3k
-if str is not bytes:
-    unicode = str
+                             login_url, login_fresh, login_required,
+                             session_protected, fresh_login_required,
+                             confirm_login, set_login_view, user_accessed)
+from flask.ext.login.utils import (make_next_param, encode_cookie,
+                                   decode_cookie, _user_context_processor,
+                                   _secret_key)
 
 
 @contextmanager
@@ -200,16 +196,16 @@ class LoginTestCase(unittest.TestCase):
 
         @self.app.route('/login-notch')
         def login_notch():
-            return unicode(login_user(notch))
+            return text_type(login_user(notch))
 
         @self.app.route('/login-notch-remember')
         def login_notch_remember():
-            return unicode(login_user(notch, remember=True))
+            return text_type(login_user(notch, remember=True))
 
         @self.app.route('/login-notch-permanent')
         def login_notch_permanent():
             session.permanent = True
-            return unicode(login_user(notch))
+            return text_type(login_user(notch))
 
         @self.app.route('/needs-refresh')
         def needs_refresh():
@@ -228,11 +224,11 @@ class LoginTestCase(unittest.TestCase):
 
         @self.app.route('/is-fresh')
         def is_fresh():
-            return unicode(login_fresh())
+            return text_type(login_fresh())
 
         @self.app.route('/logout')
         def logout():
-            return unicode(logout_user())
+            return text_type(logout_user())
 
         @self.login_manager.user_loader
         def load_user(user_id):
@@ -259,7 +255,7 @@ class LoginTestCase(unittest.TestCase):
 
         @self.app.route('/empty_session')
         def empty_session():
-            return unicode(u'modified=%s' % session.modified)
+            return text_type(u'modified=%s' % session.modified)
 
         # This will help us with the possibility of typoes in the tests. Now
         # we shouldn't have to check each response to help us set up state
@@ -1201,7 +1197,7 @@ class UnicodeCookieUserIDTestCase(unittest.TestCase):
 
         @self.app.route('/login-germanjapanese-remember')
         def login_germanjapanese_remember():
-            return unicode(login_user(germanjapanese, remember=True))
+            return text_type(login_user(germanjapanese, remember=True))
 
         @self.app.route('/username')
         def username():
@@ -1217,7 +1213,7 @@ class UnicodeCookieUserIDTestCase(unittest.TestCase):
 
         @self.login_manager.user_loader
         def load_user(user_id):
-            return USERS[unicode(user_id)]
+            return USERS[text_type(user_id)]
 
         # This will help us with the possibility of typoes in the tests. Now
         # we shouldn't have to check each response to help us set up state
