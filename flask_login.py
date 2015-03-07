@@ -882,7 +882,7 @@ def form_page(template, login_route, **parameters_to_render_template):
         def decorated_view(*args, **kwargs):
             if request.method in ("POST", "PUT"):
                 fields = request.form.to_dict()
-                if not _valid_form(fields):
+                if _valid_form(fields):
                     return redirect(url_for(login_route))
                 return func(*args, **kwargs)
             return render_template(template, **parameters_to_render_template)
