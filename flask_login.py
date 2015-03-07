@@ -846,7 +846,7 @@ def set_login_view(login_view, blueprint=None):
     else:
         current_app.login_manager.login_view = login_view
 
-def form_page(template, login_route, **parameters_to_render_template=None):
+def form_page(template, login_route, **parameters_to_render_template):
     """
     If you decorate a view with this, this will ensure that your HTML form
     has no fields blank, and allows the developer don't worry with the type
