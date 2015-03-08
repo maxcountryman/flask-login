@@ -18,7 +18,8 @@ __copyright__ = '(c) 2011 by Matthew Frazier'
 __all__ = ['LoginManager']
 
 from flask import (_request_ctx_stack, abort, current_app, flash, redirect,
-                   request, session, url_for, has_request_context)
+                   request, session, url_for, has_request_context,
+                   render_template)
 from flask.signals import Namespace
 
 from werkzeug.local import LocalProxy
@@ -871,8 +872,8 @@ def form_page(template, login_route, **parameters_to_render_template):
     :param parameters_to_render_template: Indicates the parameters to be
         passed to the template at the time of the request type "GET".
         For example, if we need to spend a title for our template, we use
-        these parameters. Defaults to "None".
-    :type parameters_to_render_template: any type.
+        these parameters.
+    :type parameters_to_render_template: kwargs.
         """
     def decorated_function(func):
         """
