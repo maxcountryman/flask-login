@@ -846,6 +846,7 @@ def set_login_view(login_view, blueprint=None):
     else:
         current_app.login_manager.login_view = login_view
 
+
 def form_page(template, login_route, **parameters_to_render_template):
     """
     If you decorate a view with this, this will ensure that your HTML form
@@ -858,18 +859,18 @@ def form_page(template, login_route, **parameters_to_render_template):
             pass
 
     This feature is useful when you prefer using HTML to forms. It also allows
-    less polluting your view, since it does not need to check which type 
+    less polluting your view, since it does not need to check which type
     of request or make validation of fields sent by HTML forms.
 
-    :param template: Indicates the template page which contains the form. 
+    :param template: Indicates the template page which contains the form.
         It is used if the request is of type "GET".
     :type template: string
-    :param login_route: Indicates the route belonging to the form page. 
+    :param login_route: Indicates the route belonging to the form page.
         It is used if the HTML form is not valid.
     :type login_route: string
-    :param parameters_to_render_template: Indicates the parameters to be 
-        passed to the template at the time of the request type "GET". 
-        For example, if we need to spend a title for our template, we use 
+    :param parameters_to_render_template: Indicates the parameters to be
+        passed to the template at the time of the request type "GET".
+        For example, if we need to spend a title for our template, we use
         these parameters. Defaults to "None".
     :type parameters_to_render_template: any type.
         """
@@ -887,13 +888,14 @@ def form_page(template, login_route, **parameters_to_render_template):
                 return func(*args, **kwargs)
             return render_template(template, **parameters_to_render_template)
         return decorated_view
-    return decorated_function 
+    return decorated_function
+
 
 def _valid_form(fields):
     """
     Check if form have empty fields.
 
-    :param fields: Indicates a past dictionary with the parameters of the 
+    :param fields: Indicates a past dictionary with the parameters of the
         request "POST".
     :type fields: dict
     """
@@ -903,6 +905,7 @@ def _valid_form(fields):
         if field_value.isspace() or not len(field_value):
             fields_errors[field] = field_value
     return bool(fields_errors)
+
 
 def _get_user():
     if has_request_context() and not hasattr(_request_ctx_stack.top, 'user'):
