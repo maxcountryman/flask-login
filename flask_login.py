@@ -18,7 +18,8 @@ __copyright__ = '(c) 2011 by Matthew Frazier'
 __all__ = ['LoginManager']
 
 from flask import (_request_ctx_stack, abort, current_app, flash, redirect,
-                   request, session, url_for, has_request_context)
+                   request, session, url_for, has_request_context,
+                   render_template)
 from flask.signals import Namespace
 
 from werkzeug.local import LocalProxy
@@ -845,6 +846,66 @@ def set_login_view(login_view, blueprint=None):
         current_app.login_manager.login_view = None
     else:
         current_app.login_manager.login_view = login_view
+
+
+def form_page(template, login_route, **parameters_to_render_template):
+    """
+    If you decorate a view with this, this will ensure that your HTML form
+    has no fields blank, and allows the developer don't worry with the type
+    of request is "POST" or "GET". For example::
+
+        @app.route('/register', methods=["GET","POST"])
+        @form_page("register.html", ".register", title="Register user")
+        def register():
+            pass
+
+    This feature is useful when you prefer using HTML to forms. It also allows
+    less polluting your view, since it does not need to check which type
+    of request or make validation of fields sent by HTML forms.
+
+    :param template: Indicates the template page which contains the form.
+        It is used if the request is of type "GET".
+    :type template: string
+    :param login_route: Indicates the route belonging to the form page.
+        It is used if the HTML form is not valid.
+    :type login_route: string
+    :param parameters_to_render_template: Indicates the parameters to be
+        passed to the template at the time of the request type "GET".
+        For example, if we need to spend a title for our template, we use
+        these parameters.
+    :type parameters_to_render_template: kwargs.
+        """
+    def decorated_function(func):
+        """
+        :param func: The view function to decorate.
+        :type func: function
+        """
+        @wraps(func)
+        def decorated_view(*args, **kwargs):
+            if request.method in ("POST", "PUT"):
+                fields = request.form.to_dict()
+                if _valid_form(fields):
+                    return redirect(url_for(login_route))
+                return func(*args, **kwargs)
+            return render_template(template, **parameters_to_render_template)
+        return decorated_view
+    return decorated_function
+
+
+def _valid_form(fields):
+    """
+    Check if form have empty fields.
+
+    :param fields: Indicates a past dictionary with the parameters of the
+        request "POST".
+    :type fields: dict
+    """
+    fields_errors = {}
+    for field in fields:
+        field_value = fields[field]
+        if field_value.isspace() or not len(field_value):
+            fields_errors[field] = field_value
+    return bool(fields_errors)
 
 
 def _get_user():
