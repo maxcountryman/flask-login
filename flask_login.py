@@ -852,7 +852,7 @@ def form_page(template, login_route, **parameters_to_render_template):
     has no fields blank, and allows the developer don't worry with the type
     of request is "POST" or "GET". For example::
 
-        @app.route('/login', methods=["GET","POST"])
+        @app.route('/register', methods=["GET","POST"])
         @form_page("register.html", ".register", title="Register user")
         def register():
             pass
