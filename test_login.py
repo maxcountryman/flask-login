@@ -31,7 +31,7 @@ from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
                              fresh_login_required, confirm_login,
                              encode_cookie, decode_cookie, set_login_view,
                              _secret_key, _user_context_processor,
-                             user_accessed)
+                             user_accessed, blueprint_login_required)
 
 
 # be compatible with py3k
@@ -532,6 +532,52 @@ class LoginTestCase(unittest.TestCase):
                 result = c.get('/protected')
                 self.assertEqual(result.status_code, 302)
                 expected = 'http://localhost/app_login?next=%2Fprotected'
+                self.assertEqual(result.location, expected)
+
+    def test_unauthorized_uses_blueprint_before_request(self):
+        with self.app.app_context():
+
+            first = Blueprint('first', 'first')
+            second = Blueprint('second', 'second')
+            second.before_request(blueprint_login_required)
+
+            @self.app.route('/app_login')
+            def app_login():
+                return 'Login Form Goes Here!'
+
+            @first.route('/unsecure')
+            def first_unsecure():
+                return u'Always Granted'
+
+            @first.route('/protected')
+            @login_required
+            def first_protected():
+                return u'Access Granted'
+
+            @second.route('/protected')
+            def second_protected():
+                return u'Access Granted'
+
+            self.app.register_blueprint(first, url_prefix='/first')
+            self.app.register_blueprint(second, url_prefix='/second')
+
+            set_login_view('app_login')
+
+            with self.app.test_client() as c:
+
+                result = c.get('/first/unsecure')
+                self.assertEqual(result.status_code, 200)
+
+                result = c.get('/first/protected')
+                self.assertEqual(result.status_code, 302)
+                expected = ('http://localhost/'
+                            'app_login?next=%2Ffirst%2Fprotected')
+                self.assertEqual(result.location, expected)
+
+                result = c.get('/second/protected')
+                self.assertEqual(result.status_code, 302)
+                expected = ('http://localhost/'
+                            'app_login?next=%2Fsecond%2Fprotected')
                 self.assertEqual(result.location, expected)
 
     #
