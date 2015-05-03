@@ -67,15 +67,27 @@ will continue.)
 Once a user has authenticated, you log them in with the `login_user`
 function. For example::
 
-    @app.route("/login", methods=["GET", "POST"])
+    @app.route('/login', methods=['GET', 'POST'])
     def login():
+        # Here we use a class of some kind to represent and validate our
+        # client-side form data. For example, WTForms is a library that will
+        # handle this for us.
         form = LoginForm()
         if form.validate_on_submit():
-            # login and validate the user...
+            # Login and validate the user.
             login_user(user)
-            flash("Logged in successfully.")
-            return redirect(request.args.get("next") or url_for("index"))
-        return render_template("login.html", form=form)
+
+            flask.flash('Logged in successfully.')
+
+            next = flask.request.args.get('next')
+            if not next_is_valid(next):
+                return flask.abort(400)
+
+            return flask.redirect(next or flask.url_for('index'))
+        return flask.render_template('login.html', form=form)
+
+*Warning:* You MUST validate the value of the `next` parameter. If you do not,
+your application will be vulnerable to open redirects.
 
 It's that simple. You can then access the logged-in user with the
 `current_user` proxy, which is available in every template::
