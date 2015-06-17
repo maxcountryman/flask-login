@@ -614,6 +614,29 @@ class LoginTestCase(unittest.TestCase):
             self._delete_session(c)
             self.assertEqual(u'False', c.get('/is-fresh').data.decode('utf-8'))
 
+    def test_login_persists_with_signle_x_forwarded_for(self):
+        self.app.config['SESSION_PROTECTION'] = 'strong'
+        with self.app.test_client() as c:
+            c.get('/login-notch', headers=[('X-Forwarded-For', '10.1.1.1')])
+            result = c.get('/username',
+                           headers=[('X-Forwarded-For', '10.1.1.1')])
+            self.assertEqual(u'Notch', result.data.decode('utf-8'))
+            result = c.get('/username',
+                           headers=[('X-Forwarded-For', '10.1.1.1')])
+            self.assertEqual(u'Notch', result.data.decode('utf-8'))
+
+    def test_login_persists_with_many_x_forwarded_for(self):
+        self.app.config['SESSION_PROTECTION'] = 'strong'
+        with self.app.test_client() as c:
+            c.get('/login-notch',
+                  headers=[('X-Forwarded-For', '10.1.1.1')])
+            result = c.get('/username',
+                           headers=[('X-Forwarded-For', '10.1.1.1')])
+            self.assertEqual(u'Notch', result.data.decode('utf-8'))
+            result = c.get('/username',
+                           headers=[('X-Forwarded-For', '10.1.1.1, 10.1.1.2')])
+            self.assertEqual(u'Notch', result.data.decode('utf-8'))
+
     def test_user_loaded_from_cookie_fired(self):
         with self.app.test_client() as c:
             c.get('/login-notch-remember')

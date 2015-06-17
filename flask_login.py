@@ -863,7 +863,9 @@ def _cookie_digest(payload, key=None):
 def _get_remote_addr():
     address = request.headers.get('X-Forwarded-For', request.remote_addr)
     if address is not None:
-        address = address.encode('utf-8')
+        # An 'X-Forwarded-For' header includes a comma separated list of the
+        # addresses, the first address being the actual remote address.
+        address = address.encode('utf-8').split(b',')[0].strip()
     return address
 
 
