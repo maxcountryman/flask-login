@@ -614,6 +614,29 @@ class LoginTestCase(unittest.TestCase):
             self._delete_session(c)
             self.assertEqual(u'False', c.get('/is-fresh').data.decode('utf-8'))
 
+    def test_login_persists_with_signle_x_forwarded_for(self):
+        self.app.config['SESSION_PROTECTION'] = 'strong'
+        with self.app.test_client() as c:
+            c.get('/login-notch', headers=[('X-Forwarded-For', '10.1.1.1')])
+            result = c.get('/username',
+                           headers=[('X-Forwarded-For', '10.1.1.1')])
+            self.assertEqual(u'Notch', result.data.decode('utf-8'))
+            result = c.get('/username',
+                           headers=[('X-Forwarded-For', '10.1.1.1')])
+            self.assertEqual(u'Notch', result.data.decode('utf-8'))
+
+    def test_login_persists_with_many_x_forwarded_for(self):
+        self.app.config['SESSION_PROTECTION'] = 'strong'
+        with self.app.test_client() as c:
+            c.get('/login-notch',
+                  headers=[('X-Forwarded-For', '10.1.1.1')])
+            result = c.get('/username',
+                           headers=[('X-Forwarded-For', '10.1.1.1')])
+            self.assertEqual(u'Notch', result.data.decode('utf-8'))
+            result = c.get('/username',
+                           headers=[('X-Forwarded-For', '10.1.1.1, 10.1.1.2')])
+            self.assertEqual(u'Notch', result.data.decode('utf-8'))
+
     def test_user_loaded_from_cookie_fired(self):
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
@@ -707,11 +730,11 @@ class LoginTestCase(unittest.TestCase):
             self.assertIn(u'Aktualisieren', msgs)
         self.login_manager.localize_callback = None
 
-    def test_needs_refresh_aborts_403(self):
+    def test_needs_refresh_aborts_401(self):
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
             result = c.get('/needs-refresh')
-            self.assertEqual(result.status_code, 403)
+            self.assertEqual(result.status_code, 401)
 
     def test_redirects_to_refresh_view(self):
         @self.app.route('/refresh-view')
@@ -1006,7 +1029,7 @@ class LoginTestCase(unittest.TestCase):
 
             self._delete_session(c)
             stale_result = c.get('/very-protected')
-            self.assertEqual(stale_result.status_code, 403)
+            self.assertEqual(stale_result.status_code, 401)
 
             c.get('/confirm-login')
             refreshed_result = c.get('/very-protected')

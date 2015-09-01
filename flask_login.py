@@ -308,7 +308,7 @@ class LoginManager(object):
               instead of the homepage.)
 
         If :attr:`LoginManager.refresh_view` is not defined, then it will
-        simply raise a HTTP 403 (Forbidden) error instead.
+        simply raise a HTTP 401 (Unauthorized) error instead.
 
         This should be returned from a view or before/after_request function,
         otherwise the redirect will have no effect.
@@ -319,7 +319,7 @@ class LoginManager(object):
             return self.needs_refresh_callback()
 
         if not self.refresh_view:
-            abort(403)
+            abort(401)
 
         if self.localize_callback is not None:
             flash(self.localize_callback(self.needs_refresh_message),
@@ -870,7 +870,9 @@ def _cookie_digest(payload, key=None):
 def _get_remote_addr():
     address = request.headers.get('X-Forwarded-For', request.remote_addr)
     if address is not None:
-        address = address.encode('utf-8')
+        # An 'X-Forwarded-For' header includes a comma separated list of the
+        # addresses, the first address being the actual remote address.
+        address = address.encode('utf-8').split(b',')[0].strip()
     return address
 
 
