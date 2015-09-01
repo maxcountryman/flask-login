@@ -353,6 +353,7 @@ class LoginManager(object):
 
     def _load_user(self):
         '''Loads user from session or remember_me cookie as applicable'''
+        config = current_app.config
         if (current_app.static_url_path is not None and
             request.path.startswith(current_app.static_url_path) and
             not config.get('LOGIN_FORCE_STATIC_PATH_CHECK', False)
@@ -363,7 +364,6 @@ class LoginManager(object):
         user_accessed.send(current_app._get_current_object())
 
         # first check SESSION_PROTECTION
-        config = current_app.config
         if config.get('SESSION_PROTECTION', self.session_protection):
             deleted = self._session_protection()
             if deleted:
