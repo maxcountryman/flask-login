@@ -66,12 +66,11 @@ will continue.)
 
 Once a user has authenticated, you log them in with the `login_user`
 function. For example::
-
     @app.route('/login', methods=['GET', 'POST'])
     def login():
         # Here we use a class of some kind to represent and validate our
         # client-side form data. For example, WTForms is a library that will
-        # handle this for us.
+        # handle this for us, and we use a custom LoginForm to validate.
         form = LoginForm()
         if form.validate_on_submit():
             # Login and validate the user.
