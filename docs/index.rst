@@ -64,6 +64,39 @@ It should return `None` (**not raise an exception**) if the ID is not valid.
 (In that case, the ID will manually be removed from the session and processing
 will continue.)
 
+Your User Class
+===============
+The class that you use to represent users needs to implement these properties
+and methods:
+
+`is_authenticated`
+    Returns `True` if the user is authenticated, i.e. they have provided
+    valid credentials. (Only authenticated users will fulfill the criteria
+    of `login_required`.)
+
+`is_active`
+    Returns `True` if this is an active user - in addition to being
+    authenticated, they also have activated their account, not been suspended,
+    or any condition your application has for rejecting an account. Inactive
+    accounts may not log in (without being forced of course).
+
+`is_anonymous`
+    Returns `True` if this is an anonymous user. (Actual users should return
+    `False` instead.)
+
+`get_id()`
+    Returns a `unicode` that uniquely identifies this user, and can be used
+    to load the user from the `~LoginManager.user_loader` callback. Note
+    that this **must** be a `unicode` - if the ID is natively an `int` or some
+    other type, you will need to convert it to `unicode`.
+
+To make implementing a user class easier, you can inherit from `UserMixin`,
+which provides default implementations for all of these methods. (It's not
+required, though.)
+
+Login Example
+=============
+
 Once a user has authenticated, you log them in with the `login_user`
 function. For example::
     @app.route('/login', methods=['GET', 'POST'])
@@ -74,11 +107,14 @@ function. For example::
         form = LoginForm()
         if form.validate_on_submit():
             # Login and validate the user.
+            # user should be an instance of your `User` class
             login_user(user)
 
             flask.flash('Logged in successfully.')
 
             next = flask.request.args.get('next')
+            # next_is_valid should check if the user has valid 
+            # permission to access the `next` url
             if not next_is_valid(next):
                 return flask.abort(400)
 
@@ -113,36 +149,6 @@ When the user is ready to log out::
 
 They will be logged out, and any cookies for their session will be cleaned up.
 
-
-Your User Class
-===============
-The class that you use to represent users needs to implement these properties
-and methods:
-
-`is_authenticated`
-    Returns `True` if the user is authenticated, i.e. they have provided
-    valid credentials. (Only authenticated users will fulfill the criteria
-    of `login_required`.)
-
-`is_active`
-    Returns `True` if this is an active user - in addition to being
-    authenticated, they also have activated their account, not been suspended,
-    or any condition your application has for rejecting an account. Inactive
-    accounts may not log in (without being forced of course).
-
-`is_anonymous`
-    Returns `True` if this is an anonymous user. (Actual users should return
-    `False` instead.)
-
-`get_id()`
-    Returns a `unicode` that uniquely identifies this user, and can be used
-    to load the user from the `~LoginManager.user_loader` callback. Note
-    that this **must** be a `unicode` - if the ID is natively an `int` or some
-    other type, you will need to convert it to `unicode`.
-
-To make implementing a user class easier, you can inherit from `UserMixin`,
-which provides default implementations for all of these methods. (It's not
-required, though.)
 
 
 Customizing the Login Process
