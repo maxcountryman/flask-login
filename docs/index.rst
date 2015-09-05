@@ -165,7 +165,7 @@ For example::
 The default message flashed is ``Please log in to access this page.`` To
 customize the message, set `LoginManager.login_message`::
 
-    login_manager.login_message = u"Bonvolu ensaluti por uzi tio paĝo."
+    login_manager.login_message = u"Bonvolu ensaluti por uzi tiun paĝon."
 
 To customize the message category, set `LoginManager.login_message_category`::
 
