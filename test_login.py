@@ -147,7 +147,6 @@ class InitializationTestCase(unittest.TestCase):
 
     def setUp(self):
         self.app = Flask(__name__)
-        self.app.config['TESTING'] = True
         self.app.config['SECRET_KEY'] = '1234'
 
     def test_init_app(self):
@@ -183,7 +182,6 @@ class LoginTestCase(unittest.TestCase):
         self.app = Flask(__name__)
         self.app.config['SECRET_KEY'] = 'deterministic'
         self.app.config['SESSION_PROTECTION'] = None
-        self.app.config['TESTING'] = True
         self.remember_cookie_name = 'remember'
         self.app.config['REMEMBER_COOKIE_NAME'] = self.remember_cookie_name
         self.login_manager = LoginManager()
@@ -1211,7 +1209,6 @@ class UnicodeCookieUserIDTestCase(unittest.TestCase):
         self.app = Flask(__name__)
         self.app.config['SECRET_KEY'] = 'deterministic'
         self.app.config['SESSION_PROTECTION'] = None
-        self.app.config['TESTING'] = True
         self.remember_cookie_name = 'remember'
         self.app.config['REMEMBER_COOKIE_NAME'] = self.remember_cookie_name
         self.login_manager = LoginManager()
