@@ -9,3 +9,5 @@ __pycache__/
 *.py[co]
 *.egg-info
 *.swp
+
+dist/
