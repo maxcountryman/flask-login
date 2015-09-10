@@ -3,12 +3,30 @@ Flask-Login Changelog
 
 Here you can see the full list of changes between each Flask-Login release.
 
-Version -.-.--
---------------
+Version 0.3.1
+-------------
 
-- The `is_authenticated`, `is_active`, and `is_anonymous` members of the user
-  class are now properties, not methods. Applications should update their user
-  classes accordingly.
+Released on TBD.
+
+
+Version 0.3.0
+-------------
+
+Released on September 10th, 2015
+
+- Fixes handling of X-Forward-For header.
+- Update to use SHA512 instead of MS5 for session identifier creation.
+- Fixes session creation for every view.
+- BREAKING: UTC used to set cookie duration.
+- BREAKING: Non-fresh logins now returns HTTP 401.
+- Support unicode user IDs in cookie.
+- Fixes user_logged_out signal invocation.
+- Support for per-Blueprint login views.
+- BREAKING: The `is_authenticated`, `is_active`, and `is_anonymous` members of
+  the user class are now properties, not methods. Applications should update
+  their user classes accordingly.
+- Various other improvements including documentation and code clean up.
+
 
 Version 0.2.11
 --------------
