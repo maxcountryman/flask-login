@@ -127,7 +127,7 @@ your application will be vulnerable to open redirects.
 It's that simple. You can then access the logged-in user with the
 `current_user` proxy, which is available in every template::
 
-    {% if current_user.is_authenticated() %}
+    {% if current_user.is_authenticated %}
       Hi {{ current_user.name }}!
     {% endif %}
 
