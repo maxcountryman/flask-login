@@ -3,6 +3,8 @@ python:
   - 2.6
   - 2.7
   - 3.3
+  - 3.4
+  - 3.5
 install:
   - python install_requirements.py dev
   - pip install . --use-mirrors
