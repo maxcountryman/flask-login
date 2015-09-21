@@ -16,6 +16,10 @@ Issues should relate to specific bugs or feature requests. If this doesn't fit t
 
 If you'd like to submit PR, please make sure that all tests pass prior to submission. The README contains further instructions.
 
+## Extended Documentation
+
+Sphinx-generated documentation can be found [here](http://flask-login.readthedocs.org/en/latest/). This page is updated automatically. Documentation for prior versions of the library may be found there as well. Always review this page when a problem is first encountered.
+
 ## Thanks
 
 Finally this project has seen contributions from many people and we owe them a debt of gratitude for taking time to improve the project.
