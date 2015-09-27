@@ -858,11 +858,18 @@ class LoginTestCase(unittest.TestCase):
     def test_session_protection_strong_deletes_session(self):
         self.app.config['SESSION_PROTECTION'] = 'strong'
         with self.app.test_client() as c:
+            # write some unrelated data in the session, to ensure it does not
+            # get destroyed
+            with c.session_transaction() as sess:
+                sess['foo'] = 'bar'
             c.get('/login-notch-remember')
             username_result = c.get('/username', headers=[('User-Agent',
                                                            'different')])
             self.assertEqual(u'Anonymous',
                              username_result.data.decode('utf-8'))
+            with c.session_transaction() as sess:
+                self.assertIn('foo', sess)
+                self.assertEqual('bar', sess['foo'])
 
     def test_session_protection_strong_fires_signal_user_agent(self):
         self.app.config['SESSION_PROTECTION'] = 'strong'
