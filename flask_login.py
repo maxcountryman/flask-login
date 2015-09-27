@@ -400,7 +400,9 @@ class LoginManager(object):
                 session_protected.send(app)
                 return False
             elif mode == 'strong':
-                sess.clear()
+                sess.pop('user_id', None)
+                sess.pop('_id', None)
+                sess.pop('_fresh', None)
                 sess['remember'] = 'clear'
                 session_protected.send(app)
                 return True
