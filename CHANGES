@@ -3,10 +3,19 @@ Flask-Login Changelog
 
 Here you can see the full list of changes between each Flask-Login release.
 
-Version 0.3.1
+Version 0.x.y
 -------------
 
 Released on TBD.
+
+
+Version 0.3.1
+-------------
+
+Released on September 30th, 2015
+
+- Fixes removal of non-Flask-Login keys from session object when using 'strong'
+  protection.
 
 
 Version 0.3.0
