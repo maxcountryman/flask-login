@@ -77,6 +77,10 @@ ID_ATTRIBUTE = 'get_id'
 #: Default name of the auth header (``Authorization``)
 AUTH_HEADER_NAME = 'Authorization'
 
+# A set of session keys that are populated by Flask-Login. Use this set to
+# purge keys safely and accurately.
+SESSION_KEYS = {'user_id', '_id', '_fresh'}
+
 
 class LoginManager(object):
     '''
@@ -400,9 +404,9 @@ class LoginManager(object):
                 session_protected.send(app)
                 return False
             elif mode == 'strong':
-                sess.pop('user_id', None)
-                sess.pop('_id', None)
-                sess.pop('_fresh', None)
+                for k in SESSION_KEYS:
+                    sess.pop(k, None)
+
                 sess['remember'] = 'clear'
                 session_protected.send(app)
                 return True
