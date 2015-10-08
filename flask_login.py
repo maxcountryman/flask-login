@@ -77,8 +77,8 @@ ID_ATTRIBUTE = 'get_id'
 #: Default name of the auth header (``Authorization``)
 AUTH_HEADER_NAME = 'Authorization'
 
-# A set of session keys that are populated by Flask-Login. Use this set to
-# purge keys safely and accurately.
+#: A set of session keys that are populated by Flask-Login. Use this set to
+#: purge keys safely and accurately.
 SESSION_KEYS = set(['user_id', 'remember', '_id', '_fresh'])
 
 #: A set of HTTP methods which are exempt from `login_required` and
