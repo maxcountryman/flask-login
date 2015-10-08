@@ -81,6 +81,10 @@ AUTH_HEADER_NAME = 'Authorization'
 # purge keys safely and accurately.
 SESSION_KEYS = set(['user_id', 'remember', '_id', '_fresh'])
 
+#: A set of HTTP methods which are exempt from `login_required` and
+#: `fresh_login_required`. By default, this is just ``OPTIONS``.
+EXEMPT_METHODS = set(['OPTIONS'])
+
 
 class LoginManager(object):
     '''
@@ -791,7 +795,7 @@ def login_required(func):
     '''
     @wraps(func)
     def decorated_view(*args, **kwargs):
-        if request.method == 'OPTIONS':
+        if request.method in EXEMPT_METHODS:
             return func(*args, **kwargs)
         elif current_app.login_manager._login_disabled:
             return func(*args, **kwargs)
@@ -827,7 +831,7 @@ def fresh_login_required(func):
     '''
     @wraps(func)
     def decorated_view(*args, **kwargs):
-        if request.method == 'OPTIONS':
+        if request.method in EXEMPT_METHODS:
             return func(*args, **kwargs)
         elif current_app.login_manager._login_disabled:
             return func(*args, **kwargs)
