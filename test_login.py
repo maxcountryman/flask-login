@@ -19,6 +19,7 @@ from flask import (
     session,
     get_flashed_messages,
 )
+from flask.views import MethodView
 
 from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
                              make_secure_token, current_user, login_user,
@@ -173,6 +174,34 @@ class InitializationTestCase(unittest.TestCase):
             expected_exception_message = 'No user_loader has been installed'
             self.assertTrue(
                 str(cm.exception).startswith(expected_exception_message))
+
+
+class MethodViewLoginTestCase(unittest.TestCase):
+    def setUp(self):
+        self.app = Flask(__name__)
+        self.login_manager = LoginManager()
+        self.login_manager.init_app(self.app)
+        self.login_manager._login_disabled = False
+
+        class SecretEndpoint(MethodView):
+            decorators = [
+                login_required,
+                fresh_login_required,
+            ]
+
+            def options(self):
+                return u''
+
+            def get(self):
+                return u''
+
+        self.app.add_url_rule('/secret',
+                              view_func=SecretEndpoint.as_view('secret'))
+
+    def test_options_call_exempt(self):
+        with self.app.test_client() as c:
+            result = c.open('/secret', method='OPTIONS')
+            self.assertEqual(result.status_code, 200)
 
 
 class LoginTestCase(unittest.TestCase):

@@ -780,12 +780,20 @@ def login_required(func):
     To enable this, if the application configuration variable `LOGIN_DISABLED`
     is set to `True`, this decorator will be ignored.
 
+    .. Note ::
+
+        Per `W3 guidelines for CORS preflight requests
+        <http://www.w3.org/TR/cors/#cross-origin-request-with-preflight-0>`_,
+        HTTP ``OPTIONS`` requests are exempt from login checks.
+
     :param func: The view function to decorate.
     :type func: function
     '''
     @wraps(func)
     def decorated_view(*args, **kwargs):
-        if current_app.login_manager._login_disabled:
+        if request.method == 'OPTIONS':
+            return func(*args, **kwargs)
+        elif current_app.login_manager._login_disabled:
             return func(*args, **kwargs)
         elif not current_user.is_authenticated:
             return current_app.login_manager.unauthorized()
@@ -808,12 +816,20 @@ def fresh_login_required(func):
     Behaves identically to the :func:`login_required` decorator with respect
     to configutation variables.
 
+    .. Note ::
+
+        Per `W3 guidelines for CORS preflight requests
+        <http://www.w3.org/TR/cors/#cross-origin-request-with-preflight-0>`_,
+        HTTP ``OPTIONS`` requests are exempt from login checks.
+
     :param func: The view function to decorate.
     :type func: function
     '''
     @wraps(func)
     def decorated_view(*args, **kwargs):
-        if current_app.login_manager._login_disabled:
+        if request.method == 'OPTIONS':
+            return func(*args, **kwargs)
+        elif current_app.login_manager._login_disabled:
             return func(*args, **kwargs)
         elif not current_user.is_authenticated:
             return current_app.login_manager.unauthorized()
