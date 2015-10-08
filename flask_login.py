@@ -79,7 +79,7 @@ AUTH_HEADER_NAME = 'Authorization'
 
 # A set of session keys that are populated by Flask-Login. Use this set to
 # purge keys safely and accurately.
-SESSION_KEYS = set(['user_id', '_id', '_fresh'])
+SESSION_KEYS = set(['user_id', 'remember', '_id', '_fresh'])
 
 
 class LoginManager(object):
