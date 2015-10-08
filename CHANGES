@@ -9,6 +9,15 @@ Version 0.x.y
 Released on TBD.
 
 
+Version 0.3.2
+-------------
+
+Released on October 8th, 2015
+
+- Fixes Python 2.6 compatibility.
+- Updates SESSION_KEYS to include "remember".
+
+
 Version 0.3.1
 -------------
 

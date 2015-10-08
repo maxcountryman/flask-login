@@ -10,7 +10,7 @@
     :license: MIT/X11, see LICENSE for more details.
 '''
 
-__version_info__ = ('0', '3', '1')
+__version_info__ = ('0', '3', '2')
 __version__ = '.'.join(__version_info__)
 __author__ = 'Matthew Frazier'
 __maintainer__ = 'Max Countryman'
