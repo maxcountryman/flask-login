@@ -408,6 +408,19 @@ e.g. ``gettext``. This function will be called with the message and its return
 value will be sent to ``flash`` instead.
 
 
+Testing
+=======
+To log a user in from a test case, assuming `user` is the user object:
+
+    with app.test_client() as c:
+        with c.session_transaction() as session:
+            flask_login.login_user_in_session(session, user)
+
+This pattern is described in more detail in `Flask documentation`_.
+
+.. _Flask documentation: http://flask.pocoo.org/docs/testing/#accessing-and-modifying-sessions
+
+
 API Documentation
 =================
 This documentation is automatically generated from Flask-Login's source code.
