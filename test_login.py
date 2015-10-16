@@ -23,6 +23,7 @@ from flask.views import MethodView
 
 from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
                              make_secure_token, current_user, login_user,
+                             login_user_in_session,
                              logout_user, user_logged_in, user_logged_out,
                              user_loaded_from_cookie, user_login_confirmed,
                              user_loaded_from_header, user_loaded_from_request,
@@ -202,6 +203,36 @@ class MethodViewLoginTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             result = c.open('/secret', method='OPTIONS')
             self.assertEqual(result.status_code, 200)
+
+
+class LoginInSessionTestCase(unittest.TestCase):
+    ''' Tests for login_user_in_session function '''
+
+    def setUp(self):
+        self.app = Flask(__name__)
+        self.app.config['SECRET_KEY'] = 'deterministic'
+        self.login_manager = LoginManager()
+        self.login_manager.init_app(self.app)
+
+        unittest.TestCase.setUp(self)
+
+    def test_login_user_in_session(self):
+        with self.app.test_request_context():
+            session = {}
+            login_user_in_session(session, notch)
+            self.assertTrue('user_id' in session)
+            self.assertTrue('_fresh' in session)
+            self.assertTrue('_id' in session)
+            self.assertTrue('remember' not in session)
+
+    def test_login_user_in_session_remember(self):
+        with self.app.test_request_context():
+            session = {}
+            login_user_in_session(session, notch, remember=True)
+            self.assertTrue('user_id' in session)
+            self.assertTrue('_fresh' in session)
+            self.assertTrue('_id' in session)
+            self.assertTrue(session['remember'])
 
 
 class LoginTestCase(unittest.TestCase):
