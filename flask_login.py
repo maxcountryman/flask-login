@@ -689,6 +689,24 @@ def login_fresh():
     return session.get('_fresh', False)
 
 
+def login_user_in_session(session, user, remember=False, fresh=True):
+    '''
+    Records a user as being logged in in the specified session.
+
+    This function is intended to be used with real sessions as well as
+    session transactions in testing
+(http://flask.pocoo.org/docs/0.10/testing/#accessing-and-modifying-sessions).
+    '''
+
+    user_id = getattr(user, current_app.login_manager.id_attribute)()
+    session['user_id'] = user_id
+    session['_fresh'] = fresh
+    session['_id'] = _create_identifier()
+
+    if remember:
+        session['remember'] = 'set'
+
+
 def login_user(user, remember=False, force=False, fresh=True):
     '''
     Logs a user in. You should pass the actual user object to this. If the
@@ -713,13 +731,7 @@ def login_user(user, remember=False, force=False, fresh=True):
     if not force and not user.is_active:
         return False
 
-    user_id = getattr(user, current_app.login_manager.id_attribute)()
-    session['user_id'] = user_id
-    session['_fresh'] = fresh
-    session['_id'] = _create_identifier()
-
-    if remember:
-        session['remember'] = 'set'
+    login_user_in_session(session, user, remember=remember, fresh=fresh)
 
     _request_ctx_stack.top.user = user
     user_logged_in.send(current_app._get_current_object(), user=_get_user())
