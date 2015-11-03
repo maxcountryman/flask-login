@@ -70,18 +70,18 @@ The class that you use to represent users needs to implement these properties
 and methods:
 
 `is_authenticated`
-    Returns `True` if the user is authenticated, i.e. they have provided
+    Is `True` if the user is authenticated, i.e. they have provided
     valid credentials. (Only authenticated users will fulfill the criteria
     of `login_required`.)
 
 `is_active`
-    Returns `True` if this is an active user - in addition to being
+    Is `True` if this is an active user - in addition to being
     authenticated, they also have activated their account, not been suspended,
     or any condition your application has for rejecting an account. Inactive
     accounts may not log in (without being forced of course).
 
 `is_anonymous`
-    Returns `True` if this is an anonymous user. (Actual users should return
+    Is `True` if this is an anonymous user. (Actual users should return
     `False` instead.)
 
 `get_id()`
