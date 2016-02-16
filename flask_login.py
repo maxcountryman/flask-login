@@ -808,7 +808,7 @@ def login_required(func):
 def fresh_login_required(func):
     '''
     If you decorate a view with this, it will ensure that the current user's
-    login is fresh - i.e. there session was not restored from a 'remember me'
+    login is fresh - i.e. their session was not restored from a 'remember me'
     cookie. Sensitive operations, like changing a password or e-mail, should
     be protected with this, to impede the efforts of cookie thieves.
 
