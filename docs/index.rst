@@ -388,7 +388,7 @@ app's configuration by setting the `SESSION_PROTECTION` setting to `None`,
 ``"basic"``, or ``"strong"``.
 
 When session protection is active, each request, it generates an identifier
-for the user's computer (basically, the MD5 hash of the IP address and user
+for the user's computer (basically, a secure hash of the IP address and user
 agent). If the session does not have an associated identifier, the one
 generated will be stored. If it has an identifier, and it matches the one
 generated, then the request is OK.
