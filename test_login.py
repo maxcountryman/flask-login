@@ -39,6 +39,7 @@ from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
 if str is not bytes:
     unicode = str
 
+werkzeug_version = tuple(int(i) for i in werkzeug_version.split('.'))
 
 @contextmanager
 def listen_to(signal):
@@ -1073,14 +1074,14 @@ class LoginTestCase(unittest.TestCase):
     #
     # Misc
     #
-    @unittest.skipIf(werkzeug_version.startswith("0.9"),
+    @unittest.skipIf(werkzeug_version >= (0, 9),
                      "wait for upstream implementing RFC 5987")
     def test_chinese_user_agent(self):
         with self.app.test_client() as c:
             result = c.get('/', headers=[('User-Agent', u'中文')])
             self.assertEqual(u'Welcome!', result.data.decode('utf-8'))
 
-    @unittest.skipIf(werkzeug_version.startswith("0.9"),
+    @unittest.skipIf(werkzeug_version >= (0, 9),
                      "wait for upstream implementing RFC 5987")
     def test_russian_cp1251_user_agent(self):
         with self.app.test_client() as c:
