@@ -31,8 +31,8 @@ from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
                              login_required, session_protected,
                              fresh_login_required, confirm_login,
                              encode_cookie, decode_cookie, set_login_view,
-                             _secret_key, _user_context_processor,
                              user_accessed)
+from flask.ext.login.utils import _secret_key, _user_context_processor
 
 
 # be compatible with py3k
