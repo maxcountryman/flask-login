@@ -21,24 +21,22 @@ import sys
 
 from setuptools import setup
 
-module_path = os.path.join(os.path.dirname(__file__), 'flask_login.py')
-version_line = [line for line in open(module_path)
-                if line.startswith('__version_info__')][0]
-
-__version__ = '.'.join(eval(version_line.split('__version_info__ = ')[-1]))
+about = {}
+with open('flask_login/__about__.py') as f:
+    exec(f.read(), about)
 
 if sys.argv[-1] == 'test':
     status = os.system('make check')
     status >>= 8
     sys.exit(status)
 
-setup(name='Flask-Login',
-      version=__version__,
-      url='https://github.com/maxcountryman/flask-login',
-      license='MIT',
-      author='Matthew Frazier',
-      author_email='leafstormrush@gmail.com',
-      description='User session management for Flask',
+setup(name=about['__title__'],
+      version=about['__version__'],
+      url=about['__url__'],
+      license=about['__license__'],
+      author=about['__author__'],
+      author_email=about['__author_email__'],
+      description=about['__description__'],
       long_description=__doc__,
       py_modules=['flask_login'],
       zip_safe=False,
