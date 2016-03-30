@@ -32,8 +32,6 @@ else:  # pragma: nocover
 
     from urllib.parse import urlparse, urlunparse
 
-    assert (urlparse, urlunparse)
-
     def iteritems(d):
         return iter(d.items())
 
@@ -41,3 +39,14 @@ else:  # pragma: nocover
         return iter(d.values())
 
     text_type = str
+
+
+__all__ = [
+    'PY2',
+    'unicode',
+    'urlparse',
+    'urlunparse',
+    'iteritems',
+    'itervalues',
+    'text_type',
+]
