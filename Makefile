@@ -15,6 +15,9 @@ test: clean_coverage
 clean_coverage:
 	@rm -f .coverage
 
+clean:
+	@rm -f flask_login/*.pyc
+
 pep8:
 	@echo 'Checking pep8 compliance...'
 	@pep8 flask_login/* test_login.py
@@ -23,4 +26,4 @@ pyflakes:
 	@echo 'Running pyflakes...'
 	@pyflakes flask_login/* test_login.py
 
-check: pep8 pyflakes test
+check: clean pep8 pyflakes test

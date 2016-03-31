@@ -17,7 +17,7 @@ from .config import (COOKIE_NAME, COOKIE_DURATION, COOKIE_SECURE,
                      COOKIE_HTTPONLY, LOGIN_MESSAGE, LOGIN_MESSAGE_CATEGORY,
                      REFRESH_MESSAGE, REFRESH_MESSAGE_CATEGORY, ID_ATTRIBUTE,
                      AUTH_HEADER_NAME, SESSION_KEYS)
-from .mixin import AnonymousUserMixin
+from .mixins import AnonymousUserMixin
 from .signals import (user_loaded_from_cookie, user_loaded_from_header,
                       user_loaded_from_request, user_unauthorized,
                       user_needs_refresh, user_accessed, session_protected)
