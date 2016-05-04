@@ -63,7 +63,7 @@ users = {'foo@bar.tld': {'pw': 'secret'}}
 
 We also need to tell Flask-Login how to load a user from a Flask request and
 from its session. To do this we need to define our user object, a
-`user_loader` callback, and a `request_loader` calledback.
+`user_loader` callback, and a `request_loader` callback.
 
 ```python
 class User(flask_login.UserMixin):
