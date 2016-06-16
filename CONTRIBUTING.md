@@ -18,7 +18,7 @@ If you'd like to submit PR, please make sure that all tests pass prior to submis
 
 ## Extended Documentation
 
-Sphinx-generated documentation can be found [here](http://flask-login.readthedocs.org/en/latest/). This page is updated automatically. Documentation for prior versions of the library may be found there as well. Always review this page when a problem is first encountered.
+Sphinx-generated documentation can be found [here](https://flask-login.readthedocs.io/en/latest/). This page is updated automatically. Documentation for prior versions of the library may be found there as well. Always review this page when a problem is first encountered.
 
 ## Thanks
 
