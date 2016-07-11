@@ -1,7 +1,7 @@
 ===========
 Flask-Login
 ===========
-.. currentmodule:: flask.ext.login
+.. currentmodule:: flask_login
 
 Flask-Login provides user session management for Flask. It handles the common
 tasks of logging in, logging out, and remembering your users' sessions over
@@ -113,7 +113,7 @@ function. For example::
             flask.flash('Logged in successfully.')
 
             next = flask.request.args.get('next')
-            # next_is_valid should check if the user has valid 
+            # next_is_valid should check if the user has valid
             # permission to access the `next` url
             if not next_is_valid(next):
                 return flask.abort(400)
@@ -198,13 +198,13 @@ a header value instead of a user id. For example::
 
     @login_manager.header_loader
     def load_user_from_header(header_val):
-        header_val = header_val.replace('Basic ', '', 1)                                
-        try:                                                                        
-            header_val = base64.b64decode(header_val)                                       
-        except TypeError:                                                     
+        header_val = header_val.replace('Basic ', '', 1)
+        try:
+            header_val = base64.b64decode(header_val)
+        except TypeError:
             pass
         return User.query.filter_by(api_key=header_val).first()
-        
+
 By default the `Authorization` header's value is passed to your
 `~LoginManager.header_loader` callback. You can change the header used with
 the `AUTH_HEADER_NAME` configuration.
@@ -234,10 +234,10 @@ using the `Authorization` header::
         # next, try to login using Basic Auth
         api_key = request.headers.get('Authorization')
         if api_key:
-            api_key = api_key.replace('Basic ', '', 1)                                
-            try:                                                                        
-                api_key = base64.b64decode(api_key)                                       
-            except TypeError:                                                     
+            api_key = api_key.replace('Basic ', '', 1)
+            try:
+                api_key = base64.b64decode(api_key)
+            except TypeError:
                 pass
             user = User.query.filter_by(api_key=api_key).first()
             if user:
@@ -245,7 +245,7 @@ using the `Authorization` header::
 
         # finally, return None if both methods did not login the user
         return None
-        
+
 
 Anonymous Users
 ===============
@@ -422,52 +422,52 @@ This documentation is automatically generated from Flask-Login's source code.
 Configuring Login
 -----------------
 .. autoclass:: LoginManager
-   
+
    .. automethod:: setup_app
-   
+
    .. automethod:: unauthorized
-   
+
    .. automethod:: needs_refresh
-   
+
    .. rubric:: General Configuration
-   
+
    .. automethod:: user_loader
-   
+
    .. automethod:: header_loader
-   
+
    .. automethod:: token_loader
-   
+
    .. attribute:: anonymous_user
-   
+
       A class or factory function that produces an anonymous user, which
       is used when no one is logged in.
-   
+
    .. rubric:: `unauthorized` Configuration
-   
+
    .. attribute:: login_view
-   
+
       The name of the view to redirect to when the user needs to log in. (This
       can be an absolute URL as well, if your authentication machinery is
       external to your application.)
-   
+
    .. attribute:: login_message
-   
+
       The message to flash when a user is redirected to the login page.
-   
+
    .. automethod:: unauthorized_handler
-   
+
    .. rubric:: `needs_refresh` Configuration
-   
+
    .. attribute:: refresh_view
-   
+
       The name of the view to redirect to when the user needs to
       reauthenticate.
-   
+
    .. attribute:: needs_refresh_message
-   
+
       The message to flash when a user is redirected to the reauthentication
       page.
-   
+
    .. automethod:: needs_refresh_handler
 
 

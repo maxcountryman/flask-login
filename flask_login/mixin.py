@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-    flask.ext.login.mixin
-    ---------------------
+    flask_login.mixin
+    -----------------
     This module provides mixin objects.
 '''
 
