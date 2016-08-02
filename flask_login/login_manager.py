@@ -427,7 +427,13 @@ class LoginManager(object):
             data = current_user.get_auth_token()
         else:
             data = encode_cookie(text_type(session['user_id']))
-        expires = datetime.utcnow() + duration
+
+        try:
+            expires = datetime.utcnow() + duration
+        except TypeError:
+            raise Exception('REMEMBER_COOKIE_DURATION must be a ' +
+                            'datetime.timedelta, instead got: {0}'.format(
+                            duration))
 
         # actually set it
         response.set_cookie(cookie_name,
