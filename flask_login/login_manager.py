@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-    flask.ext.login.login_manager
-    -----------------------------
+    flask_login.login_manager
+    -------------------------
     The LoginManager class.
 '''
 
