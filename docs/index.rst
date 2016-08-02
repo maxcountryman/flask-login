@@ -1,7 +1,7 @@
 ===========
 Flask-Login
 ===========
-.. currentmodule:: flask.ext.login
+.. currentmodule:: flask_login
 
 Flask-Login provides user session management for Flask. It handles the common
 tasks of logging in, logging out, and remembering your users' sessions over

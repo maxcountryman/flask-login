@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-    flask.ext.login.config
-    ----------------------
+    flask_login.config
+    ------------------
     This module provides default configuration values.
 '''
 

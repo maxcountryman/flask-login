@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-    flask.ext.login.signals
-    -----------------------
+    flask_login.signals
+    -------------------
     This module provides signals to get notified when Flask-Login performs
     certain actions.
 '''

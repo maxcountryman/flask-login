@@ -21,18 +21,18 @@ from flask import (
 )
 from flask.views import MethodView
 
-from flask.ext.login import (LoginManager, UserMixin, AnonymousUserMixin,
-                             make_secure_token, current_user, login_user,
-                             logout_user, user_logged_in, user_logged_out,
-                             user_loaded_from_cookie, user_login_confirmed,
-                             user_loaded_from_header, user_loaded_from_request,
-                             user_unauthorized, user_needs_refresh,
-                             make_next_param, login_url, login_fresh,
-                             login_required, session_protected,
-                             fresh_login_required, confirm_login,
-                             encode_cookie, decode_cookie, set_login_view,
-                             user_accessed)
-from flask.ext.login.utils import _secret_key, _user_context_processor
+from flask_login import (LoginManager, UserMixin, AnonymousUserMixin,
+                         make_secure_token, current_user, login_user,
+                         logout_user, user_logged_in, user_logged_out,
+                         user_loaded_from_cookie, user_login_confirmed,
+                         user_loaded_from_header, user_loaded_from_request,
+                         user_unauthorized, user_needs_refresh,
+                         make_next_param, login_url, login_fresh,
+                         login_required, session_protected,
+                         fresh_login_required, confirm_login,
+                         encode_cookie, decode_cookie, set_login_view,
+                         user_accessed)
+from flask_login.utils import _secret_key, _user_context_processor
 
 
 # be compatible with py3k

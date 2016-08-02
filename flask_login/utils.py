@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-    flask.ext.login.utils
-    ---------------------
+    flask_login.utils
+    -----------------
     General utilities.
 '''
 

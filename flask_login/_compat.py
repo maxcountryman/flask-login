@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-    flask.ext.login._compat
-    ----------------------
+    flask_login._compat
+    -------------------
     A module providing tools for cross-version compatibility.
 '''
 

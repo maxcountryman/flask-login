@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-    flask.ext.login
-    ---------------
+    flask_login
+    -----------
     This module provides user session management for Flask. It lets you log
     your users in and out in a database-independent manner.
     :copyright: (c) 2011 by Matthew Frazier.
