@@ -13,7 +13,7 @@ from .config import (COOKIE_NAME, COOKIE_DURATION, COOKIE_SECURE,
                      REFRESH_MESSAGE, REFRESH_MESSAGE_CATEGORY, ID_ATTRIBUTE,
                      AUTH_HEADER_NAME)
 from .login_manager import LoginManager
-from .mixin import UserMixin, AnonymousUserMixin
+from .mixins import UserMixin, AnonymousUserMixin
 from .signals import (user_logged_in, user_logged_out, user_loaded_from_cookie,
                       user_loaded_from_header, user_loaded_from_request,
                       user_login_confirmed, user_unauthorized,
