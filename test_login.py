@@ -363,7 +363,7 @@ class LoginTestCase(unittest.TestCase):
             result = c.get('/username', headers=headers)
             self.assertEqual(user_name, result.data.decode('utf-8'))
 
-            # Make a consequent request, but already without headers to ensure
+            # Make a consequent request, but already w/o headers to ensure
             # that current session is not anonymous for now. @See d8be747
             result = c.get('/username')
             self.assertEqual(user_name, result.data.decode('utf-8'))
@@ -387,7 +387,7 @@ class LoginTestCase(unittest.TestCase):
             result = c.get(url)
             self.assertEqual(user_name, result.data.decode('utf-8'))
 
-            # Make a consequent request, but already without auth params to ensure
+            # Make a consequent request, but already w/o auth params to ensure
             # that current session is not anonymous for now. @See d8be747
             result = c.get('/username')
             self.assertEqual(user_name, result.data.decode('utf-8'))
