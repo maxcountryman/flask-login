@@ -363,6 +363,11 @@ class LoginTestCase(unittest.TestCase):
             result = c.get('/username', headers=headers)
             self.assertEqual(user_name, result.data.decode('utf-8'))
 
+            # Make a consequent request, but already without headers to ensure
+            # that current session is not anonymous for now. @See d8be747
+            result = c.get('/username')
+            self.assertEqual(user_name, result.data.decode('utf-8'))
+
     def test_login_invalid_user_with_header(self):
         user_id = 9000
         user_name = u'Anonymous'
@@ -380,6 +385,11 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             url = '/username?user_id={user_id}'.format(user_id=user_id)
             result = c.get(url)
+            self.assertEqual(user_name, result.data.decode('utf-8'))
+
+            # Make a consequent request, but already without auth params to ensure
+            # that current session is not anonymous for now. @See d8be747
+            result = c.get('/username')
             self.assertEqual(user_name, result.data.decode('utf-8'))
 
     def test_login_invalid_user_with_request(self):
