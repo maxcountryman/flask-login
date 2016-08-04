@@ -21,7 +21,7 @@ from .mixins import AnonymousUserMixin
 from .signals import (user_loaded_from_cookie, user_loaded_from_header,
                       user_loaded_from_request, user_unauthorized,
                       user_needs_refresh, user_accessed, session_protected)
-from .utils import (current_user, _get_user, login_url, _create_identifier,
+from .utils import (_get_user, login_url, _create_identifier,
                     _user_context_processor, encode_cookie, decode_cookie)
 
 
@@ -74,8 +74,6 @@ class LoginManager(object):
         #: If present, used to translate flash messages ``self.login_message``
         #: and ``self.needs_refresh_message``
         self.localize_callback = None
-
-        self.token_callback = None
 
         self.user_callback = None
 
@@ -200,19 +198,6 @@ class LoginManager(object):
         :type callback: callable
         '''
         self.request_callback = callback
-        return callback
-
-    def token_loader(self, callback):
-        '''
-        This sets the callback for loading a user from an authentication
-        token. The function you set should take an authentication token
-        (a ``unicode``, as returned by a user's `get_auth_token` method) and
-        return a user object, or ``None`` if the user does not exist.
-
-        :param callback: The callback for retrieving a user object.
-        :type callback: callable
-        '''
-        self.token_callback = callback
         return callback
 
     def unauthorized_handler(self, callback):
@@ -357,21 +342,12 @@ class LoginManager(object):
         return False
 
     def _load_from_cookie(self, cookie):
-        if self.token_callback:
-            user = self.token_callback(cookie)
-            if user is not None:
-                session['user_id'] = getattr(user, self.id_attribute)()
-                session['_fresh'] = False
-                _request_ctx_stack.top.user = user
-            else:
-                self.reload_user()
-        else:
-            user_id = decode_cookie(cookie)
-            if user_id is not None:
-                session['user_id'] = user_id
-                session['_fresh'] = False
+        user_id = decode_cookie(cookie)
+        if user_id is not None:
+            session['user_id'] = user_id
+            session['_fresh'] = False
 
-            self.reload_user()
+        self.reload_user()
 
         if _request_ctx_stack.top.user is not None:
             app = current_app._get_current_object()
@@ -423,10 +399,7 @@ class LoginManager(object):
         httponly = config.get('REMEMBER_COOKIE_HTTPONLY', COOKIE_HTTPONLY)
 
         # prepare data
-        if self.token_callback:
-            data = current_user.get_auth_token()
-        else:
-            data = encode_cookie(text_type(session['user_id']))
+        data = encode_cookie(text_type(session['user_id']))
 
         try:
             expires = datetime.utcnow() + duration

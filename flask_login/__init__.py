@@ -18,10 +18,10 @@ from .signals import (user_logged_in, user_logged_out, user_loaded_from_cookie,
                       user_loaded_from_header, user_loaded_from_request,
                       user_login_confirmed, user_unauthorized,
                       user_needs_refresh, user_accessed, session_protected)
-from .utils import (current_user, login_url, make_secure_token,
-                    login_fresh, login_user, logout_user, confirm_login,
-                    login_required, fresh_login_required, set_login_view,
-                    encode_cookie, decode_cookie, make_next_param)
+from .utils import (current_user, login_url, login_fresh, login_user,
+                    logout_user, confirm_login, login_required,
+                    fresh_login_required, set_login_view, encode_cookie,
+                    decode_cookie, make_next_param)
 
 
 __all__ = [
@@ -50,7 +50,6 @@ __all__ = [
     'session_protected',
     'current_user',
     'login_url',
-    'make_secure_token',
     'login_fresh',
     'login_user',
     'logout_user',
