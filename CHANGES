@@ -8,6 +8,11 @@ Version 0.x.y
 
 Released on TBD.
 
+- BREAKING: The `login_manager.token_handler` function, `get_auth_token` method
+  on the User class, and the `utils.make_secure_token` utility function have
+  been removed to prevent users from creating insecure auth implementations.
+  Use the `Alternative Tokens` example from the docs instead. #291
+  
 
 Version 0.3.2
 -------------
