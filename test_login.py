@@ -22,16 +22,14 @@ from flask import (
 from flask.views import MethodView
 
 from flask_login import (LoginManager, UserMixin, AnonymousUserMixin,
-                         make_secure_token, current_user, login_user,
-                         logout_user, user_logged_in, user_logged_out,
-                         user_loaded_from_cookie, user_login_confirmed,
-                         user_loaded_from_header, user_loaded_from_request,
-                         user_unauthorized, user_needs_refresh,
-                         make_next_param, login_url, login_fresh,
-                         login_required, session_protected,
-                         fresh_login_required, confirm_login,
-                         encode_cookie, decode_cookie, set_login_view,
-                         user_accessed)
+                         current_user, login_user, logout_user, user_logged_in,
+                         user_logged_out, user_loaded_from_cookie,
+                         user_login_confirmed, user_loaded_from_header,
+                         user_loaded_from_request, user_unauthorized,
+                         user_needs_refresh, make_next_param, login_url,
+                         login_fresh, login_required, session_protected,
+                         fresh_login_required, confirm_login, encode_cookie,
+                         decode_cookie, set_login_view, user_accessed)
 from flask_login.utils import _secret_key, _user_context_processor
 
 
@@ -104,9 +102,6 @@ class User(UserMixin):
     def is_active(self):
         return self.active
 
-    def get_auth_token(self):
-        return make_secure_token(self.name, key='deterministic')
-
 
 notch = User(u'Notch', 1)
 steve = User(u'Steve', 2)
@@ -114,7 +109,6 @@ creeper = User(u'Creeper', 3, False)
 germanjapanese = User(u'Müller', u'佐藤')  # Unicode user_id
 
 USERS = {1: notch, 2: steve, 3: creeper, u'佐藤': germanjapanese}
-USER_TOKENS = dict((u.get_auth_token(), u) for u in USERS.values())
 
 
 class StaticTestCase(unittest.TestCase):
@@ -974,51 +968,6 @@ class LoginTestCase(unittest.TestCase):
             self.assertFalse(session)
 
     #
-    # Custom Token Loader
-    #
-    def test_custom_token_loader(self):
-        @self.login_manager.token_loader
-        def load_token(token):
-            return USER_TOKENS.get(token)
-
-        with self.app.test_client() as c:
-            c.get('/login-notch-remember')
-            self._delete_session(c)
-
-            # Test that remember me functionality still works
-            self.assertEqual(u'Notch', c.get('/username').data.decode('utf-8'))
-
-            # Test that we used the custom authentication token
-            remember_cookie = self._get_remember_cookie(c)
-            expected_value = make_secure_token(u'Notch', key='deterministic')
-            self.assertEqual(expected_value, remember_cookie.value)
-
-    def test_change_api_key_with_token_loader(self):
-        @self.login_manager.token_loader
-        def load_token(token):
-            return USER_TOKENS.get(token)
-
-        with self.app.test_client() as c:
-            c.get('/login-notch-remember')
-            self._delete_session(c)
-            self.app.config['SECRET_KEY'] = 'ima change this now'
-
-            result = c.get('/username')
-            self.assertEqual(result.data.decode('utf-8'), u'Notch')
-
-    def test_custom_token_loader_with_no_user(self):
-        @self.login_manager.token_loader
-        def load_token(token):
-            return
-
-        with self.app.test_client() as c:
-            c.get('/login-notch-remember')
-            self._delete_session(c)
-
-            result = c.get('/username')
-            self.assertEqual(result.data.decode('utf-8'), u'Anonymous')
-
-    #
     # Lazy Access User
     #
     def test_requests_without_accessing_session(self):
@@ -1107,14 +1056,6 @@ class LoginTestCase(unittest.TestCase):
             headers = [('User-Agent', u'ЯЙЮя'.encode('cp1251'))]
             response = c.get('/', headers=headers)
             self.assertEqual(response.data.decode('utf-8'), u'Welcome!')
-
-    def test_make_secure_token_default_key(self):
-        # Old test: 0f05743a2b617b2625362ab667c0dbdf4c9ec13a
-        # New test with sha512:
-        h1 = "47bec94a46a5d3939ca0671b01bafd5d7d5353941791734ec1e4734de40e5ce0"
-        h2 = "a45c05c17cd33b8a18840991bb1cc154fa4ee8ef2f80a572b5a6a24b3a3afc20"
-        with self.app.test_request_context():
-            self.assertEqual(make_secure_token('foo'), h1 + h2)
 
     def test_user_context_processor(self):
         with self.app.test_request_context():

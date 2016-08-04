@@ -106,35 +106,6 @@ def login_url(login_view, next_url=None, next_field='next'):
     return urlunparse(parts)
 
 
-def make_secure_token(*args, **options):
-    '''
-    This will create a secure token that you can use as an authentication
-    token for your users. It uses heavy-duty HMAC encryption to prevent people
-    from guessing the information. (To make it even more effective, if you
-    will never need to regenerate the token, you can  pass some random data
-    as one of the arguments.)
-
-    :param \*args: The data to include in the token.
-    :type args: args
-    :param \*\*options: To manually specify a secret key, pass ``key=THE_KEY``.
-        Otherwise, the ``current_app`` secret key will be used.
-    :type \*\*options: kwargs
-    '''
-    key = options.get('key')
-    key = _secret_key(key)
-
-    l = [s if isinstance(s, bytes) else s.encode('utf-8') for s in args]
-
-    payload = b'\0'.join(l)
-
-    token_value = hmac.new(key, payload, sha512).hexdigest()
-
-    if hasattr(token_value, 'decode'):  # pragma: no cover
-        token_value = token_value.decode('utf-8')  # ensure bytes
-
-    return token_value
-
-
 def login_fresh():
     '''
     This returns ``True`` if the current login is fresh.

@@ -280,31 +280,24 @@ additional infrastructure to increase the security of your remember cookies.
 
 Alternative Tokens
 ------------------
-Using the user ID as the value of the remember token is not necessarily
-secure. More secure is a hash of the username and password combined, or
-something similar. To add an alternative token, add a method to your user
-objects:
+Using the user ID as the value of the remember token means you must change the
+user's ID to invalidate their login sessions. One way to improve this is to use
+an alternative session token instead of the user's ID. For example::
 
-`get_auth_token()`
-    Returns an authentication token (as `unicode`) for the user. The auth
-    token should uniquely identify the user, and preferably not be guessable
-    by public information about the user such as their UID and name - nor
-    should it expose such information.
+    @login_manager.user_loader
+    def load_user(session_token):
+        return User.query.filter_by(session_token=session_token).first()
 
-Correspondingly, you should set a `~LoginManager.token_loader` function on the
-`LoginManager`, which takes a token (as stored in the cookie) and returns the
-appropriate `User` object.
+Then the `~UserMixin.get_id` method of your User class would return the session
+token instead of the user's ID::
 
-The `make_secure_token` function is provided for creating auth tokens
-conveniently. It will concatenate all of its arguments, then HMAC it with
-the app's secret key to ensure maximum cryptographic security. (If you store
-the user's token in the database permanently, then you may wish to add random
-data to the token to further impede guessing.)
+    def get_id(self):
+        return unicode(self.session_token)
 
-If your application uses passwords to authenticate users, including the
-password (or the salted password hash you should be using) in the auth
-token will ensure that if a user changes their password, their old
-authentication tokens will cease to be valid.
+This way you are free to change the user's session token to a new randomly
+generated value when the user changes their password, which would ensure their
+old authentication sessions will cease to be valid. Note that the session
+token must still uniquely identify the user... think of it as a second user ID.
 
 
 Fresh Logins
@@ -435,8 +428,6 @@ Configuring Login
    
    .. automethod:: header_loader
    
-   .. automethod:: token_loader
-   
    .. attribute:: anonymous_user
    
       A class or factory function that produces an anonymous user, which
@@ -505,8 +496,6 @@ User Object Helpers
 Utilities
 ---------
 .. autofunction:: login_url
-
-.. autofunction:: make_secure_token
 
 
 Signals
