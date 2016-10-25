@@ -13,8 +13,7 @@ from werkzeug.local import LocalProxy
 from werkzeug.security import safe_str_cmp
 from werkzeug.urls import url_decode, url_encode
 
-from flask import (_request_ctx_stack, current_app, request, session, url_for,
-                   has_request_context)
+from flask import (_request_ctx_stack, current_app, request, session, url_for, has_request_context)
 
 from ._compat import text_type, urlparse, urlunparse
 from .config import COOKIE_NAME, EXEMPT_METHODS
@@ -131,7 +130,7 @@ def login_user(user, remember=False, force=False, fresh=True):
         them in regardless. Defaults to ``False``.
     :type force: bool
     :param fresh: setting this to ``False`` will log in the user with a session
-    marked as not "fresh". Defaults to ``True``.
+        marked as not "fresh". Defaults to ``True``.
     :type fresh: bool
     '''
     if not force and not user.is_active:
