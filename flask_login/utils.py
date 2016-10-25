@@ -13,7 +13,8 @@ from werkzeug.local import LocalProxy
 from werkzeug.security import safe_str_cmp
 from werkzeug.urls import url_decode, url_encode
 
-from flask import (_request_ctx_stack, current_app, request, session, url_for, has_request_context)
+from flask import (_request_ctx_stack, current_app, request, session, url_for,
+                   has_request_context)
 
 from ._compat import text_type, urlparse, urlunparse
 from .config import COOKIE_NAME, EXEMPT_METHODS
