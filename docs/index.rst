@@ -98,7 +98,12 @@ Login Example
 =============
 
 Once a user has authenticated, you log them in with the `login_user`
-function. For example::
+function.
+
+    For example:
+
+.. code-block:: python
+    
     @app.route('/login', methods=['GET', 'POST'])
     def login():
         # Here we use a class of some kind to represent and validate our
@@ -414,6 +419,9 @@ This documentation is automatically generated from Flask-Login's source code.
 
 Configuring Login
 -----------------
+
+.. module:: flask_login
+
 .. autoclass:: LoginManager
    
    .. automethod:: setup_app
@@ -489,7 +497,7 @@ User Object Helpers
 .. autoclass:: UserMixin
    :members:
 
-.. autoclass:: AnonymousUser
+.. autoclass:: AnonymousUserMixin
    :members:
 
 
