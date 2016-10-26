@@ -3,11 +3,13 @@ Flask-Login Changelog
 
 Here you can see the full list of changes between each Flask-Login release.
 
-Version 0.x.y
+Version 0.4.0
 -------------
 
 Released on TBD.
 
+- Fixes OPTIONS exemption from login. #244
+- Fixes use of MD5 by replacing with SHA512. #264
 - BREAKING: The `login_manager.token_handler` function, `get_auth_token` method
   on the User class, and the `utils.make_secure_token` utility function have
   been removed to prevent users from creating insecure auth implementations.
