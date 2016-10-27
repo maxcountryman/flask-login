@@ -13,7 +13,7 @@ loading users from their ID.
 
 Links
 `````
-* `documentation <http://packages.python.org/Flask-Login>`_
+* `documentation <https://flask-login.readthedocs.io/en/latest/>`_
 * `development version <https://github.com/maxcountryman/flask-login>`_
 '''
 import os
