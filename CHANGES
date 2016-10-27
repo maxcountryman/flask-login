@@ -6,7 +6,7 @@ Here you can see the full list of changes between each Flask-Login release.
 Version 0.4.0
 -------------
 
-Released on TBD.
+Released on October 26th, 2016
 
 - Fixes OPTIONS exemption from login. #244
 - Fixes use of MD5 by replacing with SHA512. #264
