@@ -1,2 +1,2 @@
-flask==0.9
-werkzeug==0.8.3
+flask==0.11.1
+werkzeug==0.11.11

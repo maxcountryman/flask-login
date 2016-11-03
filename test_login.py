@@ -9,6 +9,7 @@ import collections
 from datetime import timedelta, datetime
 from contextlib import contextmanager
 from mock import ANY
+from semantic_version import Version
 
 
 from werkzeug import __version__ as werkzeug_version
@@ -644,10 +645,9 @@ class LoginTestCase(unittest.TestCase):
                 session['user_id'] = 2
                 self.login_manager._set_cookie(None)
 
-            expected_exception_message = 'Exception: ' \
-                'REMEMBER_COOKIE_DURATION  must be a datetime.timedelta, ' \
-                'instead got: 123'
-            self.assertIn(expected_exception_message, str(cm.exception))
+        expected_exception_message = 'REMEMBER_COOKIE_DURATION must be a ' \
+            'datetime.timedelta, instead got: 123'
+        self.assertIn(expected_exception_message, str(cm.exception))
 
     def test_remember_me_is_unfresh(self):
         with self.app.test_client() as c:
@@ -1042,14 +1042,14 @@ class LoginTestCase(unittest.TestCase):
     #
     # Misc
     #
-    @unittest.skipIf(werkzeug_version.startswith("0.9"),
+    @unittest.skipIf(Version(werkzeug_version) >= Version('0.9', partial=True),
                      "wait for upstream implementing RFC 5987")
     def test_chinese_user_agent(self):
         with self.app.test_client() as c:
             result = c.get('/', headers=[('User-Agent', u'中文')])
             self.assertEqual(u'Welcome!', result.data.decode('utf-8'))
 
-    @unittest.skipIf(werkzeug_version.startswith("0.9"),
+    @unittest.skipIf(Version(werkzeug_version) >= Version('0.9', partial=True),
                      "wait for upstream implementing RFC 5987")
     def test_russian_cp1251_user_agent(self):
         with self.app.test_client() as c:
