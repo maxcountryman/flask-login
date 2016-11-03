@@ -26,10 +26,9 @@ from .utils import (_get_user, login_url, _create_identifier,
 
 
 class LoginManager(object):
-    '''
-    This object is used to hold the settings used for logging in. Instances of
-    :class:`LoginManager` are *not* bound to specific apps, so you can create
-    one in the main body of your code and then bind it to your
+    '''This object is used to hold the settings used for logging in. Instances
+    of :class:`LoginManager` are *not* bound to specific apps, so you can
+    create one in the main body of your code and then bind it to your
     app in a factory function.
     '''
     def __init__(self, app=None, add_context_processor=True):
@@ -406,7 +405,7 @@ class LoginManager(object):
         except TypeError:
             raise Exception('REMEMBER_COOKIE_DURATION must be a ' +
                             'datetime.timedelta, instead got: {0}'.format(
-                            duration))
+                                duration))
 
         # actually set it
         response.set_cookie(cookie_name,
