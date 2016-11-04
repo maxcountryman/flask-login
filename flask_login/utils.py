@@ -151,7 +151,7 @@ def login_user(user, remember=False, force=False, fresh=True):
     user_id = getattr(user, current_app.login_manager.id_attribute)()
     session['user_id'] = user_id
     session['_fresh'] = fresh
-    session['_id'] = _create_identifier()
+    session['_id'] = current_app.login_manager.session_identifier_generator()
 
     if remember:
         session['remember'] = 'set'
@@ -191,7 +191,7 @@ def confirm_login():
     are reloaded from a cookie.
     '''
     session['_fresh'] = True
-    session['_id'] = _create_identifier()
+    session['_id'] = current_app.login_manager.session_identifier_generator()
     user_login_confirmed.send(current_app._get_current_object())
 
 
