@@ -117,14 +117,14 @@ function.
 
             flask.flash('Logged in successfully.')
 
-            next = flask.request.args.get('next')
+            next = flask.request.form['next']
             # next_is_valid should check if the user has valid 
             # permission to access the `next` url
             if not next_is_valid(next):
                 return flask.abort(400)
 
             return flask.redirect(next or flask.url_for('index'))
-        return flask.render_template('login.html', form=form)
+        return flask.render_template('login.html', next=flask.request.args.get('next'), form=form)
 
 *Warning:* You MUST validate the value of the `next` parameter. If you do not,
 your application will be vulnerable to open redirects.
