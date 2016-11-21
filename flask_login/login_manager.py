@@ -177,6 +177,9 @@ class LoginManager(object):
 
     def header_loader(self, callback):
         '''
+        This function has been deprecated. Please use
+        :meth:`LoginManager.request_loader` instead.
+
         This sets the callback for loading a user from a header value.
         The function you set should take an authentication token and
         return a user object, or `None` if the user does not exist.
