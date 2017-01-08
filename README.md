@@ -13,13 +13,7 @@ their ID.
 
 ## Installation
 
-Install the extension with one of the following commands:
-
-```sh
-$ easy_install flask-login
-```
-
-or alternatively if you have pip installed:
+Install the extension with pip:
 
 ```sh
 $ pip install flask-login
