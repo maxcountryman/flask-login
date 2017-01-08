@@ -33,11 +33,7 @@ However, it does not:
 
 Installation
 ============
-Install the extension with one of the following commands:
-
-    $ easy_install flask-login
-
-or alternatively if you have pip installed:
+Install the extension with pip:
 
     $ pip install flask-login
 
