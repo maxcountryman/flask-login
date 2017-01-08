@@ -31,6 +31,13 @@ However, it does not:
    :backlinks: none
 
 
+Installation
+============
+Install the extension with pip:
+
+    $ pip install flask-login
+
+
 Configuring your Application
 ============================
 The most important part of an application that uses Flask-Login is the
