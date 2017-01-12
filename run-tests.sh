@@ -30,7 +30,7 @@ else
 fi
 
 log "Running tests..."
-nosetests $NOSETEST_OPTIONS 2>&1 | tee -a $OUTPUT_PATH/test.log
+"${NOSETESTS:-nosetests}" $NOSETEST_OPTIONS 2>&1 | tee -a $OUTPUT_PATH/test.log
 ret=${PIPESTATUS[0]}
 
 echo
