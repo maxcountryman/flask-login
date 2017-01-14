@@ -475,6 +475,21 @@ class LoginTestCase(unittest.TestCase):
             self.assertEqual(result.location,
                              'http://localhost/login?next=%2Fsecret')
 
+    def test_unauthorized_with_next_in_session(self):
+        self.login_manager.login_view = 'login'
+        self.app.config['USE_SESSION_FOR_NEXT'] = True
+
+        @self.app.route('/login')
+        def login():
+            return session.pop('next', '')
+
+        with self.app.test_client() as c:
+            result = c.get('/secret')
+            self.assertEqual(result.status_code, 302)
+            self.assertEqual(result.location,
+                             'http://localhost/login')
+            self.assertEqual(c.get('/login').data.decode('utf-8'), '/secret')
+
     def test_unauthorized_uses_blueprint_login_view(self):
         with self.app.app_context():
 
