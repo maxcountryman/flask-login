@@ -8,3 +8,5 @@ python:
 install:
   - python install_requirements.py dev
 script: make check
+after_success:
+  - coveralls

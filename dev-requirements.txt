@@ -1,10 +1,10 @@
 -r requirements.txt
 
 blinker==1.4
-coverage==4.2
+coverage==4.3.1
 mock==2.0.0
 nose==1.3.7
 pep8==1.7.0
-pyflakes==1.3.0
+pyflakes==1.5.0
 semantic_version==2.6.0
 yanc==0.3.3
