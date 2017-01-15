@@ -7,6 +7,7 @@ python:
   - 3.5
 install:
   - python install_requirements.py dev
+  - travis_retry pip install coveralls
 script: make check
 after_success:
   - coveralls
