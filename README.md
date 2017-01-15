@@ -1,6 +1,6 @@
 # Flask-Login
 
-[![build status](https://secure.travis-ci.org/maxcountryman/flask-login.png?branch=master)](https://travis-ci.org/#!/maxcountryman/flask-login)
+[![build status](https://travis-ci.org/maxcountryman/flask-login.svg?branch=master)](https://travis-ci.org/maxcountryman/flask-login)
 [![coverage](https://coveralls.io/repos/maxcountryman/flask-login/badge.svg?branch=master&service=github)](https://coveralls.io/github/maxcountryman/flask-login?branch=master)
 
 Flask-Login provides user session management for Flask. It handles the common
