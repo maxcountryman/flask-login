@@ -31,6 +31,10 @@ from flask_login import (LoginManager, UserMixin, AnonymousUserMixin,
                          login_fresh, login_required, session_protected,
                          fresh_login_required, confirm_login, encode_cookie,
                          decode_cookie, set_login_view, user_accessed)
+from flask_login.__about__ import (__title__, __description__, __url__,
+                                   __version_info__, __version__, __author__,
+                                   __author_email__, __maintainer__,
+                                   __license__, __copyright__)
 from flask_login.utils import _secret_key, _user_context_processor
 
 
@@ -110,6 +114,22 @@ creeper = User(u'Creeper', 3, False)
 germanjapanese = User(u'Müller', u'佐藤')  # Unicode user_id
 
 USERS = {1: notch, 2: steve, 3: creeper, u'佐藤': germanjapanese}
+
+
+class AboutTestCase(unittest.TestCase):
+    """Make sure we can get version and other info."""
+
+    def test_have_about_data(self):
+        self.assertTrue(__title__ is not None)
+        self.assertTrue(__description__ is not None)
+        self.assertTrue(__url__ is not None)
+        self.assertTrue(__version_info__ is not None)
+        self.assertTrue(__version__ is not None)
+        self.assertTrue(__author__ is not None)
+        self.assertTrue(__author_email__ is not None)
+        self.assertTrue(__maintainer__ is not None)
+        self.assertTrue(__license__ is not None)
+        self.assertTrue(__copyright__ is not None)
 
 
 class StaticTestCase(unittest.TestCase):
