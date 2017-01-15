@@ -185,7 +185,9 @@ To customize the message category, set `LoginManager.login_message_category`::
     login_manager.login_message_category = "info"
 
 When the log in view is redirected to, it will have a ``next`` variable in the
-query string, which is the page that the user was trying to access.
+query string, which is the page that the user was trying to access. Alternatively,
+if `USE_SESSION_FOR_NEXT` is `True`, the page is stored in the session under the
+key ``next``.
 
 If you would like to customize the process further, decorate a function with
 `LoginManager.unauthorized_handler`::

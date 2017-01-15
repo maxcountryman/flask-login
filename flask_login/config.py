@@ -42,8 +42,13 @@ AUTH_HEADER_NAME = 'Authorization'
 
 #: A set of session keys that are populated by Flask-Login. Use this set to
 #: purge keys safely and accurately.
-SESSION_KEYS = set(['user_id', 'remember', '_id', '_fresh'])
+SESSION_KEYS = set(['user_id', 'remember', '_id', '_fresh', 'next'])
 
 #: A set of HTTP methods which are exempt from `login_required` and
 #: `fresh_login_required`. By default, this is just ``OPTIONS``.
 EXEMPT_METHODS = set(['OPTIONS'])
+
+#: If true, the page the user is attempting to access is stored in the session
+#: rather than a url parameter when redirecting to the login view; defaults to
+#: ``False``.
+USE_SESSION_FOR_NEXT = False
