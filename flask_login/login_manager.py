@@ -274,7 +274,15 @@ class LoginManager(object):
             flash(self.needs_refresh_message,
                   category=self.needs_refresh_message_category)
 
-        return redirect(login_url(self.refresh_view, request.url))
+        config = current_app.config
+        if config.get('USE_SESSION_FOR_NEXT', USE_SESSION_FOR_NEXT):
+            session['next'] = make_next_param(
+                expand_login_view(self.refresh_view), request.url)
+            redirect_url = login_url(self.refresh_view)
+        else:
+            redirect_url = login_url(self.refresh_view, request.url)
+
+        return redirect(redirect_url)
 
     def reload_user(self, user=None):
         ctx = _request_ctx_stack.top
