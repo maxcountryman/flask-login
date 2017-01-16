@@ -21,7 +21,7 @@ from .mixins import AnonymousUserMixin
 from .signals import (user_loaded_from_cookie, user_loaded_from_header,
                       user_loaded_from_request, user_unauthorized,
                       user_needs_refresh, user_accessed, session_protected)
-from .utils import (_get_user, login_url, _create_identifier,
+from .utils import (_get_user, login_url as make_login_url, _create_identifier,
                     _user_context_processor, encode_cookie, decode_cookie,
                     make_next_param, expand_login_view)
 
@@ -166,11 +166,11 @@ class LoginManager(object):
 
         config = current_app.config
         if config.get('USE_SESSION_FOR_NEXT', USE_SESSION_FOR_NEXT):
-            session['next'] = make_next_param(expand_login_view(login_view),
-                                              request.url)
-            redirect_url = login_url(login_view)
+            login_url = expand_login_view(login_view)
+            session['next'] = make_next_param(login_url, request.url)
+            redirect_url = make_login_url(login_view)
         else:
-            redirect_url = login_url(login_view, request.url)
+            redirect_url = make_login_url(login_view, next_url=request.url)
 
         return redirect(redirect_url)
 
@@ -276,11 +276,12 @@ class LoginManager(object):
 
         config = current_app.config
         if config.get('USE_SESSION_FOR_NEXT', USE_SESSION_FOR_NEXT):
-            url = expand_login_view(self.refresh_view)
-            session['next'] = make_next_param(url, request.url)
-            redirect_url = login_url(self.refresh_view)
+            login_url = expand_login_view(self.refresh_view)
+            session['next'] = make_next_param(login_url, request.url)
+            redirect_url = make_login_url(self.refresh_view)
         else:
-            redirect_url = login_url(self.refresh_view, request.url)
+            login_url = self.refresh_view
+            redirect_url = make_login_url(login_url, next_url=request.url)
 
         return redirect(redirect_url)
 
