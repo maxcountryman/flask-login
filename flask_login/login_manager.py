@@ -276,8 +276,8 @@ class LoginManager(object):
 
         config = current_app.config
         if config.get('USE_SESSION_FOR_NEXT', USE_SESSION_FOR_NEXT):
-            session['next'] = make_next_param(
-                expand_login_view(self.refresh_view), request.url)
+            url = expand_login_view(self.refresh_view)
+            session['next'] = make_next_param(url, request.url)
             redirect_url = login_url(self.refresh_view)
         else:
             redirect_url = login_url(self.refresh_view, request.url)
