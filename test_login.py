@@ -825,6 +825,22 @@ class LoginTestCase(unittest.TestCase):
             expected = 'http://localhost/refresh-view?next=%2Fneeds-refresh'
             self.assertEqual(result.location, expected)
 
+    def test_refresh_with_next_in_session(self):
+        @self.app.route('/refresh-view')
+        def refresh_view():
+            return session.pop('next', '')
+
+        self.login_manager.refresh_view = 'refresh_view'
+        self.app.config['USE_SESSION_FOR_NEXT'] = True
+
+        with self.app.test_client() as c:
+            c.get('/login-notch-remember')
+            result = c.get('/needs-refresh')
+            self.assertEqual(result.status_code, 302)
+            self.assertEqual(result.location, 'http://localhost/refresh-view')
+            result = c.get('/refresh-view')
+            self.assertEqual(result.data.decode('utf-8'), '/needs-refresh')
+
     def test_confirm_login(self):
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
