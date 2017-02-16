@@ -113,7 +113,7 @@ def login_url(login_view, next_url=None, next_field='next'):
     parsed_result = urlparse(base)
     md = url_decode(parsed_result.query)
     md[next_field] = make_next_param(base, next_url)
-    parsed_result = parsed_result._replace(url_encode(md, sort=True))
+    parsed_result = parsed_result._replace(query=url_encode(md, sort=True))
     return urlunparse(parsed_result)
 
 
