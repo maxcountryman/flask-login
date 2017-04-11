@@ -33,7 +33,7 @@ However, it does not:
 
 Installation
 ============
-Install the extension with pip:
+Install the extension with pip::
 
     $ pip install flask-login
 
