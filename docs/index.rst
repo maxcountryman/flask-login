@@ -160,7 +160,9 @@ When the user is ready to log out::
         logout_user()
         return redirect(somewhere)
 
-They will be logged out, and any cookies for their session will be cleaned up.
+They will be logged out, and any cookies for their session will be cleaned up. 
+Finally, note that the `login_required` decorator should always be placed 
+directly above the view definition, with other decorators above it.
 
 
 
