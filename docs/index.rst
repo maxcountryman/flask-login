@@ -30,6 +30,94 @@ However, it does not:
    :local:
    :backlinks: none
 
+Hello World flask-login 
+=========================
+
+Below is a minimal example of how to create a fully functioning site with flask-login, complete with login and logout::
+
+    from flask import Flask, request, redirect, url_for
+    
+    from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
+    
+    
+    login_manager = LoginManager()
+    
+    app = Flask(__name__)
+    app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
+    login_manager.init_app(app)
+    
+    login_form = """
+        <form action='login' method='POST'>
+            <input type="text" name="username" id="username" placeholder="username"></input>
+            <input type="password" name="password" id="password" placeholder="password"></input>
+            <input type="submit" name="submit"></input>
+        </form>
+    """
+    
+    users = {
+        'dave' : 'mySecret',
+        'jim' : 'hunter2'
+    }
+    
+    # Your implementation of validate user should be more complete
+    def validate_user(username, password):
+        if username not in users:
+            return False
+        return users[username] == password
+    
+    # Load user should return a User object created from a store
+    @login_manager.user_loader
+    def load_user(user_id):
+        if user_id not in users:
+            return None
+    
+        user = UserMixin()
+        user.id = user_id
+        return user
+    
+    # Here we return an error message - but it's possible to use a redirect instead
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        return "You are not logged in!"
+    
+    @app.route('/invalid')
+    def invalid():
+        return 'Invalid username or password!'
+    
+    # routes which require logging in use the login_required decorator
+    @app.route('/', methods=['GET', 'POST'])
+    @login_required
+    def index():
+        return "You're logged in {name}!".format(name=current_user.id)
+    
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        if request.method == "GET":
+            return login_form
+    
+        form = request.form
+    
+        user = UserMixin()
+        user.id = form['username']
+        user.is_authenticated = validate_user(user.id, form['password'])
+    
+        if not user.is_authenticated:
+            return redirect('/invalid')
+    
+        login_user(user)
+    
+        return redirect(url_for('index'))
+    
+    @app.route("/logout")
+    @login_required
+    def logout():
+        logout_user()
+        return redirect('login')
+    
+    if __name__ == '__main__':
+        app.run(debug=True)
+        
+Note that while introducing the basic structure of your flask-login application, it also doesn't touch on the advance features possible with flask-login. We will look at these features later
 
 Installation
 ============
