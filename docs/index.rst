@@ -110,7 +110,7 @@ function.
     For example:
 
 .. code-block:: python
-    
+
     @app.route('/login', methods=['GET', 'POST'])
     def login():
         # Here we use a class of some kind to represent and validate our
@@ -213,13 +213,13 @@ a header value instead of a user id. For example::
 
     @login_manager.header_loader
     def load_user_from_header(header_val):
-        header_val = header_val.replace('Basic ', '', 1)                                
-        try:                                                                        
-            header_val = base64.b64decode(header_val)                                       
-        except TypeError:                                                     
+        header_val = header_val.replace('Basic ', '', 1)
+        try:
+            header_val = base64.b64decode(header_val)
+        except TypeError:
             pass
         return User.query.filter_by(api_key=header_val).first()
-        
+
 By default the `Authorization` header's value is passed to your
 `~LoginManager.header_loader` callback. You can change the header used with
 the `AUTH_HEADER_NAME` configuration.
@@ -249,10 +249,10 @@ using the `Authorization` header::
         # next, try to login using Basic Auth
         api_key = request.headers.get('Authorization')
         if api_key:
-            api_key = api_key.replace('Basic ', '', 1)                                
-            try:                                                                        
-                api_key = base64.b64decode(api_key)                                       
-            except TypeError:                                                     
+            api_key = api_key.replace('Basic ', '', 1)
+            try:
+                api_key = base64.b64decode(api_key)
+            except TypeError:
                 pass
             user = User.query.filter_by(api_key=api_key).first()
             if user:
@@ -260,7 +260,7 @@ using the `Authorization` header::
 
         # finally, return None if both methods did not login the user
         return None
-        
+
 
 Anonymous Users
 ===============
@@ -300,7 +300,7 @@ additional infrastructure to increase the security of your remember cookies.
 
 
 Alternative Tokens
-------------------
+==================
 Using the user ID as the value of the remember token means you must change the
 user's ID to invalidate their login sessions. One way to improve this is to use
 an alternative session token instead of the user's ID. For example::
@@ -322,7 +322,7 @@ token must still uniquely identify the user... think of it as a second user ID.
 
 
 Fresh Logins
-------------
+============
 When a user logs in, their session is marked as "fresh," which indicates that
 they actually authenticated on that session. When their session is destroyed
 and they are logged back in with a "remember me" cookie, it is marked as
@@ -355,7 +355,7 @@ To mark a session as fresh again, call the `confirm_login` function.
 
 
 Cookie Settings
----------------
+===============
 The details of the cookie can be customized in the application settings.
 
 =========================== =================================================
@@ -418,6 +418,34 @@ then the entire session (as well as the remember token if it exists) is
 deleted.
 
 
+Disabling Session Cookie for APIs
+=================================
+When authenticating to APIs, you might want to disable setting the Flask
+Session cookie. To do this, use a custom session interface that skips saving
+the session depending on a flag you set on the request. For example::
+
+    from flask import g
+    from flask.sessions import SecureCookieSessionInterface
+    from flask_login import user_loaded_from_header
+
+    class CustomSessionInterface(SecureCookieSessionInterface):
+        """Prevent creating session from API requests."""
+        def save_session(self, *args, **kwargs):
+            if g.get('login_via_header'):
+                return
+            return super(CustomSessionInterface, self).save_session(*args,
+                                                                    **kwargs)
+
+    app.session_interface = CustomSessionInterface()
+
+    @user_loaded_from_header.connect
+    def user_loaded_from_header(self, user=None):
+        g.login_via_header = True
+
+This prevents setting the Flask Session cookie whenever the user authenticated
+using your `~LoginManager.header_loader`.
+
+
 Localization
 ============
 By default, the `LoginManager` uses ``flash`` to display messages when a user
@@ -439,50 +467,50 @@ Configuring Login
 .. module:: flask_login
 
 .. autoclass:: LoginManager
-   
+
    .. automethod:: setup_app
-   
+
    .. automethod:: unauthorized
-   
+
    .. automethod:: needs_refresh
-   
+
    .. rubric:: General Configuration
-   
+
    .. automethod:: user_loader
-   
+
    .. automethod:: header_loader
-   
+
    .. attribute:: anonymous_user
-   
+
       A class or factory function that produces an anonymous user, which
       is used when no one is logged in.
-   
+
    .. rubric:: `unauthorized` Configuration
-   
+
    .. attribute:: login_view
-   
+
       The name of the view to redirect to when the user needs to log in. (This
       can be an absolute URL as well, if your authentication machinery is
       external to your application.)
-   
+
    .. attribute:: login_message
-   
+
       The message to flash when a user is redirected to the login page.
-   
+
    .. automethod:: unauthorized_handler
-   
+
    .. rubric:: `needs_refresh` Configuration
-   
+
    .. attribute:: refresh_view
-   
+
       The name of the view to redirect to when the user needs to
       reauthenticate.
-   
+
    .. attribute:: needs_refresh_message
-   
+
       The message to flash when a user is redirected to the reauthentication
       page.
-   
+
    .. automethod:: needs_refresh_handler
 
 
