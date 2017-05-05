@@ -20,17 +20,11 @@ class UserMixin(object):
         # We set it back to its default implementation
         __hash__ = object.__hash__
 
-    @property
-    def is_active(self):
-        return True
+    is_active = True
 
-    @property
-    def is_authenticated(self):
-        return True
+    is_authenticated = True
 
-    @property
-    def is_anonymous(self):
-        return False
+    is_anonymous = False
 
     def get_id(self):
         try:
@@ -60,17 +54,11 @@ class AnonymousUserMixin(object):
     '''
     This is the default object for representing an anonymous user.
     '''
-    @property
-    def is_authenticated(self):
-        return False
+    is_authenticated = False
 
-    @property
-    def is_active(self):
-        return False
+    is_active = False
 
-    @property
-    def is_anonymous(self):
-        return True
+    is_anonymous = True
 
     def get_id(self):
         return
