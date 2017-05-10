@@ -333,7 +333,7 @@ class LoginManager(object):
                 return self._load_from_cookie(request.cookies[cookie_name])
             elif self.request_callback:
                 return self._load_from_request(request)
-            elif header_name in request.headers:
+            elif self.header_callback and header_name in request.headers:
                 return self._load_from_header(request.headers[header_name])
 
         return self.reload_user()
@@ -376,26 +376,20 @@ class LoginManager(object):
             user_loaded_from_cookie.send(app, user=_get_user())
 
     def _load_from_header(self, header):
-        user = None
-        if self.header_callback:
-            user = self.header_callback(header)
+        user = self.header_callback(header)
+        self.reload_user(user=user)
         if user is not None:
-            self.reload_user(user=user)
+            session['user_id'] = getattr(user, self.id_attribute)()
             app = current_app._get_current_object()
             user_loaded_from_header.send(app, user=_get_user())
-        else:
-            self.reload_user()
 
     def _load_from_request(self, request):
-        user = None
-        if self.request_callback:
-            user = self.request_callback(request)
+        user = self.request_callback(request)
+        self.reload_user(user=user)
         if user is not None:
-            self.reload_user(user=user)
+            session['user_id'] = getattr(user, self.id_attribute)()
             app = current_app._get_current_object()
             user_loaded_from_request.send(app, user=_get_user())
-        else:
-            self.reload_user()
 
     def _update_remember_cookie(self, response):
         # Don't modify the session unless there's something to do.
