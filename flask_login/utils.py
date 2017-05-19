@@ -110,11 +110,11 @@ def login_url(login_view, next_url=None, next_field='next'):
     if next_url is None:
         return base
 
-    parts = list(urlparse(base))
-    md = url_decode(parts[4])
+    parsed_result = urlparse(base)
+    md = url_decode(parsed_result.query)
     md[next_field] = make_next_param(base, next_url)
-    parts[4] = url_encode(md, sort=True)
-    return urlunparse(parts)
+    parsed_result = parsed_result._replace(query=url_encode(md, sort=True))
+    return urlunparse(parsed_result)
 
 
 def login_fresh():
