@@ -87,7 +87,7 @@ class LoginManager(object):
 
         self.request_callback = None
 
-        self.session_identifier_generator = _create_identifier
+        self._session_identifier_generator = _create_identifier
 
         if app is not None:
             self.init_app(app, add_context_processor)
@@ -342,7 +342,7 @@ class LoginManager(object):
 
     def _session_protection(self):
         sess = session._get_current_object()
-        ident = self.session_identifier_generator()
+        ident = self._session_identifier_generator()
 
         app = current_app._get_current_object()
         mode = app.config.get('SESSION_PROTECTION', self.session_protection)
