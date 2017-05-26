@@ -1,4 +1,4 @@
-<!-- Have a question? Please ask it on https://stackoverflow.com/questions/tagged/flask%20flask-login?sort=votes&mode=all -->
+<!-- Have a question? Please ask it on https://stackoverflow.com/questions/tagged/flask-login?sort=votes -->
 
 Make sure these boxes are checked before submitting your issue--thank you!
 
