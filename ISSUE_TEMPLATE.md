@@ -1,3 +1,5 @@
+<!-- Have a question? Please ask it on https://stackoverflow.com/questions/tagged/flask-login?sort=votes -->
+
 Make sure these boxes are checked before submitting your issue--thank you!
 
 - [ ] Ensure you are using the latest PyPI release.
