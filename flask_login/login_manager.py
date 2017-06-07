@@ -165,8 +165,12 @@ class LoginManager(object):
                       category=self.login_message_category)
             else:
                 flash(self.login_message, category=self.login_message_category)
-
         config = current_app.config
+        if config.get('FORCE_HOSTNAME'):
+            url_clean = request.url.replace('http://', '').replace('https://','')
+            if not url_clean.startswith(config['FORCE_HOSTNAME']):
+                raise Exception('HOSTNAME MISSMATCH. Possible Host Header Poisoning')
+
         if config.get('USE_SESSION_FOR_NEXT', USE_SESSION_FOR_NEXT):
             login_url = expand_login_view(login_view)
             session['next'] = make_next_param(login_url, request.url)
@@ -277,6 +281,11 @@ class LoginManager(object):
                   category=self.needs_refresh_message_category)
 
         config = current_app.config
+        if config.get('FORCE_HOSTNAME'):
+            url_clean = request.url.replace('http://', '').replace('https://','')
+            if not url_clean.startswith(config['FORCE_HOSTNAME']):
+                raise Exception('HOSTNAME MISSMATCH. Possible Host Header Poisoning')
+
         if config.get('USE_SESSION_FOR_NEXT', USE_SESSION_FOR_NEXT):
             login_url = expand_login_view(self.refresh_view)
             session['next'] = make_next_param(login_url, request.url)
