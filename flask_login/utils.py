@@ -124,7 +124,7 @@ def login_fresh():
     return session.get('_fresh', False)
 
 
-def login_user(user, remember=False, force=False, fresh=True):
+def login_user(user, remember=False, duration=None, force=False, fresh=True):
     '''
     Logs a user in. You should pass the actual user object to this. If the
     user's `is_active` property is ``False``, they will not be logged in
@@ -144,6 +144,10 @@ def login_user(user, remember=False, force=False, fresh=True):
     :param fresh: setting this to ``False`` will log in the user with a session
         marked as not "fresh". Defaults to ``True``.
     :type fresh: bool
+    :param **kwargs duration: pass in a custom cookie duration, used in conjunction with remember
+    :type duration: dictionary
+        where n is is an integer value
+        ```duration={weeks=n, days=n, hours=n, minutes=n, seconds=n}```
     '''
     if not force and not user.is_active:
         return False
@@ -155,6 +159,8 @@ def login_user(user, remember=False, force=False, fresh=True):
 
     if remember:
         session['remember'] = 'set'
+        if duration != None:
+            session['cookie_duration'] = duration
 
     _request_ctx_stack.top.user = user
     user_logged_in.send(current_app._get_current_object(), user=_get_user())
@@ -178,6 +184,9 @@ def logout_user():
     cookie_name = current_app.config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
     if cookie_name in request.cookies:
         session['remember'] = 'clear'
+
+    if 'cookie_duration' in session:
+        session.pop('cookie_duration')
 
     user_logged_out.send(current_app._get_current_object(), user=user)
 
