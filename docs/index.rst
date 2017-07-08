@@ -299,6 +299,23 @@ should, if your application handles any kind of sensitive data) provide
 additional infrastructure to increase the security of your remember cookies.
 
 
+Remember Me Duration (opotional)
+================================
+By default, the duration a users cookie will last it set through the 
+``config.py`` file.
+
+However, if a custom "remember me" length is desired, the optional ``duration`` 
+argument formatted as a dicationary can be passed to the `login_user` call 
+along with the ``remember=True`` being set. If the ``remember`` arguement is not 
+set the ``duration`` argument will be ignored. 
+For example::
+
+    user = User(u'Username', 1)
+    login_user(user, remember=True, duration={'weeks':2, 'days':2})
+
+This utilizes the builtin ``datetime.timedelta``, with that available 
+dictionary keys are (weeks, days, hours, minutes, seconds).
+
 Alternative Tokens
 ==================
 Using the user ID as the value of the remember token means you must change the

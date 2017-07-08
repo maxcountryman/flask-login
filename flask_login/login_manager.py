@@ -7,7 +7,7 @@
 
 
 import warnings
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import (_request_ctx_stack, abort, current_app, flash, redirect,
                    request, session)
@@ -415,12 +415,31 @@ class LoginManager(object):
         # cookie settings
         config = current_app.config
         cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
-        duration = config.get('REMEMBER_COOKIE_DURATION', COOKIE_DURATION)
         domain = config.get('REMEMBER_COOKIE_DOMAIN')
         path = config.get('REMEMBER_COOKIE_PATH', '/')
-
         secure = config.get('REMEMBER_COOKIE_SECURE', COOKIE_SECURE)
         httponly = config.get('REMEMBER_COOKIE_HTTPONLY', COOKIE_HTTPONLY)
+
+        # check if custom cookie duration is set
+        if 'cookie_duration' in session:
+            duration = session.get('cookie_duration')
+            weeks = days = hours = minutes = seconds = 0
+            for key, value in duration.iteritems():
+                if key == 'weeks':
+                    weeks = value
+                elif key == 'days':
+                    days = value
+                elif key == 'hours':
+                    hours = value
+                elif key == 'minutes':
+                    minutes = value
+                elif key == 'seconds':
+                    seconds = value
+                else:
+                    return "unknown key"
+            duration = timedelta(weeks=weeks, days=days, hours=hours, minutes=minutes, seconds=seconds)
+        else:
+            duration = config.get('REMEMBER_COOKIE_DURATION', COOKIE_DURATION)
 
         # prepare data
         data = encode_cookie(text_type(session['user_id']))

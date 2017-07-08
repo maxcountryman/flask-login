@@ -1,0 +1,3 @@
+[nose.plugins]
+yanc = yanc.yancplugin:YancPlugin
+

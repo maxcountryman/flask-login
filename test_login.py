@@ -247,7 +247,11 @@ class LoginTestCase(unittest.TestCase):
         @self.app.route('/login-notch-remember')
         def login_notch_remember():
             return unicode(login_user(notch, remember=True))
-
+        
+        @self.app.route('/login-notch-remember-custom')
+        def login_notch_remember_custom():
+            return unicode(login_user(notch, remember=True, duration={'weeks':2, 'days':2}))
+        
         @self.app.route('/login-notch-permanent')
         def login_notch_permanent():
             session.permanent = True
@@ -645,6 +649,10 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
 
+            print('\n'*10)
+            print(c.cookie_jar._cookies)
+            print('\n'*10)
+
             # TODO: Is there a better way to test this?
             self.assertIn(domain, c.cookie_jar._cookies,
                           'Custom domain not found as cookie domain')
@@ -664,7 +672,41 @@ class LoginTestCase(unittest.TestCase):
             fail_msg = fail_msg.format(expiration_date, expected_date)
             self.assertLess(difference, timedelta(seconds=10), fail_msg)
             self.assertGreater(difference, timedelta(seconds=-10), fail_msg)
+    
+    # new duration test
+    def test_remember_me_uses_custom_cookie_duration(self):
+        name = self.app.config['REMEMBER_COOKIE_NAME'] = 'cookie_duration'
+        duration = timedelta(weeks=2, days=2)
+        path = self.app.config['REMEMBER_COOKIE_PATH'] = '/mypath'
+        domain = self.app.config['REMEMBER_COOKIE_DOMAIN'] = '.localhost.local'
 
+        with self.app.test_client() as c:
+            c.get('/login-notch-remember-custom')
+
+            print('\n'*10)
+            print(c.cookie_jar._cookies)
+            print('\n'*10)
+
+            # TODO: Is there a better way to test this?
+            self.assertIn(domain, c.cookie_jar._cookies,
+                          'Custom domain not found as cookie domain')
+            domain_cookie = c.cookie_jar._cookies[domain]
+            self.assertIn(path, domain_cookie,
+                          'Custom path not found as cookie path')
+            path_cookie = domain_cookie[path]
+            self.assertIn(name, path_cookie,
+                          'Custom name not found as cookie name')
+            cookie = path_cookie[name]
+
+            expiration_date = datetime.utcfromtimestamp(cookie.expires)
+            expected_date = datetime.utcnow() + duration
+            difference = expected_date - expiration_date
+
+            fail_msg = 'The expiration date {0} was far from the expected {1}'
+            fail_msg = fail_msg.format(expiration_date, expected_date)
+            self.assertLess(difference, timedelta(seconds=10), fail_msg)
+            self.assertGreater(difference, timedelta(seconds=-10), fail_msg)
+    
     def test_remember_me_with_invalid_duration_returns_500_response(self):
         self.app.config['REMEMBER_COOKIE_DURATION'] = 123
 
