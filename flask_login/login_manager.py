@@ -426,7 +426,7 @@ class LoginManager(object):
         data = encode_cookie(text_type(session['user_id']))
 
         try:
-            expires = datetime.utcnow() + duration
+            expires = datetime.utcnow() + duration # TODO: check if datetime is int and convert to datetime.timedelta()
         except TypeError:
             raise Exception('REMEMBER_COOKIE_DURATION must be a ' +
                             'datetime.timedelta, instead got: {0}'.format(
