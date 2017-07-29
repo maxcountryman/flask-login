@@ -291,15 +291,14 @@ class LoginManager(object):
         '''
         Syntax example:
         from flask_login import LoginManager
-        
         @login_manager.user_loader
         def any_valid_func_name(user_id):
             # get your user object using the given user_id,
-            # if you use SQLAlchemy, for example: user_obj = User.query.get(int(user_id))
+            # if you use SQLAlchemy, for example: 
+            user_obj = User.query.get(int(user_id))
             return user_obj
-        
         Reason to let you define this self.user_callback:
-            Because we won't know how/where you will load you user object with the given user_id.
+            Because we won't know how/where you will load you user object.
         '''
         ctx = _request_ctx_stack.top
 
