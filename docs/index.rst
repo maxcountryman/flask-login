@@ -290,7 +290,9 @@ after the user has logged out.
 makes it nearly transparent - just pass ``remember=True`` to the `login_user`
 call. A cookie will be saved on the user's computer, and then Flask-Login
 will automatically restore the user ID from that cookie if it is not in the
-session. The cookie is tamper-proof, so if the user tampers with it (i.e.
+session. The amount of time before the cookie expires can be set with the
+`REMEMBER_COOKIE_DURATION` configuration or it can be passed to `login_user`.
+The cookie is tamper-proof, so if the user tampers with it (i.e.
 inserts someone else's user ID in place of their own), the cookie will merely
 be rejected, as if it was not there.
 

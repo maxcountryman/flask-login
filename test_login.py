@@ -248,6 +248,11 @@ class LoginTestCase(unittest.TestCase):
         def login_notch_remember():
             return unicode(login_user(notch, remember=True))
 
+        @self.app.route('/login-notch-remember-custom')
+        def login_notch_remember_custom():
+            duration = timedelta(hours=7)
+            return unicode(login_user(notch, remember=True, duration=duration))
+
         @self.app.route('/login-notch-permanent')
         def login_notch_permanent():
             session.permanent = True
@@ -635,6 +640,13 @@ class LoginTestCase(unittest.TestCase):
             result = c.get('/username')
             self.assertEqual(u'Notch', result.data.decode('utf-8'))
 
+    def test_remember_me_custom_duration(self):
+        with self.app.test_client() as c:
+            c.get('/login-notch-remember-custom')
+            self._delete_session(c)
+            result = c.get('/username')
+            self.assertEqual(u'Notch', result.data.decode('utf-8'))
+
     def test_remember_me_uses_custom_cookie_parameters(self):
         name = self.app.config['REMEMBER_COOKIE_NAME'] = 'myname'
         duration = self.app.config['REMEMBER_COOKIE_DURATION'] = \
@@ -665,11 +677,50 @@ class LoginTestCase(unittest.TestCase):
             self.assertLess(difference, timedelta(seconds=10), fail_msg)
             self.assertGreater(difference, timedelta(seconds=-10), fail_msg)
 
+    def test_remember_me_custom_duration_uses_custom_cookie(self):
+        name = self.app.config['REMEMBER_COOKIE_NAME'] = 'myname'
+        duration = timedelta(hours=7)
+        path = self.app.config['REMEMBER_COOKIE_PATH'] = '/mypath'
+        domain = self.app.config['REMEMBER_COOKIE_DOMAIN'] = '.localhost.local'
+
+        with self.app.test_client() as c:
+            c.get('/login-notch-remember-custom')
+
+            # TODO: Is there a better way to test this?
+            self.assertIn(domain, c.cookie_jar._cookies,
+                          'Custom domain not found as cookie domain')
+            domain_cookie = c.cookie_jar._cookies[domain]
+            self.assertIn(path, domain_cookie,
+                          'Custom path not found as cookie path')
+            path_cookie = domain_cookie[path]
+            self.assertIn(name, path_cookie,
+                          'Custom name not found as cookie name')
+            cookie = path_cookie[name]
+
+            expiration_date = datetime.utcfromtimestamp(cookie.expires)
+            expected_date = datetime.utcnow() + duration
+            difference = expected_date - expiration_date
+
+            fail_msg = 'The expiration date {0} was far from the expected {1}'
+            fail_msg = fail_msg.format(expiration_date, expected_date)
+            self.assertLess(difference, timedelta(seconds=10), fail_msg)
+            self.assertGreater(difference, timedelta(seconds=-10), fail_msg)
+
     def test_remember_me_with_invalid_duration_returns_500_response(self):
         self.app.config['REMEMBER_COOKIE_DURATION'] = 123
 
         with self.app.test_client() as c:
             result = c.get('/login-notch-remember')
+            self.assertEqual(result.status_code, 500)
+
+    def test_remember_me_with_invalid_custom_duration_returns_500_resp(self):
+        @self.app.route('/login-notch-remember-custom-invalid')
+        def login_notch_remember_custom_invalid():
+            duration = 123
+            return unicode(login_user(notch, remember=True, duration=duration))
+
+        with self.app.test_client() as c:
+            result = c.get('/login-notch-remember-custom-invalid')
             self.assertEqual(result.status_code, 500)
 
     def test_set_cookie_with_invalid_duration_raises_exception(self):
@@ -681,6 +732,15 @@ class LoginTestCase(unittest.TestCase):
                 self.login_manager._set_cookie(None)
 
         expected_exception_message = 'REMEMBER_COOKIE_DURATION must be a ' \
+            'datetime.timedelta, instead got: 123'
+        self.assertIn(expected_exception_message, str(cm.exception))
+
+    def test_set_cookie_with_invalid_custom_duration_raises_exception(self):
+        with self.assertRaises(Exception) as cm:
+            with self.app.test_request_context():
+                login_user(notch, remember=True, duration='123')
+
+        expected_exception_message = 'duration must be a ' \
             'datetime.timedelta, instead got: 123'
         self.assertIn(expected_exception_message, str(cm.exception))
 
@@ -753,6 +813,13 @@ class LoginTestCase(unittest.TestCase):
     def test_logout_stays_logged_out_with_remember_me(self):
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
+            c.get('/logout')
+            result = c.get('/username')
+            self.assertEqual(result.data.decode('utf-8'), u'Anonymous')
+
+    def test_logout_stays_logged_out_with_remember_me_custom_duration(self):
+        with self.app.test_client() as c:
+            c.get('/login-notch-remember-custom')
             c.get('/logout')
             result = c.get('/username')
             self.assertEqual(result.data.decode('utf-8'), u'Anonymous')
