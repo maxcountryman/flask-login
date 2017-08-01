@@ -315,8 +315,8 @@ class LoginManager(object):
                 if self.user_callback is None:
                     raise Exception(
                         "No user_loader has been installed for this "
-                        "LoginManager. Add one with the "
-                        "'LoginManager.user_loader' decorator.")
+                        "LoginManager. Refer to https://flask-login.readthedocs.io/"
+                        "en/latest/#how-it-works for more info.")
                 user = self.user_callback(user_id)
                 if user is None:
                     ctx.user = self.anonymous_user()
