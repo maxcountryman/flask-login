@@ -666,7 +666,8 @@ class LoginTestCase(unittest.TestCase):
             self.assertGreater(difference, timedelta(seconds=-10), fail_msg)
 
     def test_remember_me_with_duration_in_seconds(self):
-        self.app.config['REMEMBER_COOKIE_DURATION'] = 172800  # two days in seconds
+        # e.g. 172800 is two days in seconds
+        self.app.config['REMEMBER_COOKIE_DURATION'] = 172800
 
         with self.app.test_client() as c:
             result = c.get('/login-notch-remember')
