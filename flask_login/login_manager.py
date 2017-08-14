@@ -428,12 +428,7 @@ class LoginManager(object):
         if isinstance(duration, (int, long)):
             duration = timedelta(seconds=duration)
 
-        try:
-            expires = datetime.utcnow() + duration
-        except TypeError:
-            raise Exception('REMEMBER_COOKIE_DURATION must be a ' +
-                            'datetime.timedelta, instead got: {0}'.format(
-                                duration))
+        expires = datetime.utcnow() + duration
 
         # actually set it
         response.set_cookie(cookie_name,
