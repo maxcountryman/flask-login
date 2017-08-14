@@ -425,7 +425,7 @@ class LoginManager(object):
         # prepare data
         data = encode_cookie(text_type(session['user_id']))
 
-        if isinstance(duration, (int, long)):
+        if not isinstance(duration, timedelta):
             duration = timedelta(seconds=duration)
 
         expires = datetime.utcnow() + duration
