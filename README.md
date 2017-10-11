@@ -102,7 +102,7 @@ def login():
         return '''
                <form action='login' method='POST'>
                 <input type='text' name='email' id='email' placeholder='email'></input>
-                <input type='password' name='pw' id='pw' placeholder='password'></input>
+                <input type='password' name='password' id='password' placeholder='password'></input>
                 <input type='submit' name='submit'></input>
                </form>
                '''
