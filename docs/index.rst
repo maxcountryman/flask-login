@@ -397,9 +397,10 @@ Or, to disable it::
 
     login_manager.session_protection = None
 
-By default, it is activated in ``"basic"`` mode. It can be disabled in the
-app's configuration by setting the `SESSION_PROTECTION` setting to `None`,
-``"basic"``, or ``"strong"``.
+By default, it is activated in ``"basic"`` mode. It can also be configured in
+the app's configuration by setting the `SESSION_PROTECTION` setting to `None`,
+``"basic"``, or ``"strong"``. `SESSION_PROTECTION` setting will override
+`~LoginManager.session_protection` attribute.
 
 When session protection is active, each request, it generates an identifier
 for the user's computer (basically, a secure hash of the IP address and user
