@@ -53,7 +53,7 @@ doesn't care how your data is stored so long as you tell it how to retrieve it!
 
 ```python
 # Our mock database.
-users = {'foo@bar.tld': {'pw': 'secret'}}
+users = {'foo@bar.tld': {'password': 'secret'}}
 ```
 
 We also need to tell Flask-Login how to load a user from a Flask request and
@@ -86,7 +86,7 @@ def request_loader(request):
 
     # DO NOT ever store passwords in plaintext and always compare password
     # hashes using constant-time comparison!
-    user.is_authenticated = request.form['pw'] == users[email]['pw']
+    user.is_authenticated = request.form['password'] == users[email]['password']
 
     return user
 ```
@@ -101,14 +101,14 @@ def login():
     if flask.request.method == 'GET':
         return '''
                <form action='login' method='POST'>
-                <input type='text' name='email' id='email' placeholder='email'></input>
-                <input type='password' name='pw' id='pw' placeholder='password'></input>
-                <input type='submit' name='submit'></input>
+                <input type='text' name='email' id='email' placeholder='email'/>
+                <input type='password' name='passwordw' id='password' placeholder='password'/>
+                <input type='submit' name='submit'/>
                </form>
                '''
 
     email = flask.request.form['email']
-    if flask.request.form['pw'] == users[email]['pw']:
+    if flask.request.form['password'] == users[email]['password']:
         user = User()
         user.id = email
         flask_login.login_user(user)
