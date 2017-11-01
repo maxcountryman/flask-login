@@ -5,6 +5,9 @@ python:
   - 3.3
   - 3.4
   - 3.5
+  - 3.6
+  - pypy
+  - pypy3
 install:
   - python install_requirements.py dev
   - travis_retry pip install coveralls
