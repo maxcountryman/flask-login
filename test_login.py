@@ -1475,18 +1475,6 @@ class StrictHostForRedirectsTestCase(unittest.TestCase):
         def index():
             return u'Welcome!'
 
-        @self.app.route('/username')
-        def username():
-            if current_user.is_authenticated:
-                return current_user.name
-            return u'Anonymous'
-
-        @self.app.route('/userid')
-        def user_id():
-            if current_user.is_authenticated:
-                return current_user.id
-            return u'wrong_id'
-
         @self.login_manager.user_loader
         def load_user(user_id):
             return USERS[unicode(user_id)]
