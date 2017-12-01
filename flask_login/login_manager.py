@@ -8,7 +8,7 @@
 
 import warnings
 from datetime import datetime
-
+from datetime import timedelta
 from flask import (_request_ctx_stack, abort, current_app, flash, redirect,
                    request, session)
 
@@ -443,12 +443,10 @@ class LoginManager(object):
         # prepare data
         data = encode_cookie(text_type(session['user_id']))
 
-        try:
-            expires = datetime.utcnow() + duration
-        except TypeError:
-            raise Exception('REMEMBER_COOKIE_DURATION must be a ' +
-                            'datetime.timedelta, instead got: {0}'.format(
-                                duration))
+        if not isinstance(duration, timedelta):
+            duration = timedelta(seconds=duration)
+
+        expires = datetime.utcnow() + duration
 
         # actually set it
         response.set_cookie(cookie_name,

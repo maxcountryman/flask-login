@@ -665,24 +665,21 @@ class LoginTestCase(unittest.TestCase):
             self.assertLess(difference, timedelta(seconds=10), fail_msg)
             self.assertGreater(difference, timedelta(seconds=-10), fail_msg)
 
-    def test_remember_me_with_invalid_duration_returns_500_response(self):
-        self.app.config['REMEMBER_COOKIE_DURATION'] = 123
+    def test_remember_me_with_duration_in_seconds_int(self):
+        # e.g. 172800 is two days in seconds
+        self.app.config['REMEMBER_COOKIE_DURATION'] = 172800
 
         with self.app.test_client() as c:
             result = c.get('/login-notch-remember')
-            self.assertEqual(result.status_code, 500)
+            self.assertEqual(result.status_code, 200)
 
-    def test_set_cookie_with_invalid_duration_raises_exception(self):
-        self.app.config['REMEMBER_COOKIE_DURATION'] = 123
+    def test_remember_me_with_duration_timedelta(self):
+        from datetime import timedelta
+        self.app.config['REMEMBER_COOKIE_DURATION'] = timedelta(seconds=172800)
 
-        with self.assertRaises(Exception) as cm:
-            with self.app.test_request_context():
-                session['user_id'] = 2
-                self.login_manager._set_cookie(None)
-
-        expected_exception_message = 'REMEMBER_COOKIE_DURATION must be a ' \
-            'datetime.timedelta, instead got: 123'
-        self.assertIn(expected_exception_message, str(cm.exception))
+        with self.app.test_client() as c:
+            result = c.get('/login-notch-remember')
+            self.assertEqual(result.status_code, 200)
 
     def test_remember_me_is_unfresh(self):
         with self.app.test_client() as c:
