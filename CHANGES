@@ -11,6 +11,8 @@ Unreleased
 
 - New config option USE_SESSION_FOR_NEXT to enable storing next url in session
   instead of url. #330
+- Accept int seconds along with timedelta for REMEMBER_COOKIE_DURATION. #370
+- New config option FORCE_HOST_FOR_REDIRECTS to force host for redirects. #371
 
 
 Version 0.4.0
@@ -24,7 +26,7 @@ Released on October 26th, 2016
   on the User class, and the `utils.make_secure_token` utility function have
   been removed to prevent users from creating insecure auth implementations.
   Use the `Alternative Tokens` example from the docs instead. #291
-  
+
 
 Version 0.3.2
 -------------
