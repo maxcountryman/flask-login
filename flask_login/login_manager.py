@@ -288,6 +288,23 @@ class LoginManager(object):
         return redirect(redirect_url)
 
     def reload_user(self, user=None):
+        '''
+        This set the ctx.user with the user object loaded by your customized
+        user_loader callback function, which should retrieved the user object
+        with the user_id got from session.
+
+        Syntax example:
+        from flask_login import LoginManager
+        @login_manager.user_loader
+        def any_valid_func_name(user_id):
+            # get your user object using the given user_id,
+            # if you use SQLAlchemy, for example:
+            user_obj = User.query.get(int(user_id))
+            return user_obj
+
+        Reason to let YOU define this self.user_callback:
+            Because we won't know how/where you will load you user object.
+        '''
         ctx = _request_ctx_stack.top
 
         if user is None:
@@ -298,8 +315,9 @@ class LoginManager(object):
                 if self.user_callback is None:
                     raise Exception(
                         "No user_loader has been installed for this "
-                        "LoginManager. Add one with the "
-                        "'LoginManager.user_loader' decorator.")
+                        "LoginManager. Refer to"
+                        "https://flask-login.readthedocs.io/"
+                        "en/latest/#how-it-works for more info.")
                 user = self.user_callback(user_id)
                 if user is None:
                     ctx.user = self.anonymous_user()
