@@ -364,7 +364,7 @@ The details of the cookie can be customized in the application settings.
 `REMEMBER_COOKIE_NAME`                 The name of the cookie to store the "remember me"
                                        information in. **Default:** ``remember_token``
 `REMEMBER_COOKIE_DURATION`             The amount of time before the cookie expires, as
-                                       a `datetime.timedelta` object.
+                                       a `datetime.timedelta` object or integer seconds.
                                        **Default:** 365 days (1 non-leap Gregorian year)
 `REMEMBER_COOKIE_DOMAIN`               If the "Remember Me" cookie should cross domains,
                                        set the domain value here (i.e. ``.example.com``

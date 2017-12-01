@@ -94,7 +94,11 @@ def login_url(login_view, next_url=None, next_field='next'):
     Creates a URL for redirecting to a login page. If only `login_view` is
     provided, this will just return the URL for it. If `next_url` is provided,
     however, this will append a ``next=URL`` parameter to the query string
-    so that the login view can redirect back to that URL.
+    so that the login view can redirect back to that URL. Flask-Login's default
+    unauthorized handler uses this function when redirecting to your login url.
+    To force the host name used, set `FORCE_HOST_FOR_REDIRECTS` to a host. This
+    prevents from redirecting to external sites if request headers Host or
+    X-Forwarded-For are present.
 
     :param login_view: The name of the login view. (Alternately, the actual
                        URL to the login view.)
