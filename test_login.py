@@ -1247,45 +1247,49 @@ class LoginTestCase(unittest.TestCase):
 
 
 class TestLoginUrlGeneration(unittest.TestCase):
-    def test_make_next_param(self):
-        self.assertEqual('/profile',
-                         make_next_param('/login', 'http://localhost/profile'))
+    def setUp(self):
+        self.app = Flask(__name__)
+        self.login_manager = LoginManager()
+        self.login_manager.init_app(self.app)
 
-        self.assertEqual('http://localhost/profile',
-                         make_next_param('https://localhost/login',
-                                         'http://localhost/profile'))
-
-        self.assertEqual('http://localhost/profile',
-                         make_next_param('http://accounts.localhost/login',
-                                         'http://localhost/profile'))
-
-    def test_login_url_generation(self):
-        PROTECTED = 'http://localhost/protected'
-
-        self.assertEqual('/login?n=%2Fprotected', login_url('/login',
-                                                            PROTECTED, 'n'))
-
-        self.assertEqual('/login?next=%2Fprotected', login_url('/login',
-                                                               PROTECTED))
-
-        expected = 'https://auth.localhost/login' + \
-                   '?next=http%3A%2F%2Flocalhost%2Fprotected'
-        self.assertEqual(expected,
-                         login_url('https://auth.localhost/login', PROTECTED))
-
-        self.assertEqual('/login?affil=cgnu&next=%2Fprotected',
-                         login_url('/login?affil=cgnu', PROTECTED))
-
-    def test_login_url_generation_with_view(self):
-        app = Flask(__name__)
-        login_manager = LoginManager()
-        login_manager.init_app(app)
-
-        @app.route('/login')
+        @self.app.route('/login')
         def login():
             return ''
 
-        with app.test_request_context():
+    def test_make_next_param(self):
+        with self.app.test_request_context():
+            url = make_next_param('/login', 'http://localhost/profile')
+            self.assertEqual('/profile', url)
+
+            url = make_next_param('https://localhost/login',
+                                  'http://localhost/profile')
+            self.assertEqual('http://localhost/profile', url)
+
+            url = make_next_param('http://accounts.localhost/login',
+                                  'http://localhost/profile')
+            self.assertEqual('http://localhost/profile', url)
+
+    def test_login_url_generation(self):
+        with self.app.test_request_context():
+            PROTECTED = 'http://localhost/protected'
+
+            self.assertEqual('/login?n=%2Fprotected', login_url('/login',
+                                                                PROTECTED,
+                                                                'n'))
+
+            url = login_url('/login', PROTECTED)
+            self.assertEqual('/login?next=%2Fprotected', url)
+
+            expected = 'https://auth.localhost/login' + \
+                '?next=http%3A%2F%2Flocalhost%2Fprotected'
+            result = login_url('https://auth.localhost/login', PROTECTED)
+            self.assertEqual(expected, result)
+
+            self.assertEqual('/login?affil=cgnu&next=%2Fprotected',
+                             login_url('/login?affil=cgnu', PROTECTED))
+
+    def test_login_url_generation_with_view(self):
+        with self.app.test_request_context():
             self.assertEqual('/login?next=%2Fprotected',
                              login_url('login', '/protected'))
 
@@ -1450,3 +1454,103 @@ class UnicodeCookieUserIDTestCase(unittest.TestCase):
             self._delete_session(c)
             result = c.get('/userid')
             self.assertEqual(u'佐藤', result.data.decode('utf-8'))
+
+
+class StrictHostForRedirectsTestCase(unittest.TestCase):
+    def setUp(self):
+        self.app = Flask(__name__)
+        self.app.config['SECRET_KEY'] = 'deterministic'
+        self.app.config['SESSION_PROTECTION'] = None
+        self.remember_cookie_name = 'remember'
+        self.app.config['REMEMBER_COOKIE_NAME'] = self.remember_cookie_name
+        self.login_manager = LoginManager()
+        self.login_manager.init_app(self.app)
+        self.login_manager._login_disabled = False
+
+        @self.app.route('/secret')
+        def secret():
+            return self.login_manager.unauthorized()
+
+        @self.app.route('/')
+        def index():
+            return u'Welcome!'
+
+        @self.login_manager.user_loader
+        def load_user(user_id):
+            return USERS[unicode(user_id)]
+
+        # This will help us with the possibility of typoes in the tests. Now
+        # we shouldn't have to check each response to help us set up state
+        # (such as login pages) to make sure it worked: we will always
+        # get an exception raised (rather than return a 404 response)
+        @self.app.errorhandler(404)
+        def handle_404(e):
+            raise e
+
+        unittest.TestCase.setUp(self)
+
+    def test_unauthorized_uses_host_from_next_url(self):
+        self.login_manager.login_view = 'login'
+        self.app.config['FORCE_HOST_FOR_REDIRECTS'] = None
+
+        @self.app.route('/login')
+        def login():
+            return session.pop('next', '')
+
+        with self.app.test_client() as c:
+            result = c.get('/secret', base_url='http://foo.com')
+            self.assertEqual(result.status_code, 302)
+            self.assertEqual(result.location,
+                             'http://foo.com/login?next=%2Fsecret')
+
+    def test_unauthorized_uses_host_from_config_when_available(self):
+        self.login_manager.login_view = 'login'
+        self.app.config['FORCE_HOST_FOR_REDIRECTS'] = 'good.com'
+
+        @self.app.route('/login')
+        def login():
+            return session.pop('next', '')
+
+        with self.app.test_client() as c:
+            result = c.get('/secret', base_url='http://bad.com')
+            self.assertEqual(result.status_code, 302)
+            self.assertEqual(result.location,
+                             'http://good.com/login?next=%2Fsecret')
+
+    def test_unauthorized_uses_host_from_x_forwarded_for_header(self):
+        self.login_manager.login_view = 'login'
+        self.app.config['FORCE_HOST_FOR_REDIRECTS'] = None
+
+        @self.app.route('/login')
+        def login():
+            return session.pop('next', '')
+
+        with self.app.test_client() as c:
+            headers = {
+                'X-Forwarded-Host': 'proxy.com',
+            }
+            result = c.get('/secret',
+                           base_url='http://foo.com',
+                           headers=headers)
+            self.assertEqual(result.status_code, 302)
+            self.assertEqual(result.location,
+                             'http://proxy.com/login?next=%2Fsecret')
+
+    def test_unauthorized_ignores_host_from_x_forwarded_for_header(self):
+        self.login_manager.login_view = 'login'
+        self.app.config['FORCE_HOST_FOR_REDIRECTS'] = 'good.com'
+
+        @self.app.route('/login')
+        def login():
+            return session.pop('next', '')
+
+        with self.app.test_client() as c:
+            headers = {
+                'X-Forwarded-Host': 'proxy.com',
+            }
+            result = c.get('/secret',
+                           base_url='http://foo.com',
+                           headers=headers)
+            self.assertEqual(result.status_code, 302)
+            self.assertEqual(result.location,
+                             'http://good.com/login?next=%2Fsecret')
