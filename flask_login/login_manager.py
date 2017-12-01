@@ -447,6 +447,9 @@ class LoginManager(object):
         # prepare data
         data = encode_cookie(text_type(session['user_id']))
 
+        if isinstance(duration, int):
+            duration = timedelta(seconds=duration)
+
         try:
             expires = datetime.utcnow() + duration
         except TypeError:

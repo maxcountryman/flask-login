@@ -679,6 +679,7 @@ class LoginTestCase(unittest.TestCase):
 
     def test_remember_me_custom_duration_uses_custom_cookie(self):
         name = self.app.config['REMEMBER_COOKIE_NAME'] = 'myname'
+        self.app.config['REMEMBER_COOKIE_DURATION'] = 172800
         duration = timedelta(hours=7)
         path = self.app.config['REMEMBER_COOKIE_PATH'] = '/mypath'
         domain = self.app.config['REMEMBER_COOKIE_DOMAIN'] = '.localhost.local'
@@ -706,8 +707,29 @@ class LoginTestCase(unittest.TestCase):
             self.assertLess(difference, timedelta(seconds=10), fail_msg)
             self.assertGreater(difference, timedelta(seconds=-10), fail_msg)
 
+    def test_remember_me_accepts_duration_as_int(self):
+        self.app.config['REMEMBER_COOKIE_DURATION'] = 172800
+        duration = timedelta(seconds=172800)
+        name = self.app.config['REMEMBER_COOKIE_NAME'] = 'myname'
+        domain = self.app.config['REMEMBER_COOKIE_DOMAIN'] = '.localhost.local'
+
+        with self.app.test_client() as c:
+            result = c.get('/login-notch-remember')
+            self.assertEqual(result.status_code, 200)
+
+            cookie = c.cookie_jar._cookies[domain]['/'][name]
+
+            expiration_date = datetime.utcfromtimestamp(cookie.expires)
+            expected_date = datetime.utcnow() + duration
+            difference = expected_date - expiration_date
+
+            fail_msg = 'The expiration date {0} was far from the expected {1}'
+            fail_msg = fail_msg.format(expiration_date, expected_date)
+            self.assertLess(difference, timedelta(seconds=10), fail_msg)
+            self.assertGreater(difference, timedelta(seconds=-10), fail_msg)
+
     def test_remember_me_with_invalid_duration_returns_500_response(self):
-        self.app.config['REMEMBER_COOKIE_DURATION'] = 123
+        self.app.config['REMEMBER_COOKIE_DURATION'] = '123'
 
         with self.app.test_client() as c:
             result = c.get('/login-notch-remember')
@@ -716,7 +738,7 @@ class LoginTestCase(unittest.TestCase):
     def test_remember_me_with_invalid_custom_duration_returns_500_resp(self):
         @self.app.route('/login-notch-remember-custom-invalid')
         def login_notch_remember_custom_invalid():
-            duration = 123
+            duration = '123'
             return unicode(login_user(notch, remember=True, duration=duration))
 
         with self.app.test_client() as c:
@@ -724,7 +746,7 @@ class LoginTestCase(unittest.TestCase):
             self.assertEqual(result.status_code, 500)
 
     def test_set_cookie_with_invalid_duration_raises_exception(self):
-        self.app.config['REMEMBER_COOKIE_DURATION'] = 123
+        self.app.config['REMEMBER_COOKIE_DURATION'] = '123'
 
         with self.assertRaises(Exception) as cm:
             with self.app.test_request_context():
