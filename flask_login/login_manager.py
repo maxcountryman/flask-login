@@ -419,6 +419,10 @@ class LoginManager(object):
 
     def _update_remember_cookie(self, response):
         # Don't modify the session unless there's something to do.
+        if 'remember' not in session and \
+                current_app.config.get('REMEMBER_COOKIE_REFRESH_EACH_REQUEST'):
+            session['remember'] = 'set'
+
         if 'remember' in session:
             operation = session.pop('remember', None)
 

@@ -8,7 +8,7 @@ import base64
 import collections
 from datetime import timedelta, datetime
 from contextlib import contextmanager
-from mock import ANY
+from mock import ANY, patch, Mock
 from semantic_version import Version
 
 
@@ -765,6 +765,49 @@ class LoginTestCase(unittest.TestCase):
         expected_exception_message = 'duration must be a ' \
             'datetime.timedelta, instead got: 123'
         self.assertIn(expected_exception_message, str(cm.exception))
+
+    def test_remember_me_refresh_every_request(self):
+        domain = self.app.config['REMEMBER_COOKIE_DOMAIN'] = '.localhost.local'
+        path = self.app.config['REMEMBER_COOKIE_PATH'] = '/'
+
+        # No refresh
+        self.app.config['REMEMBER_COOKIE_REFRESH_EACH_REQUEST'] = False
+        with self.app.test_client() as c:
+            c.get('/login-notch-remember')
+            self.assertIn('remember', c.cookie_jar._cookies[domain][path])
+            expiration_date_1 = datetime.utcfromtimestamp(
+                c.cookie_jar._cookies[domain][path]['remember'].expires)
+
+            self._delete_session(c)
+
+            c.get('/username')
+            self.assertIn('remember', c.cookie_jar._cookies[domain][path])
+            expiration_date_2 = datetime.utcfromtimestamp(
+                c.cookie_jar._cookies[domain][path]['remember'].expires)
+            self.assertEqual(expiration_date_1, expiration_date_2)
+
+        # With refresh (mock datetime's `utcnow`)
+        with patch('flask_login.login_manager.datetime') as mock_dt:
+            self.app.config['REMEMBER_COOKIE_REFRESH_EACH_REQUEST'] = True
+            now = datetime.utcnow()
+            mock_dt.utcnow = Mock(return_value=now)
+
+            with self.app.test_client() as c:
+                c.get('/login-notch-remember')
+                self.assertIn('remember', c.cookie_jar._cookies[domain][path])
+                expiration_date_1 = datetime.utcfromtimestamp(
+                    c.cookie_jar._cookies[domain][path]['remember'].expires)
+                self.assertIsNotNone(expiration_date_1)
+
+                self._delete_session(c)
+
+                mock_dt.utcnow = Mock(return_value=now + timedelta(seconds=1))
+                c.get('/username')
+                self.assertIn('remember', c.cookie_jar._cookies[domain][path])
+                expiration_date_2 = datetime.utcfromtimestamp(
+                    c.cookie_jar._cookies[domain][path]['remember'].expires)
+                self.assertIsNotNone(expiration_date_2)
+                self.assertNotEqual(expiration_date_1, expiration_date_2)
 
     def test_remember_me_is_unfresh(self):
         with self.app.test_client() as c:

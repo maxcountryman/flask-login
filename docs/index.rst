@@ -360,26 +360,30 @@ Cookie Settings
 ===============
 The details of the cookie can be customized in the application settings.
 
-=========================== =================================================
-`REMEMBER_COOKIE_NAME`      The name of the cookie to store the "remember me"
-                            information in. **Default:** ``remember_token``
-`REMEMBER_COOKIE_DURATION`  The amount of time before the cookie expires, as
-                            a `datetime.timedelta` object.
-                            **Default:** 365 days (1 non-leap Gregorian year)
-`REMEMBER_COOKIE_DOMAIN`    If the "Remember Me" cookie should cross domains,
-                            set the domain value here (i.e. ``.example.com``
-                            would allow the cookie to be used on all
-                            subdomains of ``example.com``).
-                            **Default:** `None`
-`REMEMBER_COOKIE_PATH`      Limits the "Remember Me" cookie to a certain path.
-                            **Default:** ``/``
-`REMEMBER_COOKIE_SECURE`    Restricts the "Remember Me" cookie's scope to
-                            secure channels (typically HTTPS).
-                            **Default:** `None`
-`REMEMBER_COOKIE_HTTPONLY`  Prevents the "Remember Me" cookie from being
-                            accessed by client-side scripts.
-                            **Default:** `False`
-=========================== =================================================
+====================================== =================================================
+`REMEMBER_COOKIE_NAME`                 The name of the cookie to store the "remember me"
+                                       information in. **Default:** ``remember_token``
+`REMEMBER_COOKIE_DURATION`             The amount of time before the cookie expires, as
+                                       a `datetime.timedelta` object.
+                                       **Default:** 365 days (1 non-leap Gregorian year)
+`REMEMBER_COOKIE_DOMAIN`               If the "Remember Me" cookie should cross domains,
+                                       set the domain value here (i.e. ``.example.com``
+                                       would allow the cookie to be used on all
+                                       subdomains of ``example.com``).
+                                       **Default:** `None`
+`REMEMBER_COOKIE_PATH`                 Limits the "Remember Me" cookie to a certain path.
+                                       **Default:** ``/``
+`REMEMBER_COOKIE_SECURE`               Restricts the "Remember Me" cookie's scope to
+                                       secure channels (typically HTTPS).
+                                       **Default:** `None`
+`REMEMBER_COOKIE_HTTPONLY`             Prevents the "Remember Me" cookie from being
+                                       accessed by client-side scripts.
+                                       **Default:** `False`
+`REMEMBER_COOKIE_REFRESH_EACH_REQUEST` If set to `True` the cookie is refreshed on every
+                                       request, which bumps the lifetime. Works like
+                                       Flask's `SESSION_REFRESH_EACH_REQUEST`.
+                                       **Default:** `False`
+====================================== =================================================
 
 
 Session Protection
