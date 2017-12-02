@@ -7,7 +7,7 @@ Here you can see the full list of changes between each Flask-Login release.
 Version 0.4.1
 -------------
 
-Unreleased
+Released on December 2nd, 2017
 
 - New config option USE_SESSION_FOR_NEXT to enable storing next url in session
   instead of url. #330
