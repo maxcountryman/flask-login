@@ -81,11 +81,11 @@ class LoginManager(object):
 
         self.id_attribute = ID_ATTRIBUTE
 
-        self.user_callback = None
+        self._user_callback = None
 
-        self.header_callback = None
+        self._header_callback = None
 
-        self.request_callback = None
+        self._request_callback = None
 
         self._session_identifier_generator = _create_identifier
 
@@ -185,7 +185,7 @@ class LoginManager(object):
         :param callback: The callback for retrieving a user object.
         :type callback: callable
         '''
-        self.user_callback = callback
+        self._user_callback = callback
         return callback
 
     def header_loader(self, callback):
@@ -202,7 +202,7 @@ class LoginManager(object):
         '''
         print('LoginManager.header_loader is deprecated. Use ' +
               'LoginManager.request_loader instead.')
-        self.header_callback = callback
+        self._header_callback = callback
         return callback
 
     def request_loader(self, callback):
@@ -214,7 +214,7 @@ class LoginManager(object):
         :param callback: The callback for retrieving a user object.
         :type callback: callable
         '''
-        self.request_callback = callback
+        self._request_callback = callback
         return callback
 
     def unauthorized_handler(self, callback):
@@ -298,7 +298,7 @@ class LoginManager(object):
     def _load_user(self):
         '''Loads user from session or remember_me cookie as applicable'''
 
-        if self.user_callback is None and self.request_callback is None:
+        if self._user_callback is None and self._request_callback is None:
             raise Exception(
                 "Missing user_loader or request_loader. Refer to "
                 "http://flask-login.readthedocs.io/#how-it-works "
@@ -314,8 +314,8 @@ class LoginManager(object):
 
         # Load user from Flask Session
         user_id = session.get('user_id')
-        if user_id is not None and self.user_callback is not None:
-            user = self.user_callback(user_id)
+        if user_id is not None and self._user_callback is not None:
+            user = self._user_callback(user_id)
 
         # Load user from Remember Me Cookie or Request Loader
         if user is None:
@@ -327,7 +327,7 @@ class LoginManager(object):
             if has_cookie:
                 cookie = request.cookies[cookie_name]
                 user = self._load_user_from_remember_cookie(cookie)
-            elif self.request_callback:
+            elif self._request_callback:
                 user = self._load_user_from_request(request)
             elif header_name in request.headers:
                 user = self._load_user_from_header(request.headers[header_name])
@@ -367,8 +367,8 @@ class LoginManager(object):
             session['user_id'] = user_id
             session['_fresh'] = False
             user = None
-            if self.user_callback:
-                user = self.user_callback(user_id)
+            if self._user_callback:
+                user = self._user_callback(user_id)
             if user is not None:
                 app = current_app._get_current_object()
                 user_loaded_from_cookie.send(app, user=user)
@@ -376,8 +376,8 @@ class LoginManager(object):
         return None
 
     def _load_user_from_header(self, header):
-        if self.header_callback:
-            user = self.header_callback(header)
+        if self._header_callback:
+            user = self._header_callback(header)
             if user is not None:
                 app = current_app._get_current_object()
                 user_loaded_from_header.send(app, user=user)
@@ -385,8 +385,8 @@ class LoginManager(object):
         return None
 
     def _load_user_from_request(self, request):
-        if self.request_callback:
-            user = self.request_callback(request)
+        if self._request_callback:
+            user = self._request_callback(request)
             if user is not None:
                 app = current_app._get_current_object()
                 user_loaded_from_request.send(app, user=user)

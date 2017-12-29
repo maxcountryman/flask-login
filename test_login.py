@@ -383,7 +383,7 @@ class LoginTestCase(unittest.TestCase):
     def test_login_user_with_header(self):
         user_id = 2
         user_name = USERS[user_id].name
-        self.login_manager.request_callback = None
+        self.login_manager._request_callback = None
         with self.app.test_client() as c:
             basic_fmt = 'Basic {0}'
             decoded = bytes.decode(base64.b64encode(str.encode(str(user_id))))
@@ -394,7 +394,7 @@ class LoginTestCase(unittest.TestCase):
     def test_login_invalid_user_with_header(self):
         user_id = 9000
         user_name = u'Anonymous'
-        self.login_manager.request_callback = None
+        self.login_manager._request_callback = None
         with self.app.test_client() as c:
             basic_fmt = 'Basic {0}'
             decoded = bytes.decode(base64.b64encode(str.encode(str(user_id))))
@@ -857,7 +857,7 @@ class LoginTestCase(unittest.TestCase):
     def test_user_loaded_from_header_fired(self):
         user_id = 1
         user_name = USERS[user_id].name
-        self.login_manager.request_callback = None
+        self.login_manager._request_callback = None
         with self.app.test_client() as c:
             with listen_to(user_loaded_from_header) as listener:
                 headers = [
@@ -1305,7 +1305,7 @@ class LoginViaRequestTestCase(unittest.TestCase):
         unittest.TestCase.setUp(self)
 
     def test_has_no_user_loader_callback(self):
-        self.assertIsNone(self.login_manager.user_callback)
+        self.assertIsNone(self.login_manager._user_callback)
 
     def test_request_context_users_are_anonymous(self):
         with self.app.test_request_context():
