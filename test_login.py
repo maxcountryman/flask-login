@@ -194,9 +194,8 @@ class InitializationTestCase(unittest.TestCase):
             session['user_id'] = '2'
             with self.assertRaises(Exception) as cm:
                 login_manager._load_user()
-            expected_exception_message = 'Missing user_loader or request_loader'
-            self.assertTrue(
-                str(cm.exception).startswith(expected_exception_message))
+            expected_message = 'Missing user_loader or request_loader'
+            self.assertTrue(str(cm.exception).startswith(expected_message))
 
 
 class MethodViewLoginTestCase(unittest.TestCase):

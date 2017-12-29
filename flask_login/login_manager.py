@@ -330,7 +330,8 @@ class LoginManager(object):
             elif self._request_callback:
                 user = self._load_user_from_request(request)
             elif header_name in request.headers:
-                user = self._load_user_from_header(request.headers[header_name])
+                header = request.headers[header_name]
+                user = self._load_user_from_header(header)
 
         return self._update_request_context_with_user(user)
 
