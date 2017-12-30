@@ -325,10 +325,6 @@ class LoginTestCase(unittest.TestCase):
 
         unittest.TestCase.setUp(self)
 
-    def _get_remember_cookie(self, test_client):
-        our_cookies = test_client.cookie_jar._cookies['localhost.local']['/']
-        return our_cookies[self.remember_cookie_name]
-
     def _delete_session(self, c):
         # Helper method to cause the session to be deleted
         # as if the browser was closed. This will remove
@@ -1004,6 +1000,16 @@ class LoginTestCase(unittest.TestCase):
             # "after_request" handlers that call _update_remember_cookie.
             # Ensure that if nothing changed the session is not modified.
             self.assertFalse(session.modified)
+
+    def test_invalid_remember_cookie(self):
+        domain = self.app.config['REMEMBER_COOKIE_DOMAIN'] = '.localhost.local'
+        with self.app.test_client() as c:
+            c.get('/login-notch-remember')
+            with c.session_transaction() as sess:
+                sess['user_id'] = None
+            c.set_cookie(domain, self.remember_cookie_name, 'foo')
+            result = c.get('/username')
+            self.assertEqual(u'Anonymous', result.data.decode('utf-8'))
 
     #
     # Session Protection
