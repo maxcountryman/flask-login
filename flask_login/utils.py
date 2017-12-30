@@ -176,7 +176,7 @@ def login_user(user, remember=False, duration=None, force=False, fresh=True):
                 raise Exception('duration must be a datetime.timedelta, '
                                 'instead got: {0}'.format(duration))
 
-    _request_ctx_stack.top.user = user
+    current_app.login_manager._update_request_context_with_user(user)
     user_logged_in.send(current_app._get_current_object(), user=_get_user())
     return True
 
@@ -203,7 +203,7 @@ def logout_user():
 
     user_logged_out.send(current_app._get_current_object(), user=user)
 
-    current_app.login_manager.reload_user()
+    current_app.login_manager._update_request_context_with_user()
     return True
 
 

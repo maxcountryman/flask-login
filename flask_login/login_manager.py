@@ -21,7 +21,7 @@ from .mixins import AnonymousUserMixin
 from .signals import (user_loaded_from_cookie, user_loaded_from_header,
                       user_loaded_from_request, user_unauthorized,
                       user_needs_refresh, user_accessed, session_protected)
-from .utils import (_get_user, login_url as make_login_url, _create_identifier,
+from .utils import (login_url as make_login_url, _create_identifier,
                     _user_context_processor, encode_cookie, decode_cookie,
                     make_next_param, expand_login_view)
 
@@ -75,17 +75,17 @@ class LoginManager(object):
         #: and ``self.needs_refresh_message``
         self.localize_callback = None
 
-        self.user_callback = None
-
         self.unauthorized_callback = None
 
         self.needs_refresh_callback = None
 
         self.id_attribute = ID_ATTRIBUTE
 
-        self.header_callback = None
+        self._user_callback = None
 
-        self.request_callback = None
+        self._header_callback = None
+
+        self._request_callback = None
 
         self._session_identifier_generator = _create_identifier
 
@@ -185,7 +185,7 @@ class LoginManager(object):
         :param callback: The callback for retrieving a user object.
         :type callback: callable
         '''
-        self.user_callback = callback
+        self._user_callback = callback
         return callback
 
     def header_loader(self, callback):
@@ -200,7 +200,9 @@ class LoginManager(object):
         :param callback: The callback for retrieving a user object.
         :type callback: callable
         '''
-        self.header_callback = callback
+        print('LoginManager.header_loader is deprecated. Use ' +
+              'LoginManager.request_loader instead.')
+        self._header_callback = callback
         return callback
 
     def request_loader(self, callback):
@@ -212,7 +214,7 @@ class LoginManager(object):
         :param callback: The callback for retrieving a user object.
         :type callback: callable
         '''
-        self.request_callback = callback
+        self._request_callback = callback
         return callback
 
     def unauthorized_handler(self, callback):
@@ -287,87 +289,64 @@ class LoginManager(object):
 
         return redirect(redirect_url)
 
-    def reload_user(self, user=None):
-        '''
-        This set the ctx.user with the user object loaded by your customized
-        user_loader callback function, which should retrieved the user object
-        with the user_id got from session.
+    def _update_request_context_with_user(self, user=None):
+        '''Store the given user as ctx.user.'''
 
-        Syntax example:
-        from flask_login import LoginManager
-        @login_manager.user_loader
-        def any_valid_func_name(user_id):
-            # get your user object using the given user_id,
-            # if you use SQLAlchemy, for example:
-            user_obj = User.query.get(int(user_id))
-            return user_obj
-
-        Reason to let YOU define this self.user_callback:
-            Because we won't know how/where you will load you user object.
-        '''
         ctx = _request_ctx_stack.top
-
-        if user is None:
-            user_id = session.get('user_id')
-            if user_id is None:
-                ctx.user = self.anonymous_user()
-            else:
-                if self.user_callback is None:
-                    raise Exception(
-                        "No user_loader has been installed for this "
-                        "LoginManager. Refer to "
-                        "https://flask-login.readthedocs.io/"
-                        "en/latest/#how-it-works for more info.")
-                user = self.user_callback(user_id)
-                if user is None:
-                    ctx.user = self.anonymous_user()
-                else:
-                    ctx.user = user
-        else:
-            ctx.user = user
+        ctx.user = self.anonymous_user() if user is None else user
 
     def _load_user(self):
         '''Loads user from session or remember_me cookie as applicable'''
+
+        if self._user_callback is None and self._request_callback is None:
+            raise Exception(
+                "Missing user_loader or request_loader. Refer to "
+                "http://flask-login.readthedocs.io/#how-it-works "
+                "for more info.")
+
         user_accessed.send(current_app._get_current_object())
 
-        # first check SESSION_PROTECTION
-        config = current_app.config
-        if config.get('SESSION_PROTECTION', self.session_protection):
-            deleted = self._session_protection()
-            if deleted:
-                return self.reload_user()
+        # Check SESSION_PROTECTION
+        if self._session_protection_failed():
+            return self._update_request_context_with_user()
 
-        # If a remember cookie is set, and the session is not, move the
-        # cookie user ID to the session.
-        #
-        # However, the session may have been set if the user has been
-        # logged out on this request, 'remember' would be set to clear,
-        # so we should check for that and not restore the session.
-        is_missing_user_id = 'user_id' not in session
-        if is_missing_user_id:
+        user = None
+
+        # Load user from Flask Session
+        user_id = session.get('user_id')
+        if user_id is not None and self._user_callback is not None:
+            user = self._user_callback(user_id)
+
+        # Load user from Remember Me Cookie or Request Loader
+        if user is None:
+            config = current_app.config
             cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
             header_name = config.get('AUTH_HEADER_NAME', AUTH_HEADER_NAME)
             has_cookie = (cookie_name in request.cookies and
                           session.get('remember') != 'clear')
             if has_cookie:
-                return self._load_from_cookie(request.cookies[cookie_name])
-            elif self.request_callback:
-                return self._load_from_request(request)
+                cookie = request.cookies[cookie_name]
+                user = self._load_user_from_remember_cookie(cookie)
+            elif self._request_callback:
+                user = self._load_user_from_request(request)
             elif header_name in request.headers:
-                return self._load_from_header(request.headers[header_name])
+                header = request.headers[header_name]
+                user = self._load_user_from_header(header)
 
-        return self.reload_user()
+        return self._update_request_context_with_user(user)
 
-    def _session_protection(self):
+    def _session_protection_failed(self):
         sess = session._get_current_object()
         ident = self._session_identifier_generator()
 
         app = current_app._get_current_object()
         mode = app.config.get('SESSION_PROTECTION', self.session_protection)
 
+        if not mode or mode not in ['basic', 'strong']:
+            return False
+
         # if the sess is empty, it's an anonymous user or just logged out
         # so we can skip this
-
         if sess and ident != sess.get('_id', None):
             if mode == 'basic' or sess.permanent:
                 sess['_fresh'] = False
@@ -383,39 +362,37 @@ class LoginManager(object):
 
         return False
 
-    def _load_from_cookie(self, cookie):
+    def _load_user_from_remember_cookie(self, cookie):
         user_id = decode_cookie(cookie)
         if user_id is not None:
             session['user_id'] = user_id
             session['_fresh'] = False
+            user = None
+            if self._user_callback:
+                user = self._user_callback(user_id)
+            if user is not None:
+                app = current_app._get_current_object()
+                user_loaded_from_cookie.send(app, user=user)
+                return user
+        return None
 
-        self.reload_user()
+    def _load_user_from_header(self, header):
+        if self._header_callback:
+            user = self._header_callback(header)
+            if user is not None:
+                app = current_app._get_current_object()
+                user_loaded_from_header.send(app, user=user)
+                return user
+        return None
 
-        if _request_ctx_stack.top.user is not None:
-            app = current_app._get_current_object()
-            user_loaded_from_cookie.send(app, user=_get_user())
-
-    def _load_from_header(self, header):
-        user = None
-        if self.header_callback:
-            user = self.header_callback(header)
-        if user is not None:
-            self.reload_user(user=user)
-            app = current_app._get_current_object()
-            user_loaded_from_header.send(app, user=_get_user())
-        else:
-            self.reload_user()
-
-    def _load_from_request(self, request):
-        user = None
-        if self.request_callback:
-            user = self.request_callback(request)
-        if user is not None:
-            self.reload_user(user=user)
-            app = current_app._get_current_object()
-            user_loaded_from_request.send(app, user=_get_user())
-        else:
-            self.reload_user()
+    def _load_user_from_request(self, request):
+        if self._request_callback:
+            user = self._request_callback(request)
+            if user is not None:
+                app = current_app._get_current_object()
+                user_loaded_from_request.send(app, user=user)
+                return user
+        return None
 
     def _update_remember_cookie(self, response):
         # Don't modify the session unless there's something to do.

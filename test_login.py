@@ -117,7 +117,7 @@ USERS = {1: notch, 2: steve, 3: creeper, u'佐藤': germanjapanese}
 
 
 class AboutTestCase(unittest.TestCase):
-    """Make sure we can get version and other info."""
+    '''Make sure we can get version and other info.'''
 
     def test_have_about_data(self):
         self.assertTrue(__title__ is not None)
@@ -141,6 +141,10 @@ class StaticTestCase(unittest.TestCase):
         lm = LoginManager()
         lm.init_app(app)
 
+        @lm.user_loader
+        def load_user(user_id):
+            return USERS[int(user_id)]
+
         with app.test_client() as c:
             c.get('/static/favicon.ico')
             self.assertTrue(current_user.is_anonymous)
@@ -151,6 +155,10 @@ class StaticTestCase(unittest.TestCase):
         app.secret_key = 'this is a temp key'
         lm = LoginManager()
         lm.init_app(app)
+
+        @lm.user_loader
+        def load_user(user_id):
+            return USERS[int(user_id)]
 
         with app.test_client() as c:
             with listen_to(user_accessed) as listener:
@@ -185,10 +193,9 @@ class InitializationTestCase(unittest.TestCase):
         with self.app.test_request_context():
             session['user_id'] = '2'
             with self.assertRaises(Exception) as cm:
-                login_manager.reload_user()
-            expected_exception_message = 'No user_loader has been installed'
-            self.assertTrue(
-                str(cm.exception).startswith(expected_exception_message))
+                login_manager._load_user()
+            expected_message = 'Missing user_loader or request_loader'
+            self.assertTrue(str(cm.exception).startswith(expected_message))
 
 
 class MethodViewLoginTestCase(unittest.TestCase):
@@ -318,10 +325,6 @@ class LoginTestCase(unittest.TestCase):
 
         unittest.TestCase.setUp(self)
 
-    def _get_remember_cookie(self, test_client):
-        our_cookies = test_client.cookie_jar._cookies['localhost.local']['/']
-        return our_cookies[self.remember_cookie_name]
-
     def _delete_session(self, c):
         # Helper method to cause the session to be deleted
         # as if the browser was closed. This will remove
@@ -375,7 +378,7 @@ class LoginTestCase(unittest.TestCase):
     def test_login_user_with_header(self):
         user_id = 2
         user_name = USERS[user_id].name
-        self.login_manager.request_callback = None
+        self.login_manager._request_callback = None
         with self.app.test_client() as c:
             basic_fmt = 'Basic {0}'
             decoded = bytes.decode(base64.b64encode(str.encode(str(user_id))))
@@ -386,7 +389,7 @@ class LoginTestCase(unittest.TestCase):
     def test_login_invalid_user_with_header(self):
         user_id = 9000
         user_name = u'Anonymous'
-        self.login_manager.request_callback = None
+        self.login_manager._request_callback = None
         with self.app.test_client() as c:
             basic_fmt = 'Basic {0}'
             decoded = bytes.decode(base64.b64encode(str.encode(str(user_id))))
@@ -849,7 +852,7 @@ class LoginTestCase(unittest.TestCase):
     def test_user_loaded_from_header_fired(self):
         user_id = 1
         user_name = USERS[user_id].name
-        self.login_manager.request_callback = None
+        self.login_manager._request_callback = None
         with self.app.test_client() as c:
             with listen_to(user_loaded_from_header) as listener:
                 headers = [
@@ -997,6 +1000,16 @@ class LoginTestCase(unittest.TestCase):
             # "after_request" handlers that call _update_remember_cookie.
             # Ensure that if nothing changed the session is not modified.
             self.assertFalse(session.modified)
+
+    def test_invalid_remember_cookie(self):
+        domain = self.app.config['REMEMBER_COOKIE_DOMAIN'] = '.localhost.local'
+        with self.app.test_client() as c:
+            c.get('/login-notch-remember')
+            with c.session_transaction() as sess:
+                sess['user_id'] = None
+            c.set_cookie(domain, self.remember_cookie_name, 'foo')
+            result = c.get('/username')
+            self.assertEqual(u'Anonymous', result.data.decode('utf-8'))
 
     #
     # Session Protection
@@ -1244,6 +1257,117 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_request_context():
             _ucp = self.app.context_processor(_user_context_processor)
             self.assertIsInstance(_ucp()['current_user'], AnonymousUserMixin)
+
+
+class LoginViaRequestTestCase(unittest.TestCase):
+    ''' Tests for LoginManager.request_loader.'''
+
+    def setUp(self):
+        self.app = Flask(__name__)
+        self.app.config['SECRET_KEY'] = 'deterministic'
+        self.app.config['SESSION_PROTECTION'] = None
+        self.remember_cookie_name = 'remember'
+        self.app.config['REMEMBER_COOKIE_NAME'] = self.remember_cookie_name
+        self.login_manager = LoginManager()
+        self.login_manager.init_app(self.app)
+        self.login_manager._login_disabled = False
+
+        @self.app.route('/')
+        def index():
+            return u'Welcome!'
+
+        @self.app.route('/login-notch')
+        def login_notch():
+            return unicode(login_user(notch))
+
+        @self.app.route('/username')
+        def username():
+            if current_user.is_authenticated:
+                return current_user.name
+            return u'Anonymous', 401
+
+        @self.app.route('/logout')
+        def logout():
+            return unicode(logout_user())
+
+        @self.login_manager.request_loader
+        def load_user_from_request(request):
+            user_id = request.args.get('user_id') or session.get('user_id')
+            try:
+                user_id = int(float(user_id))
+            except TypeError:
+                pass
+            return USERS.get(user_id)
+
+        # This will help us with the possibility of typoes in the tests. Now
+        # we shouldn't have to check each response to help us set up state
+        # (such as login pages) to make sure it worked: we will always
+        # get an exception raised (rather than return a 404 response)
+        @self.app.errorhandler(404)
+        def handle_404(e):
+            raise e
+
+        unittest.TestCase.setUp(self)
+
+    def test_has_no_user_loader_callback(self):
+        self.assertIsNone(self.login_manager._user_callback)
+
+    def test_request_context_users_are_anonymous(self):
+        with self.app.test_request_context():
+            self.assertTrue(current_user.is_anonymous)
+
+    def test_defaults_anonymous(self):
+        with self.app.test_client() as c:
+            result = c.get('/username')
+            self.assertEqual(result.status_code, 401)
+
+    def test_login_via_request(self):
+        user_id = 2
+        user_name = USERS[user_id].name
+        with self.app.test_client() as c:
+            url = '/username?user_id={user_id}'.format(user_id=user_id)
+            result = c.get(url)
+            self.assertEqual(user_name, result.data.decode('utf-8'))
+
+    def test_login_via_request_uses_cookie_when_already_logged_in(self):
+        user_id = 2
+        user_name = notch.name
+        with self.app.test_client() as c:
+            c.get('/login-notch')
+            url = '/username'
+            result = c.get(url)
+            self.assertEqual(user_name, result.data.decode('utf-8'))
+            url = '/username?user_id={user_id}'.format(user_id=user_id)
+            result = c.get(url)
+            self.assertEqual(u'Steve', result.data.decode('utf-8'))
+
+    def test_login_invalid_user_with_request(self):
+        user_id = 9000
+        with self.app.test_client() as c:
+            url = '/username?user_id={user_id}'.format(user_id=user_id)
+            result = c.get(url)
+            self.assertEqual(result.status_code, 401)
+
+    def test_login_invalid_user_with_request_when_already_logged_in(self):
+        user_id = 9000
+        with self.app.test_client() as c:
+            url = '/login-notch'
+            result = c.get(url)
+            self.assertEqual(u'True', result.data.decode('utf-8'))
+            url = '/username?user_id={user_id}'.format(user_id=user_id)
+            result = c.get(url)
+            self.assertEqual(result.status_code, 401)
+
+    def test_login_user_with_request_does_not_modify_session(self):
+        user_id = 2
+        user_name = USERS[user_id].name
+        with self.app.test_client() as c:
+            url = '/username?user_id={user_id}'.format(user_id=user_id)
+            result = c.get(url)
+            self.assertEqual(user_name, result.data.decode('utf-8'))
+            url = '/username'
+            result = c.get(url)
+            self.assertEqual(u'Anonymous', result.data.decode('utf-8'))
 
 
 class TestLoginUrlGeneration(unittest.TestCase):
