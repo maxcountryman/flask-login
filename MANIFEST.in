@@ -1,1 +1,3 @@
 include README.md LICENSE
+include test_login.py
+graft doc
