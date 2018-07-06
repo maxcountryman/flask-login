@@ -305,22 +305,22 @@ Alternative Tokens
 ==================
 Using the user ID as the value of the remember token means you must change the
 user's ID to invalidate their login sessions. One way to improve this is to use
-an alternative session token instead of the user's ID. For example::
+an alternative user id instead of the user's ID. For example::
 
     @login_manager.user_loader
-    def load_user(session_token):
-        return User.query.filter_by(session_token=session_token).first()
+    def load_user(user_id):
+        return User.query.filter_by(alternative_id=user_id).first()
 
-Then the `~UserMixin.get_id` method of your User class would return the session
-token instead of the user's ID::
+Then the `~UserMixin.get_id` method of your User class would return the
+alternative id instead of the user's primary ID::
 
     def get_id(self):
-        return unicode(self.session_token)
+        return unicode(self.alternative_id)
 
-This way you are free to change the user's session token to a new randomly
+This way you are free to change the user's alternative id to a new randomly
 generated value when the user changes their password, which would ensure their
-old authentication sessions will cease to be valid. Note that the session
-token must still uniquely identify the user... think of it as a second user ID.
+old authentication sessions will cease to be valid. Note that the alternative
+id must still uniquely identify the user... think of it as a second user ID.
 
 
 Fresh Logins
