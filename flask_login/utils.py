@@ -195,6 +195,9 @@ def logout_user():
     if '_fresh' in session:
         session.pop('_fresh')
 
+    if '_id' in session:
+        session.pop('_id')
+
     cookie_name = current_app.config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
     if cookie_name in request.cookies:
         session['remember'] = 'clear'

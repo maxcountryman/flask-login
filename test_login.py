@@ -518,7 +518,7 @@ class LoginTestCase(unittest.TestCase):
                              'http://localhost/login')
             self.assertEqual(c.get('/login').data.decode('utf-8'), '/secret')
 
-    def test_unauthorized_with_next_in_strong_session_where_current_user_is_called(self):
+    def test_unauthorized_with_next_in_strong_session(self):
         self.login_manager.login_view = 'login'
         self.app.config['SESSION_PROTECTION'] = 'strong'
         self.app.config['USE_SESSION_FOR_NEXT'] = True
