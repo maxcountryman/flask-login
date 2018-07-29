@@ -169,7 +169,7 @@ class LoginManager(object):
         config = current_app.config
         if config.get('USE_SESSION_FOR_NEXT', USE_SESSION_FOR_NEXT):
             login_url = expand_login_view(login_view)
-            session['_id'] = current_app.login_manager._session_identifier_generator()
+            session['_id'] = self._session_identifier_generator()
             session['next'] = make_next_param(login_url, request.url)
             redirect_url = make_login_url(login_view)
         else:
@@ -282,7 +282,7 @@ class LoginManager(object):
         config = current_app.config
         if config.get('USE_SESSION_FOR_NEXT', USE_SESSION_FOR_NEXT):
             login_url = expand_login_view(self.refresh_view)
-            session['_id'] = current_app.login_manager._session_identifier_generator()
+            session['_id'] = self._session_identifier_generator()
             session['next'] = make_next_param(login_url, request.url)
             redirect_url = make_login_url(self.refresh_view)
         else:
