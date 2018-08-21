@@ -187,6 +187,9 @@ class InitializationTestCase(unittest.TestCase):
     def test_login_disabled_is_set(self):
         login_manager = LoginManager(self.app, add_context_processor=True)
         self.assertFalse(login_manager._login_disabled)
+        with self.app.app_context():
+            login_manager._login_disabled = True
+            self.assertTrue(login_manager._login_disabled)
 
     def test_no_user_loader_raises(self):
         login_manager = LoginManager(self.app, add_context_processor=True)
@@ -203,7 +206,7 @@ class MethodViewLoginTestCase(unittest.TestCase):
         self.app = Flask(__name__)
         self.login_manager = LoginManager()
         self.login_manager.init_app(self.app)
-        self.login_manager._login_disabled = False
+        self.app.config['LOGIN_DISABLED'] = False
 
         class SecretEndpoint(MethodView):
             decorators = [
@@ -237,7 +240,7 @@ class LoginTestCase(unittest.TestCase):
         self.app.config['REMEMBER_COOKIE_NAME'] = self.remember_cookie_name
         self.login_manager = LoginManager()
         self.login_manager.init_app(self.app)
-        self.login_manager._login_disabled = False
+        self.app.config['LOGIN_DISABLED'] = False
 
         @self.app.route('/')
         def index():
@@ -1224,7 +1227,7 @@ class LoginTestCase(unittest.TestCase):
         def protected():
             return u'Access Granted'
 
-        self.app.login_manager._login_disabled = True
+        self.app.config['LOGIN_DISABLED'] = True
 
         with self.app.test_client() as c:
             result = c.get('/protected')
@@ -1289,7 +1292,7 @@ class LoginViaRequestTestCase(unittest.TestCase):
         self.app.config['REMEMBER_COOKIE_NAME'] = self.remember_cookie_name
         self.login_manager = LoginManager()
         self.login_manager.init_app(self.app)
-        self.login_manager._login_disabled = False
+        self.app.config['LOGIN_DISABLED'] = False
 
         @self.app.route('/')
         def index():
@@ -1540,7 +1543,7 @@ class UnicodeCookieUserIDTestCase(unittest.TestCase):
         self.app.config['REMEMBER_COOKIE_NAME'] = self.remember_cookie_name
         self.login_manager = LoginManager()
         self.login_manager.init_app(self.app)
-        self.login_manager._login_disabled = False
+        self.app.config['LOGIN_DISABLED'] = False
 
         @self.app.route('/')
         def index():
@@ -1608,7 +1611,7 @@ class StrictHostForRedirectsTestCase(unittest.TestCase):
         self.app.config['REMEMBER_COOKIE_NAME'] = self.remember_cookie_name
         self.login_manager = LoginManager()
         self.login_manager.init_app(self.app)
-        self.login_manager._login_disabled = False
+        self.app.config['LOGIN_DISABLED'] = False
 
         @self.app.route('/secret')
         def secret():
