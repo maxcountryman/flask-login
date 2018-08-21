@@ -10,7 +10,7 @@ import warnings
 from datetime import datetime, timedelta
 
 from flask import (_request_ctx_stack, abort, current_app, flash, redirect,
-                   request, session)
+                   has_app_context, request, session)
 
 from ._compat import text_type
 from .config import (COOKIE_NAME, COOKIE_DURATION, COOKIE_SECURE,
@@ -115,8 +115,6 @@ class LoginManager(object):
         '''
         app.login_manager = self
         app.after_request(self._update_remember_cookie)
-
-        self._login_disabled = app.config.get('LOGIN_DISABLED', False)
 
         if add_context_processor:
             app.context_processor(_user_context_processor)
@@ -455,3 +453,15 @@ class LoginManager(object):
         domain = config.get('REMEMBER_COOKIE_DOMAIN')
         path = config.get('REMEMBER_COOKIE_PATH', '/')
         response.delete_cookie(cookie_name, domain=domain, path=path)
+
+    @property
+    def _login_disabled(self):
+        """Legacy property, use app.config['LOGIN_DISABLED'] instead."""
+        if has_app_context():
+            return current_app.config.get('LOGIN_DISABLED', False)
+        return False
+
+    @_login_disabled.setter
+    def _login_disabled(self, newvalue):
+        """Legacy property setter, use app.config['LOGIN_DISABLED'] instead."""
+        current_app.config['LOGIN_DISABLED'] = newvalue

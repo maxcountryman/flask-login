@@ -257,7 +257,7 @@ def login_required(func):
     def decorated_view(*args, **kwargs):
         if request.method in EXEMPT_METHODS:
             return func(*args, **kwargs)
-        elif current_app.login_manager._login_disabled:
+        elif current_app.config.get('LOGIN_DISABLED'):
             return func(*args, **kwargs)
         elif not current_user.is_authenticated:
             return current_app.login_manager.unauthorized()
@@ -293,7 +293,7 @@ def fresh_login_required(func):
     def decorated_view(*args, **kwargs):
         if request.method in EXEMPT_METHODS:
             return func(*args, **kwargs)
-        elif current_app.login_manager._login_disabled:
+        elif current_app.config.get('LOGIN_DISABLED'):
             return func(*args, **kwargs)
         elif not current_user.is_authenticated:
             return current_app.login_manager.unauthorized()
