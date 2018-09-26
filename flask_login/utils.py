@@ -26,24 +26,32 @@ from .signals import user_logged_in, user_logged_out, user_login_confirmed
 current_user = LocalProxy(lambda: _get_user())
 
 
-def encode_cookie(payload):
+def encode_cookie(payload, key=None):
     '''
     This will encode a ``unicode`` value into a cookie, and sign that cookie
     with the app's secret key.
 
     :param payload: The value to encode, as `unicode`.
     :type payload: unicode
+
+    :param key: The key to use when creating the cookie digest. If not
+                specified, the SECRET_KEY value from app config will be used.
+    :type key: str
     '''
-    return u'{0}|{1}'.format(payload, _cookie_digest(payload))
+    return u'{0}|{1}'.format(payload, _cookie_digest(payload, key=key))
 
 
-def decode_cookie(cookie):
+def decode_cookie(cookie, key=None):
     '''
     This decodes a cookie given by `encode_cookie`. If verification of the
     cookie fails, ``None`` will be implicitly returned.
 
     :param cookie: An encoded cookie.
     :type cookie: str
+
+    :param key: The key to use when creating the cookie digest. If not
+                specified, the SECRET_KEY value from app config will be used.
+    :type key: str
     '''
     try:
         payload, digest = cookie.rsplit(u'|', 1)
@@ -52,7 +60,7 @@ def decode_cookie(cookie):
     except ValueError:
         return
 
-    if safe_str_cmp(_cookie_digest(payload), digest):
+    if safe_str_cmp(_cookie_digest(payload, key=key), digest):
         return payload
 
 
