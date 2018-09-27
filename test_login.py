@@ -1462,6 +1462,25 @@ class CookieEncodingTestCase(unittest.TestCase):
             self.assertIsNone(decode_cookie(u'Foo|BAD_BASH'))
             self.assertIsNone(decode_cookie(u'no bar'))
 
+    def test_cookie_encoding_with_key(self):
+        app = Flask(__name__)
+        app.config['SECRET_KEY'] = 'not-used'
+        key = 'deterministic'
+
+        # COOKIE = u'1|7d276051c1eec578ed86f6b8478f7f7d803a7970'
+
+        # Due to the restriction of 80 chars I have to break up the hash in two
+        h1 = u'0e9e6e9855fbe6df7906ec4737578a1d491b38d3fd5246c1561016e189d6516'
+        h2 = u'043286501ca43257c938e60aad77acec5ce916b94ca9d00c0bb6f9883ae4b82'
+        h3 = u'ae'
+        COOKIE = u'1|' + h1 + h2 + h3
+
+        with app.test_request_context():
+            self.assertEqual(COOKIE, encode_cookie(u'1', key=key))
+            self.assertEqual(u'1', decode_cookie(COOKIE, key=key))
+            self.assertIsNone(decode_cookie(u'Foo|BAD_BASH', key=key))
+            self.assertIsNone(decode_cookie(u'no bar', key=key))
+
 
 class SecretKeyTestCase(unittest.TestCase):
     def setUp(self):
