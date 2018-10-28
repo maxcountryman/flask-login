@@ -238,7 +238,7 @@ def login_required(func):
         @app.route('/post')
         @login_required
         def post():
-            pass
+            return a_response
 
     If there are only certain times you need to require that your user is
     logged in, you can do so with::

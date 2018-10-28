@@ -44,6 +44,8 @@ The most important part of an application that uses Flask-Login is the
 `LoginManager` class. You should create one for your application somewhere in
 your code, like this::
 
+    from flask_login import LoginManager
+
     login_manager = LoginManager()
 
 The login manager contains the code that lets your application and Flask-Login
@@ -111,12 +113,16 @@ function.
 
 .. code-block:: python
 
+    import flask
+    from flask_login import login_user
+
     @app.route('/login', methods=['GET', 'POST'])
     def login():
         # Here we use a class of some kind to represent and validate our
         # client-side form data. For example, WTForms is a library that will
         # handle this for us, and we use a custom LoginForm to validate.
         form = LoginForm()
+
         if form.validate_on_submit():
             # Login and validate the user.
             # user should be an instance of your `User` class
@@ -124,41 +130,58 @@ function.
 
             flask.flash('Logged in successfully.')
 
-            next = flask.request.args.get('next')
+            next_url = form.next_url.data
             # is_safe_url should check if the url is safe for redirects.
             # See http://flask.pocoo.org/snippets/62/ for an example.
-            if not is_safe_url(next):
+            if not is_safe_url(next_url):
                 return flask.abort(400)
 
-            return flask.redirect(next or flask.url_for('index'))
+            return flask.redirect(next_url or flask.url_for('index'))
+
+        # Pass the next URL along through the Login form.
+        form.next_url.data = flask.request.args.get('next')
         return flask.render_template('login.html', form=form)
 
-*Warning:* You MUST validate the value of the `next` parameter. If you do not,
+*Warning:* You MUST validate the value of the `next_url` parameter. If you do not,
 your application will be vulnerable to open redirects. For an example
 implementation of `is_safe_url` see `this Flask Snippet`_.
+
+See the `Flask-WTF documentation on creating forms`_ for examples on how to create
+your `LoginForm` class and corresponding template. Make sure your template
+includes the `{{ form.csrf_token }}` field, otherwise it will fail to validate.
+Also make sure to include a hidden `next_url` field so that it can be used to pass
+along the redirect url.
+
+See also the `Flask documentation on message flashing`_ for a demonstration on how
+to put flashed messages in your login form.
 
 It's that simple. You can then access the logged-in user with the
 `current_user` proxy, which is available in every template::
 
     {% if current_user.is_authenticated %}
-      Hi {{ current_user.name }}!
+      Hi {{ current_user.get_id() }}!
     {% endif %}
 
 Views that require your users to be logged in can be
 decorated with the `login_required` decorator::
 
+    from flask_login import login_required
+
     @app.route("/settings")
     @login_required
     def settings():
-        pass
+        return settings_response
 
 When the user is ready to log out::
+
+    import flask
+    from flask_login import login_required, logout_user
 
     @app.route("/logout")
     @login_required
     def logout():
         logout_user()
-        return redirect(somewhere)
+        return flask.redirect(somewhere)
 
 They will be logged out, and any cookies for their session will be cleaned up.
 
@@ -173,7 +196,7 @@ log in view. (If the login view is not set, it will abort with a 401 error.)
 The name of the log in view can be set as `LoginManager.login_view`.
 For example::
 
-    login_manager.login_view = "users.login"
+    login_manager.login_view = "login"
 
 The default message flashed is ``Please log in to access this page.`` To
 customize the message, set `LoginManager.login_message`::
@@ -211,6 +234,8 @@ to provide a `~LoginManager.header_loader` callback. This callback should behave
 the same as your `~LoginManager.user_loader` callback, except that it accepts
 a header value instead of a user id. For example::
 
+    import base64
+
     @login_manager.header_loader
     def load_user_from_header(header_val):
         header_val = header_val.replace('Basic ', '', 1)
@@ -235,6 +260,8 @@ Flask request instead of a user_id.
 
 For example, to support login from both a url argument and from Basic Auth
 using the `Authorization` header::
+
+    import base64
 
     @login_manager.request_loader
     def load_user_from_request(request):
@@ -595,3 +622,5 @@ signals in your code.
 
 .. _Flask documentation on signals: http://flask.pocoo.org/docs/signals/
 .. _this Flask Snippet: http://flask.pocoo.org/snippets/62/
+.. _Flask-WTF documentation on creating forms: https://flask-wtf.readthedocs.io/en/stable/quickstart.html
+.. _Flask documentation on message flashing: http://flask.pocoo.org/docs/patterns/flashing/
