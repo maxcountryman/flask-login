@@ -56,6 +56,15 @@ login with::
     login_manager.init_app(app)
 
 
+By default, Flask-Login uses sessions for authentication. This means you must
+set the secret key on your application, otherwise Flask will give you
+an error message telling you to do so. See the `Flask documentation on sessions`_
+to see how to set a secret key.
+
+*Warning:* Make SURE to use the given command in the
+"How to generate good secret keys" section to generate your own secret key.
+DO NOT use the example one.
+
 How it Works
 ============
 You will need to provide a `~LoginManager.user_loader` callback. This callback
@@ -595,3 +604,4 @@ signals in your code.
 
 .. _Flask documentation on signals: http://flask.pocoo.org/docs/signals/
 .. _this Flask Snippet: http://flask.pocoo.org/snippets/62/
+.. _Flask documentation on sessions: http://flask.pocoo.org/docs/quickstart/#sessions
