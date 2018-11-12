@@ -1,2 +1,2 @@
-flask==0.12
+flask>=0.12.3
 werkzeug==0.11.15
