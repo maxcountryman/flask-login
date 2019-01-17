@@ -423,7 +423,7 @@ generated will be stored. If it has an identifier, and it matches the one
 generated, then the request is OK.
 
 If the identifiers do not match in `basic` mode, or when the session is
-permanent, then the session will simply be marked as non-fresh, and anything
+permanent (and session protection is active), then the session will simply be marked as non-fresh, and anything
 requiring a fresh login will force the user to re-authenticate. (Of course,
 you must be already using fresh logins where appropriate for this to have an
 effect.)
