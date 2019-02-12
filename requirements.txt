@@ -1,2 +1,2 @@
 flask>=0.12.3
-werkzeug==0.14.1
+werkzeug>=0.14.0
