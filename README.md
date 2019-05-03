@@ -54,11 +54,14 @@ doesn't care how your data is stored so long as you tell it how to retrieve it!
 ```python
 # Our mock database.
 users = {'foo@bar.tld': {'password': 'secret'}}
+# Our mock apikey.
+apikeys = ['test-api-key']
 ```
 
-We also need to tell Flask-Login how to load a user from a Flask request and
-from its session. To do this we need to define our user object, a
-`user_loader` callback, and a `request_loader` callback.
+We also need to tell Flask-Login how to load a user from a Flask request and from its session.
+To do this we need to define our user object, a user_loader callback, and a request_loader callback.
+If you want to implement login function by only session cookie, you don't need to define `request_loader`.
+But if you use except session cookies, you must define `request_loader`.
 
 ```python
 class User(flask_login.UserMixin):
@@ -77,16 +80,11 @@ def user_loader(email):
 
 @login_manager.request_loader
 def request_loader(request):
-    email = request.form.get('email')
-    if email not in users:
+    apikey = request.cookies.get('TEST-APIKEY')
+    if apikey not in apikeys:
         return
-
     user = User()
-    user.id = email
-
-    # DO NOT ever store passwords in plaintext and always compare password
-    # hashes using constant-time comparison!
-    user.is_authenticated = request.form['password'] == users[email]['password']
+    user.id = apikey
 
     return user
 ```
