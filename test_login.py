@@ -13,6 +13,7 @@ from semantic_version import Version
 
 
 from werkzeug import __version__ as werkzeug_version
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask import (
     Flask,
     Blueprint,
@@ -1685,6 +1686,7 @@ class StrictHostForRedirectsTestCase(unittest.TestCase):
     def test_unauthorized_uses_host_from_x_forwarded_for_header(self):
         self.login_manager.login_view = 'login'
         self.app.config['FORCE_HOST_FOR_REDIRECTS'] = None
+        self.app.wsgi_app = ProxyFix(self.app.wsgi_app, x_host=1)
 
         @self.app.route('/login')
         def login():
