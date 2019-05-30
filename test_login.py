@@ -34,7 +34,8 @@ from flask_login import (LoginManager, UserMixin, AnonymousUserMixin,
                          user_needs_refresh, make_next_param, login_url,
                          login_fresh, login_required, session_protected,
                          fresh_login_required, confirm_login, encode_cookie,
-                         decode_cookie, set_login_view, user_accessed)
+                         decode_cookie, set_login_view, user_accessed,
+                         FlaskLoginClient)
 from flask_login.__about__ import (__title__, __description__, __url__,
                                    __version_info__, __version__, __author__,
                                    __author_email__, __maintainer__,
@@ -1726,3 +1727,63 @@ class StrictHostForRedirectsTestCase(unittest.TestCase):
             self.assertEqual(result.status_code, 302)
             self.assertEqual(result.location,
                              'http://good.com/login?next=%2Fsecret')
+
+
+class CustomTestClientTestCase(unittest.TestCase):
+    def setUp(self):
+        self.app = Flask(__name__)
+        self.app.config['SECRET_KEY'] = 'deterministic'
+        self.app.config['SESSION_PROTECTION'] = None
+        self.remember_cookie_name = 'remember'
+        self.app.config['REMEMBER_COOKIE_NAME'] = self.remember_cookie_name
+        self.login_manager = LoginManager()
+        self.login_manager.init_app(self.app)
+        self.app.config['LOGIN_DISABLED'] = False
+        self.app.test_client_class = FlaskLoginClient
+
+        @self.app.route('/')
+        def index():
+            return u'Welcome!'
+
+        @self.app.route('/username')
+        def username():
+            if current_user.is_authenticated:
+                return current_user.name
+            return u'Anonymous'
+
+        @self.app.route('/is-fresh')
+        def is_fresh():
+            return unicode(login_fresh())
+
+        @self.login_manager.user_loader
+        def load_user(user_id):
+            return USERS[int(user_id)]
+
+        # This will help us with the possibility of typoes in the tests. Now
+        # we shouldn't have to check each response to help us set up state
+        # (such as login pages) to make sure it worked: we will always
+        # get an exception raised (rather than return a 404 response)
+        @self.app.errorhandler(404)
+        def handle_404(e):
+            raise e
+
+        unittest.TestCase.setUp(self)
+
+    def test_no_args_to_test_client(self):
+        with self.app.test_client() as c:
+            result = c.get('/username')
+            self.assertEqual(u'Anonymous', result.data.decode('utf-8'))
+
+    def test_user_arg_to_test_client(self):
+        with self.app.test_client(user=notch) as c:
+            username = c.get('/username')
+            self.assertEqual(u'Notch', username.data.decode('utf-8'))
+            is_fresh = c.get('/is-fresh')
+            self.assertEqual(u'True', is_fresh.data.decode('utf-8'))
+
+    def test_fresh_login_arg_to_test_client(self):
+        with self.app.test_client(user=creeper, fresh_login=False) as c:
+            username = c.get('/username')
+            self.assertEqual(u'Creeper', username.data.decode('utf-8'))
+            is_fresh = c.get('/is-fresh')
+            self.assertEqual(u'False', is_fresh.data.decode('utf-8'))

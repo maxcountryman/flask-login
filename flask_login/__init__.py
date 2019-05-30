@@ -19,6 +19,7 @@ from .signals import (user_logged_in, user_logged_out, user_loaded_from_cookie,
                       user_loaded_from_header, user_loaded_from_request,
                       user_login_confirmed, user_unauthorized,
                       user_needs_refresh, user_accessed, session_protected)
+from .test_client import FlaskLoginClient
 from .utils import (current_user, login_url, login_fresh, login_user,
                     logout_user, confirm_login, login_required,
                     fresh_login_required, set_login_view, encode_cookie,
@@ -27,6 +28,7 @@ from .utils import (current_user, login_url, login_fresh, login_user,
 
 __all__ = [
     LoginManager.__name__,
+    FlaskLoginClient.__name__,
     UserMixin.__name__,
     AnonymousUserMixin.__name__,
     __version__,
