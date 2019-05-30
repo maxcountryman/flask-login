@@ -460,6 +460,34 @@ the session depending on a flag you set on the request. For example::
 This prevents setting the Flask Session cookie whenever the user authenticated
 using your `~LoginManager.header_loader`.
 
+Automated Testing
+=================
+To make it easier for you to write automated tests, Flask-Login provides a
+custom test client class that will set the user's login cookie for you.
+To use this custom test client class, assign it to the
+:attr:`test_client_class <flask.Flask.test_client_class>` attribute
+on your application object, like this::
+
+    from flask_login import FlaskLoginClient
+
+    app.test_client_class = FlaskLoginClient
+
+Next, use the :meth:`app.test_client() <flask.Flask.test_client>` method
+to make a test client, as you normally do. However, now you can pass a
+user object to this method, and your client will be automatically
+logged in with this user!
+
+.. code-block:: python
+
+    def test_simple(self):
+        user = User.query.get(1)
+        with app.test_client(user=user) as client:
+            # this request has user 1 already logged in!
+            resp = client.get("/")
+
+Note that you must use a keyword argument, not a positional argument.
+``test_client(user=user)`` will work, but ``test_client(user)``
+will not.
 
 Localization
 ============
@@ -563,6 +591,8 @@ User Object Helpers
 Utilities
 ---------
 .. autofunction:: login_url
+
+.. autoclass:: FlaskLoginClient
 
 
 Signals
