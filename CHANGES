@@ -3,6 +3,10 @@ Flask-Login Changelog
 
 Here you can see the full list of changes between each Flask-Login release.
 
+Unreleased
+----------
+- New custom test client: `flask_login.FlaskLoginClient`.
+  You can use this to write clearer automated tests. #431
 
 Version 0.4.1
 -------------
