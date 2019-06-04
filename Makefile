@@ -11,6 +11,7 @@ all:
 test: clean_coverage
 	@echo 'Running all tests...'
 	coverage run --source=flask_login --module pytest
+	coverage report
 
 clean_coverage:
 	@rm -f .coverage
