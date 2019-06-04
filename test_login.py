@@ -8,7 +8,10 @@ import base64
 import collections
 from datetime import timedelta, datetime
 from contextlib import contextmanager
-from mock import ANY, patch, Mock
+try:
+    from mock import ANY, patch, Mock
+except ImportError:
+    from unittest.mock import ANY, patch, Mock
 from semantic_version import Version
 
 
