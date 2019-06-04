@@ -15,5 +15,5 @@ class FlaskLoginClient(FlaskClient):
 
         if user:
             with self.session_transaction() as sess:
-                sess["user_id"] = user.id
+                sess["user_id"] = user.get_id()
                 sess["_fresh"] = fresh
