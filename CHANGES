@@ -5,6 +5,10 @@ Here you can see the full list of changes between each Flask-Login release.
 
 Unreleased
 ----------
+nothing yet
+
+Version 1.0.0
+-------------
 - New custom test client: `flask_login.FlaskLoginClient`.
   You can use this to write clearer automated tests. #431
 
