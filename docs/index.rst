@@ -135,7 +135,7 @@ function.
 
             next = flask.request.args.get('next')
             # is_safe_url should check if the url is safe for redirects.
-            # See http://flask.pocoo.org/snippets/62/ for an example.
+            # See warning below for an example.
             if not is_safe_url(next):
                 return flask.abort(400)
 
@@ -633,5 +633,5 @@ signals in your code.
    the app.
 
 .. _Flask documentation on signals: http://flask.pocoo.org/docs/signals/
-.. _this Flask Snippet: http://flask.pocoo.org/snippets/62/
+.. _this Flask Snippet: https://web.archive.org/web/20190217035443/http://flask.pocoo.org/snippets/62/
 .. _Flask documentation on sessions: http://flask.pocoo.org/docs/quickstart/#sessions
