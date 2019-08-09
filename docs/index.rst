@@ -633,5 +633,5 @@ signals in your code.
    the app.
 
 .. _Flask documentation on signals: http://flask.pocoo.org/docs/signals/
-.. _this Flask Snippet: http://flask.pocoo.org/snippets/62/
+.. _this Flask Snippet: https://web.archive.org/web/20120517003641/http://flask.pocoo.org/snippets/62/
 .. _Flask documentation on sessions: http://flask.pocoo.org/docs/quickstart/#sessions
