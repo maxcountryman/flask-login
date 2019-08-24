@@ -8,4 +8,3 @@ pytest<5.0; python_version == "2.7"
 pycodestyle==2.5.0
 pyflakes==2.1.1
 semantic_version==2.6.0
-unittest2==1.1.0; python_version == "2.7"
