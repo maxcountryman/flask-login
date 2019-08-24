@@ -21,7 +21,7 @@ clean:
 
 pep8:
 	@echo 'Checking pep8 compliance...'
-	@pep8 flask_login/* test_login.py
+	@pycodestyle flask_login/* test_login.py
 
 pyflakes:
 	@echo 'Running pyflakes...'

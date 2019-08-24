@@ -1,9 +1,11 @@
 -r requirements.txt
 
 blinker==1.4
-coverage==4.3.1
-mock==2.0.0; python_version < '3.3'
-pytest<3.3  # pytest 3.3 drops support for Python 2.6 and 3.3
-pep8==1.7.0
-pyflakes==1.5.0
+coverage==4.5.4
+mock==2.0.0; python_version == "2.7"
+pytest==5.1.1; python_version > "2.7"
+pytest<5.0; python_version == "2.7"
+pycodestyle==2.5.0
+pyflakes==2.1.1
 semantic_version==2.6.0
+unittest2==1.1.0; python_version == "2.7"

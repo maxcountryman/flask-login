@@ -74,12 +74,12 @@ def make_next_param(login_url, current_url):
     :param current_url: The URL to reduce.
     :type current_url: str
     '''
-    l = urlparse(login_url)
-    c = urlparse(current_url)
+    l_url = urlparse(login_url)
+    c_url = urlparse(current_url)
 
-    if (not l.scheme or l.scheme == c.scheme) and \
-            (not l.netloc or l.netloc == c.netloc):
-        return urlunparse(('', '', c.path, c.params, c.query, ''))
+    if (not l_url.scheme or l_url.scheme == c_url.scheme) and \
+            (not l_url.netloc or l_url.netloc == c_url.netloc):
+        return urlunparse(('', '', c_url.path, c_url.params, c_url.query, ''))
     return current_url
 
 
