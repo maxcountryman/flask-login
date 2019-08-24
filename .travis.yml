@@ -6,7 +6,8 @@ python:
   - pypy
   - pypy3
 install:
-  - python install_requirements.py dev
+  - travis_retry pip install -r dev-requirements.txt
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then travis_retry pip install -r dev-py2-requirements.txt; fi
   - travis_retry pip install coveralls
 script: make check
 after_success:
