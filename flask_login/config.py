@@ -16,7 +16,7 @@ COOKIE_NAME = 'remember_token'
 COOKIE_DURATION = timedelta(days=365)
 
 #: Whether the "remember me" cookie requires Secure; defaults to ``None``
-COOKIE_SECURE = None
+COOKIE_SECURE = False
 
 #: Whether the "remember me" cookie uses HttpOnly or not; defaults to ``False``
 COOKIE_HTTPONLY = False
