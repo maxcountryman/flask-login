@@ -18,8 +18,8 @@ COOKIE_DURATION = timedelta(days=365)
 #: Whether the "remember me" cookie requires Secure; defaults to ``False``
 COOKIE_SECURE = False
 
-#: Whether the "remember me" cookie uses HttpOnly or not; defaults to ``False``
-COOKIE_HTTPONLY = False
+#: Whether the "remember me" cookie uses HttpOnly or not; defaults to ``True``
+COOKIE_HTTPONLY = True
 
 #: The default flash message to display when users need to log in.
 LOGIN_MESSAGE = u'Please log in to access this page.'
