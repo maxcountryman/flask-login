@@ -21,7 +21,7 @@ COOKIE_SECURE = None
 #: Whether the "remember me" cookie uses HttpOnly or not; defaults to ``False``
 COOKIE_HTTPONLY = False
 
-#: Whether the "remember me" cookie requires the same origin; defaults to ``None``
+#: Whether the "remember me" cookie requires same origin; defaults to ``None``
 COOKIE_SAMESITE = None
 
 #: The default flash message to display when users need to log in.
