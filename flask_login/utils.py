@@ -94,7 +94,10 @@ def expand_login_view(login_view):
     if login_view.startswith(('https://', 'http://', '/')):
         return login_view
     else:
-        return url_for(login_view)
+        if request.view_args is None:
+            return url_for(login_view)
+        else:
+            return url_for(login_view, **request.view_args)
 
 
 def login_url(login_view, next_url=None, next_field='next'):
