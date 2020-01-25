@@ -387,7 +387,7 @@ The details of the cookie can be customized in the application settings.
                                        **Default:** `None`
 `REMEMBER_COOKIE_HTTPONLY`             Prevents the "Remember Me" cookie from being
                                        accessed by client-side scripts.
-                                       **Default:** `False`
+                                       **Default:** `True`
 `REMEMBER_COOKIE_REFRESH_EACH_REQUEST` If set to `True` the cookie is refreshed on every
                                        request, which bumps the lifetime. Works like
                                        Flask's `SESSION_REFRESH_EACH_REQUEST`.
