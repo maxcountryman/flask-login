@@ -6,7 +6,7 @@ python:
   - pypy
   - pypy3
 install:
-  - travis_retry pip install -r dev-requirements.txt
+  - travis_retry pip install -r requirements.test.txt
   - travis_retry pip install coveralls
 script: make check
 after_success:
