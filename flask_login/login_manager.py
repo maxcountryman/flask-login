@@ -15,7 +15,7 @@ from flask import (_request_ctx_stack, abort, current_app, flash, redirect,
 from ._compat import text_type
 from .config import (COOKIE_NAME, COOKIE_DURATION, COOKIE_SECURE,
                      COOKIE_HTTPONLY, COOKIE_SAMESITE, LOGIN_MESSAGE,
-                     LOGIN_MESSAGE_CATEGORY, REFRESH_MESSAGE,
+                     LOGIN_MESSAGE_CATEGORY, REFRESH_MESSAGE, USER_ID_KEY,
                      REFRESH_MESSAGE_CATEGORY, ID_ATTRIBUTE,
                      AUTH_HEADER_NAME, SESSION_KEYS, USE_SESSION_FOR_NEXT)
 from .mixins import AnonymousUserMixin
@@ -81,6 +81,9 @@ class LoginManager(object):
         self.needs_refresh_callback = None
 
         self.id_attribute = ID_ATTRIBUTE
+
+        # The key for user id look up in the session storage
+        self.user_id_key = USER_ID_KEY
 
         self._user_callback = None
 
@@ -325,7 +328,7 @@ class LoginManager(object):
         user = None
 
         # Load user from Flask Session
-        user_id = session.get('_user_id')
+        user_id = session.get(self.user_id_key)
         if user_id is not None and self._user_callback is not None:
             user = self._user_callback(user_id)
 
@@ -377,7 +380,7 @@ class LoginManager(object):
     def _load_user_from_remember_cookie(self, cookie):
         user_id = decode_cookie(cookie)
         if user_id is not None:
-            session['_user_id'] = user_id
+            session[self.user_id_key] = user_id
             session['_fresh'] = False
             user = None
             if self._user_callback:
@@ -415,7 +418,7 @@ class LoginManager(object):
         if '_remember' in session:
             operation = session.pop('_remember', None)
 
-            if operation == 'set' and '_user_id' in session:
+            if operation == 'set' and self.user_id_key in session:
                 self._set_cookie(response)
             elif operation == 'clear':
                 self._clear_cookie(response)
@@ -439,7 +442,7 @@ class LoginManager(object):
             duration = config.get('REMEMBER_COOKIE_DURATION', COOKIE_DURATION)
 
         # prepare data
-        data = encode_cookie(text_type(session['_user_id']))
+        data = encode_cookie(text_type(session[self.user_id_key]))
 
         if isinstance(duration, int):
             duration = timedelta(seconds=duration)
