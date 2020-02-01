@@ -17,7 +17,7 @@ from flask import (_request_ctx_stack, current_app, request, session, url_for,
                    has_request_context)
 
 from ._compat import text_type, urlparse, urlunparse
-from .config import COOKIE_NAME, EXEMPT_METHODS
+from .config import COOKIE_NAME, EXEMPT_METHODS, USER_ID_KEY
 from .signals import user_logged_in, user_logged_out, user_login_confirmed
 
 
@@ -170,7 +170,7 @@ def login_user(user, remember=False, duration=None, force=False, fresh=True):
         return False
 
     user_id = getattr(user, current_app.login_manager.id_attribute)()
-    session['_user_id'] = user_id
+    session[USER_ID_KEY] = user_id
     session['_fresh'] = fresh
     session['_id'] = current_app.login_manager._session_identifier_generator()
 
@@ -200,8 +200,8 @@ def logout_user():
 
     user = _get_user()
 
-    if '_user_id' in session:
-        session.pop('_user_id')
+    if USER_ID_KEY in session:
+        session.pop(USER_ID_KEY)
 
     if '_fresh' in session:
         session.pop('_fresh')
