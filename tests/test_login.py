@@ -38,13 +38,15 @@ from flask_login import (LoginManager, UserMixin, AnonymousUserMixin,
                          login_fresh, login_required, session_protected,
                          fresh_login_required, confirm_login, encode_cookie,
                          decode_cookie, set_login_view, user_accessed,
-                         FlaskLoginClient)
+                         FlaskLoginClient, USER_ID_KEY)
 from flask_login.__about__ import (__title__, __description__, __url__,
                                    __version_info__, __version__, __author__,
                                    __author_email__, __maintainer__,
                                    __license__, __copyright__)
 from flask_login.utils import _secret_key, _user_context_processor
-
+from ._models import (
+    ImplicitIdUser, ExplicitIdUser, USERS, notch, creeper, germanjapanese
+)
 
 # be compatible with py3k
 if str is not bytes:
@@ -100,28 +102,6 @@ def listen_to(signal):
         yield results
     finally:
         signal.disconnect(results.add)
-
-
-class User(UserMixin):
-    def __init__(self, name, id, active=True):
-        self.id = id
-        self.name = name
-        self.active = active
-
-    def get_id(self):
-        return self.id
-
-    @property
-    def is_active(self):
-        return self.active
-
-
-notch = User(u'Notch', 1)
-steve = User(u'Steve', 2)
-creeper = User(u'Creeper', 3, False)
-germanjapanese = User(u'Müller', u'佐藤')  # Unicode user_id
-
-USERS = {1: notch, 2: steve, 3: creeper, u'佐藤': germanjapanese}
 
 
 class AboutTestCase(unittest.TestCase):
@@ -202,7 +182,7 @@ class InitializationTestCase(unittest.TestCase):
     def test_no_user_loader_raises(self):
         login_manager = LoginManager(self.app, add_context_processor=True)
         with self.app.test_request_context():
-            session['_user_id'] = '2'
+            session[USER_ID_KEY] = '2'
             with self.assertRaises(Exception) as cm:
                 login_manager._load_user()
             expected_message = 'Missing user_loader or request_loader'
@@ -315,7 +295,7 @@ class LoginTestCase(unittest.TestCase):
 
         @self.login_manager.request_loader
         def load_user_from_request(request):
-            user_id = request.args.get('user_id')
+            user_id = request.args.get(USER_ID_KEY)
             try:
                 user_id = int(float(user_id))
             except TypeError:
@@ -443,7 +423,7 @@ class LoginTestCase(unittest.TestCase):
     def test_logout_without_current_user(self):
         with self.app.test_request_context():
             login_user(notch)
-            del session['_user_id']
+            del session[USER_ID_KEY]
             with listen_to(user_logged_out) as listener:
                 logout_user()
                 listener.assert_heard_one(self.app, user=ANY)
@@ -783,7 +763,7 @@ class LoginTestCase(unittest.TestCase):
 
         with self.assertRaises(Exception) as cm:
             with self.app.test_request_context():
-                session['_user_id'] = 2
+                session[USER_ID_KEY] = 2
                 self.login_manager._set_cookie(None)
 
         expected_exception_message = 'REMEMBER_COOKIE_DURATION must be a ' \
@@ -1036,7 +1016,7 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
             with c.session_transaction() as sess:
-                sess['_user_id'] = None
+                sess[USER_ID_KEY] = None
             c.set_cookie(domain, self.remember_cookie_name, 'foo')
             result = c.get('/username')
             self.assertEqual(u'Anonymous', result.data.decode('utf-8'))
@@ -1322,7 +1302,7 @@ class LoginViaRequestTestCase(unittest.TestCase):
 
         @self.login_manager.request_loader
         def load_user_from_request(request):
-            user_id = request.args.get('user_id') or session.get('_user_id')
+            user_id = request.args.get(USER_ID_KEY) or session.get(USER_ID_KEY)
             try:
                 user_id = int(float(user_id))
             except TypeError:
@@ -1506,16 +1486,6 @@ class SecretKeyTestCase(unittest.TestCase):
 
     def test_default(self):
         self.assertEqual(_secret_key('\x9e\x8f\x14'), b'\x9e\x8f\x14')
-
-
-class ImplicitIdUser(UserMixin):
-    def __init__(self, id):
-        self.id = id
-
-
-class ExplicitIdUser(UserMixin):
-    def __init__(self, name):
-        self.name = name
 
 
 class UserMixinTestCase(unittest.TestCase):
