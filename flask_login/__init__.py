@@ -11,8 +11,8 @@
 from .__about__ import __version__
 from .config import (COOKIE_NAME, COOKIE_DURATION, COOKIE_SECURE,
                      COOKIE_HTTPONLY, LOGIN_MESSAGE, LOGIN_MESSAGE_CATEGORY,
-                     REFRESH_MESSAGE, REFRESH_MESSAGE_CATEGORY, ID_ATTRIBUTE,
-                     AUTH_HEADER_NAME)
+                     REFRESH_MESSAGE, REFRESH_MESSAGE_CATEGORY, USER_ID_KEY,
+                     ID_ATTRIBUTE, AUTH_HEADER_NAME)
 from .login_manager import LoginManager
 from .mixins import UserMixin, AnonymousUserMixin
 from .signals import (user_logged_in, user_logged_out, user_loaded_from_cookie,
@@ -41,6 +41,7 @@ __all__ = [
     'REFRESH_MESSAGE',
     'REFRESH_MESSAGE_CATEGORY',
     'ID_ATTRIBUTE',
+    'USER_ID_KEY',
     'AUTH_HEADER_NAME',
     'user_logged_in',
     'user_logged_out',
