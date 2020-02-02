@@ -123,6 +123,9 @@ class LoginManager(object):
         if add_context_processor:
             app.context_processor(_user_context_processor)
 
+        if app.config is not None:
+            self.user_id_key = app.config.get("USER_ID_KEY", USER_ID_KEY)
+
     def unauthorized(self):
         '''
         This is called when the user is required to log in. If you register a
