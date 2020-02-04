@@ -167,19 +167,19 @@ def login_user(user, remember=False, duration=None, force=False, fresh=True):
         return False
 
     user_id = getattr(user, current_app.login_manager.id_attribute)()
-    session['user_id'] = user_id
+    session['_user_id'] = user_id
     session['_fresh'] = fresh
     session['_id'] = current_app.login_manager._session_identifier_generator()
 
     if remember:
-        session['remember'] = 'set'
+        session['_remember'] = 'set'
         if duration is not None:
             try:
                 # equal to timedelta.total_seconds() but works with Python 2.6
-                session['remember_seconds'] = (duration.microseconds +
-                                               (duration.seconds +
-                                                duration.days * 24 * 3600) *
-                                               10**6) / 10.0**6
+                session['_remember_seconds'] = (duration.microseconds +
+                                                (duration.seconds +
+                                                 duration.days * 24 * 3600) *
+                                                10**6) / 10.0**6
             except AttributeError:
                 raise Exception('duration must be a datetime.timedelta, '
                                 'instead got: {0}'.format(duration))
@@ -197,8 +197,8 @@ def logout_user():
 
     user = _get_user()
 
-    if 'user_id' in session:
-        session.pop('user_id')
+    if '_user_id' in session:
+        session.pop('_user_id')
 
     if '_fresh' in session:
         session.pop('_fresh')
@@ -208,9 +208,9 @@ def logout_user():
 
     cookie_name = current_app.config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
     if cookie_name in request.cookies:
-        session['remember'] = 'clear'
-        if 'remember_seconds' in session:
-            session.pop('remember_seconds')
+        session['_remember'] = 'clear'
+        if '_remember_seconds' in session:
+            session.pop('_remember_seconds')
 
     user_logged_out.send(current_app._get_current_object(), user=user)
 

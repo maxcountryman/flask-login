@@ -313,7 +313,7 @@ class LoginManager(object):
         user = None
 
         # Load user from Flask Session
-        user_id = session.get('user_id')
+        user_id = session.get('_user_id')
         if user_id is not None and self._user_callback is not None:
             user = self._user_callback(user_id)
 
@@ -323,7 +323,7 @@ class LoginManager(object):
             cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
             header_name = config.get('AUTH_HEADER_NAME', AUTH_HEADER_NAME)
             has_cookie = (cookie_name in request.cookies and
-                          session.get('remember') != 'clear')
+                          session.get('_remember') != 'clear')
             if has_cookie:
                 cookie = request.cookies[cookie_name]
                 user = self._load_user_from_remember_cookie(cookie)
@@ -356,7 +356,7 @@ class LoginManager(object):
                 for k in SESSION_KEYS:
                     sess.pop(k, None)
 
-                sess['remember'] = 'clear'
+                sess['_remember'] = 'clear'
                 session_protected.send(app)
                 return True
 
@@ -365,7 +365,7 @@ class LoginManager(object):
     def _load_user_from_remember_cookie(self, cookie):
         user_id = decode_cookie(cookie)
         if user_id is not None:
-            session['user_id'] = user_id
+            session['_user_id'] = user_id
             session['_fresh'] = False
             user = None
             if self._user_callback:
@@ -396,14 +396,14 @@ class LoginManager(object):
 
     def _update_remember_cookie(self, response):
         # Don't modify the session unless there's something to do.
-        if 'remember' not in session and \
+        if '_remember' not in session and \
                 current_app.config.get('REMEMBER_COOKIE_REFRESH_EACH_REQUEST'):
-            session['remember'] = 'set'
+            session['_remember'] = 'set'
 
-        if 'remember' in session:
-            operation = session.pop('remember', None)
+        if '_remember' in session:
+            operation = session.pop('_remember', None)
 
-            if operation == 'set' and 'user_id' in session:
+            if operation == 'set' and '_user_id' in session:
                 self._set_cookie(response)
             elif operation == 'clear':
                 self._clear_cookie(response)
@@ -420,13 +420,13 @@ class LoginManager(object):
         secure = config.get('REMEMBER_COOKIE_SECURE', COOKIE_SECURE)
         httponly = config.get('REMEMBER_COOKIE_HTTPONLY', COOKIE_HTTPONLY)
 
-        if 'remember_seconds' in session:
-            duration = timedelta(seconds=session['remember_seconds'])
+        if '_remember_seconds' in session:
+            duration = timedelta(seconds=session['_remember_seconds'])
         else:
             duration = config.get('REMEMBER_COOKIE_DURATION', COOKIE_DURATION)
 
         # prepare data
-        data = encode_cookie(text_type(session['user_id']))
+        data = encode_cookie(text_type(session['_user_id']))
 
         if isinstance(duration, int):
             duration = timedelta(seconds=duration)

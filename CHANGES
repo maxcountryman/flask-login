@@ -5,7 +5,8 @@ Here you can see the full list of changes between each Flask-Login release.
 
 Unreleased
 ----------
-nothing yet
+- Prefix authenticated user_id, remember, and remember_seconds in Flask Session
+  with underscores to prevent accidental usage in application code. #465
 
 Version 1.0.0
 -------------

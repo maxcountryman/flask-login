@@ -202,7 +202,7 @@ class InitializationTestCase(unittest.TestCase):
     def test_no_user_loader_raises(self):
         login_manager = LoginManager(self.app, add_context_processor=True)
         with self.app.test_request_context():
-            session['user_id'] = '2'
+            session['_user_id'] = '2'
             with self.assertRaises(Exception) as cm:
                 login_manager._load_user()
             expected_message = 'Missing user_loader or request_loader'
@@ -443,7 +443,7 @@ class LoginTestCase(unittest.TestCase):
     def test_logout_without_current_user(self):
         with self.app.test_request_context():
             login_user(notch)
-            del session['user_id']
+            del session['_user_id']
             with listen_to(user_logged_out) as listener:
                 logout_user()
                 listener.assert_heard_one(self.app, user=ANY)
@@ -783,7 +783,7 @@ class LoginTestCase(unittest.TestCase):
 
         with self.assertRaises(Exception) as cm:
             with self.app.test_request_context():
-                session['user_id'] = 2
+                session['_user_id'] = 2
                 self.login_manager._set_cookie(None)
 
         expected_exception_message = 'REMEMBER_COOKIE_DURATION must be a ' \
@@ -1036,7 +1036,7 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
             with c.session_transaction() as sess:
-                sess['user_id'] = None
+                sess['_user_id'] = None
             c.set_cookie(domain, self.remember_cookie_name, 'foo')
             result = c.get('/username')
             self.assertEqual(u'Anonymous', result.data.decode('utf-8'))
@@ -1322,7 +1322,7 @@ class LoginViaRequestTestCase(unittest.TestCase):
 
         @self.login_manager.request_loader
         def load_user_from_request(request):
-            user_id = request.args.get('user_id') or session.get('user_id')
+            user_id = request.args.get('user_id') or session.get('_user_id')
             try:
                 user_id = int(float(user_id))
             except TypeError:
