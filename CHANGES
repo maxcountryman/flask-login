@@ -9,7 +9,13 @@ Version 0.5.0
 - New custom test client: `flask_login.FlaskLoginClient`.
   You can use this to write clearer automated tests. #431
 - Prefix authenticated user_id, remember, and remember_seconds in Flask Session
-  with underscores to prevent accidental usage in application code. #465
+  with underscores to prevent accidental usage in application code. #470
+- Simplify user loading. #378
+- Various documentation improvements. #393, #394, #397, #417
+- Set session ID when setting next. #403
+- Clear session identifier on logout. #404
+- Ensure use of a safe and up-to-date version of Flask.
+- Drop support of Python versions: 2.6, 3.3, 3.4 #450
 
 Version 0.4.1
 -------------
