@@ -3,15 +3,13 @@ Flask-Login Changelog
 
 Here you can see the full list of changes between each Flask-Login release.
 
-Unreleased
-----------
-- Prefix authenticated user_id, remember, and remember_seconds in Flask Session
-  with underscores to prevent accidental usage in application code. #465
-
-Version 1.0.0
+Version 0.5.0
 -------------
+
 - New custom test client: `flask_login.FlaskLoginClient`.
   You can use this to write clearer automated tests. #431
+- Prefix authenticated user_id, remember, and remember_seconds in Flask Session
+  with underscores to prevent accidental usage in application code. #465
 
 Version 0.4.1
 -------------
