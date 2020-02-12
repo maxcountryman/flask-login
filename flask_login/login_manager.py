@@ -271,12 +271,13 @@ class LoginManager(object):
         if not self.refresh_view:
             abort(401)
 
-        if self.localize_callback is not None:
-            flash(self.localize_callback(self.needs_refresh_message),
-                  category=self.needs_refresh_message_category)
-        else:
-            flash(self.needs_refresh_message,
-                  category=self.needs_refresh_message_category)
+        if self.needs_refresh_message:
+            if self.localize_callback is not None:
+                flash(self.localize_callback(self.needs_refresh_message),
+                      category=self.needs_refresh_message_category)
+            else:
+                flash(self.needs_refresh_message,
+                      category=self.needs_refresh_message_category)
 
         config = current_app.config
         if config.get('USE_SESSION_FOR_NEXT', USE_SESSION_FOR_NEXT):
