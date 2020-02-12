@@ -14,8 +14,9 @@ from flask import (_request_ctx_stack, abort, current_app, flash, redirect,
 
 from ._compat import text_type
 from .config import (COOKIE_NAME, COOKIE_DURATION, COOKIE_SECURE,
-                     COOKIE_HTTPONLY, LOGIN_MESSAGE, LOGIN_MESSAGE_CATEGORY,
-                     REFRESH_MESSAGE, REFRESH_MESSAGE_CATEGORY, ID_ATTRIBUTE,
+                     COOKIE_HTTPONLY, COOKIE_SAMESITE, LOGIN_MESSAGE,
+                     LOGIN_MESSAGE_CATEGORY, REFRESH_MESSAGE,
+                     REFRESH_MESSAGE_CATEGORY, ID_ATTRIBUTE,
                      AUTH_HEADER_NAME, SESSION_KEYS, USE_SESSION_FOR_NEXT)
 from .mixins import AnonymousUserMixin
 from .signals import (user_loaded_from_cookie, user_loaded_from_header,
@@ -419,6 +420,7 @@ class LoginManager(object):
 
         secure = config.get('REMEMBER_COOKIE_SECURE', COOKIE_SECURE)
         httponly = config.get('REMEMBER_COOKIE_HTTPONLY', COOKIE_HTTPONLY)
+        samesite = config.get('REMEMBER_COOKIE_SAMESITE', COOKIE_SAMESITE)
 
         if '_remember_seconds' in session:
             duration = timedelta(seconds=session['_remember_seconds'])
@@ -445,7 +447,8 @@ class LoginManager(object):
                             domain=domain,
                             path=path,
                             secure=secure,
-                            httponly=httponly)
+                            httponly=httponly,
+                            samesite=samesite)
 
     def _clear_cookie(self, response):
         config = current_app.config
