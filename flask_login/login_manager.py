@@ -186,7 +186,7 @@ class LoginManager(object):
         :type callback: callable
         '''
         self._user_callback = callback
-        return callback
+        return self.user_callback
 
     @property
     def user_callback(self):
@@ -203,7 +203,7 @@ class LoginManager(object):
         :type callback: callable
         '''
         self._request_callback = callback
-        return callback
+        return self.request_callback
 
     @property
     def request_callback(self):
