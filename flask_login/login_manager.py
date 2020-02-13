@@ -186,24 +186,12 @@ class LoginManager(object):
         :type callback: callable
         '''
         self._user_callback = callback
-        return callback
+        return self.user_callback
 
-    def header_loader(self, callback):
-        '''
-        This function has been deprecated. Please use
-        :meth:`LoginManager.request_loader` instead.
-
-        This sets the callback for loading a user from a header value.
-        The function you set should take an authentication token and
-        return a user object, or `None` if the user does not exist.
-
-        :param callback: The callback for retrieving a user object.
-        :type callback: callable
-        '''
-        print('LoginManager.header_loader is deprecated. Use ' +
-              'LoginManager.request_loader instead.')
-        self._header_callback = callback
-        return callback
+    @property
+    def user_callback(self):
+        '''Gets the user_loader callback set by user_loader decorator.'''
+        return self._user_callback
 
     def request_loader(self, callback):
         '''
@@ -215,7 +203,12 @@ class LoginManager(object):
         :type callback: callable
         '''
         self._request_callback = callback
-        return callback
+        return self.request_callback
+
+    @property
+    def request_callback(self):
+        '''Gets the request_loader callback set by request_loader decorator.'''
+        return self._request_callback
 
     def unauthorized_handler(self, callback):
         '''
@@ -290,6 +283,23 @@ class LoginManager(object):
             redirect_url = make_login_url(login_url, next_url=request.url)
 
         return redirect(redirect_url)
+
+    def header_loader(self, callback):
+        '''
+        This function has been deprecated. Please use
+        :meth:`LoginManager.request_loader` instead.
+
+        This sets the callback for loading a user from a header value.
+        The function you set should take an authentication token and
+        return a user object, or `None` if the user does not exist.
+
+        :param callback: The callback for retrieving a user object.
+        :type callback: callable
+        '''
+        print('LoginManager.header_loader is deprecated. Use ' +
+              'LoginManager.request_loader instead.')
+        self._header_callback = callback
+        return callback
 
     def _update_request_context_with_user(self, user=None):
         '''Store the given user as ctx.user.'''
