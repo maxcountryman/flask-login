@@ -842,6 +842,20 @@ class LoginTestCase(unittest.TestCase):
                 self.assertIsNotNone(expiration_date_2)
                 self.assertNotEqual(expiration_date_1, expiration_date_2)
 
+    def test_remember_me_refresh_for_non_remember_logins(self):
+        """See https://github.com/maxcountryman/flask-login/issues/424
+
+        Logins without remember=True should not be 'refreshed', since they
+        didn't have a remember cookie in the first place.
+        """
+        domain = 'localhost.local'
+        path = '/'
+
+        self.app.config['REMEMBER_COOKIE_REFRESH_EACH_REQUEST'] = True
+        with self.app.test_client() as c:
+            c.get('/login-notch')
+            self.assertNotIn('remember', c.cookie_jar._cookies[domain][path])
+
     def test_remember_me_is_unfresh(self):
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
