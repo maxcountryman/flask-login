@@ -295,7 +295,7 @@ class LoginTestCase(unittest.TestCase):
 
         @self.login_manager.request_loader
         def load_user_from_request(request):
-            user_id = request.args.get(USER_ID_KEY)
+            user_id = request.args.get('user_id')
             try:
                 user_id = int(float(user_id))
             except TypeError:
@@ -1302,7 +1302,7 @@ class LoginViaRequestTestCase(unittest.TestCase):
 
         @self.login_manager.request_loader
         def load_user_from_request(request):
-            user_id = request.args.get(USER_ID_KEY) or session.get(USER_ID_KEY)
+            user_id = request.args.get('user_id') or session.get(USER_ID_KEY)
             try:
                 user_id = int(float(user_id))
             except TypeError:
