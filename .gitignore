@@ -1,6 +1,5 @@
 !.gitignore
 
-.idea/
 tests_output/
 __pycache__/
 **/_trial_temp/
