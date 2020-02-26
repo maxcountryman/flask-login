@@ -86,9 +86,9 @@ The class that you use to represent users needs to implement these properties
 and methods:
 
 `is_authenticated`
-    This property should return `True` if the user is authenticated, i.e. they
-    have provided valid credentials. (Only authenticated users will fulfill
-    the criteria of `login_required`.)
+    This propery should, broadly, always return `True`. It is used to check if
+    a given user is annonymised or not, as opposed to whether they are
+    authenticated.
 
 `is_active`
     This property should return `True` if this is an active user - in addition
