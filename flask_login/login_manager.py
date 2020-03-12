@@ -165,14 +165,15 @@ class LoginManager(object):
             else:
                 flash(self.login_message, category=self.login_message_category)
 
-        config = current_app.config
-        if config.get('USE_SESSION_FOR_NEXT', USE_SESSION_FOR_NEXT):
-            login_url = expand_login_view(login_view)
-            session['_id'] = self._session_identifier_generator()
-            session['next'] = make_next_param(login_url, request.url)
-            redirect_url = make_login_url(login_view)
-        else:
-            redirect_url = make_login_url(login_view, next_url=request.url)
+        if request.method == 'GET':
+            config = current_app.config
+            if config.get('USE_SESSION_FOR_NEXT', USE_SESSION_FOR_NEXT):
+                login_url = expand_login_view(login_view)
+                session['_id'] = self._session_identifier_generator()
+                session['next'] = make_next_param(login_url, request.url)
+                redirect_url = make_login_url(login_view)
+            else:
+                redirect_url = make_login_url(login_view, next_url=request.url)
 
         return redirect(redirect_url)
 
