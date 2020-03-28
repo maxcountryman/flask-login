@@ -339,7 +339,7 @@ class LoginTestCase(unittest.TestCase):
     def _delete_session(self, c):
         # Helper method to cause the session to be deleted
         # as if the browser was closed. This will remove
-        # the session regardless of the permament flag
+        # the session regardless of the permanent flag
         # on the session!
         with c.session_transaction() as sess:
             sess.clear()
@@ -1609,7 +1609,7 @@ class UnicodeCookieUserIDTestCase(unittest.TestCase):
     def _delete_session(self, c):
         # Helper method to cause the session to be deleted
         # as if the browser was closed. This will remove
-        # the session regardless of the permament flag
+        # the session regardless of the permanent flag
         # on the session!
         with c.session_transaction() as sess:
             sess.clear()
