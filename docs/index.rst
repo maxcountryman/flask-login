@@ -43,7 +43,8 @@ Configuring your Application
 The most important part of an application that uses Flask-Login is the
 `LoginManager` class. You should create one for your application somewhere in
 your code, like this::
-
+    
+    from flask_login import LoginManager
     login_manager = LoginManager()
 
 The login manager contains the code that lets your application and Flask-Login
