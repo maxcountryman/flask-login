@@ -289,7 +289,7 @@ def fresh_login_required(func):
     case, you will need to provide a :attr:`LoginManager.refresh_view`.)
 
     Behaves identically to the :func:`login_required` decorator with respect
-    to configutation variables.
+    to configuration variables.
 
     .. Note ::
 
