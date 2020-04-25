@@ -270,7 +270,7 @@ def login_required(func):
             return func(*args, **kwargs)
         elif current_app.config.get('LOGIN_DISABLED'):
             return func(*args, **kwargs)
-        elif not current_user.is_authenticated:
+        elif not (current_user.is_authenticated and current_user.is_active):
             return current_app.login_manager.unauthorized()
         return func(*args, **kwargs)
     return decorated_view
@@ -306,7 +306,7 @@ def fresh_login_required(func):
             return func(*args, **kwargs)
         elif current_app.config.get('LOGIN_DISABLED'):
             return func(*args, **kwargs)
-        elif not current_user.is_authenticated:
+        elif not (current_user.is_authenticated and current_user.is_active):
             return current_app.login_manager.unauthorized()
         elif not login_fresh():
             return current_app.login_manager.needs_refresh()
