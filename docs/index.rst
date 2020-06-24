@@ -444,6 +444,11 @@ the session depending on a flag you set on the request. For example::
     from flask.sessions import SecureCookieSessionInterface
     from flask_login import user_loaded_from_request
 
+    @user_loaded_from_request.connect
+    def user_loaded_from_request(app, user=None):
+        g.login_via_request = True
+
+
     class CustomSessionInterface(SecureCookieSessionInterface):
         """Prevent creating session from API requests."""
         def save_session(self, *args, **kwargs):
