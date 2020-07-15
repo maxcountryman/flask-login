@@ -325,7 +325,7 @@ Then the `~UserMixin.get_id` method of your User class would return the
 alternative id instead of the user's primary ID::
 
     def get_id(self):
-        return unicode(self.alternative_id)
+        return str(self.alternative_id)
 
 This way you are free to change the user's alternative id to a new randomly
 generated value when the user changes their password, which would ensure their
