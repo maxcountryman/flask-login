@@ -12,6 +12,10 @@ try:
     from mock import ANY, patch, Mock
 except ImportError:
     from unittest.mock import ANY, patch, Mock
+try:
+    from collections.abc import Hashable
+except ImportError:
+    from collections import Hashable
 from semantic_version import Version
 
 
@@ -1548,7 +1552,7 @@ class UserMixinTestCase(unittest.TestCase):
         self.assertTrue(first != u'1')
 
     def test_hashable(self):
-        self.assertTrue(isinstance(UserMixin(), collections.Hashable))
+        self.assertTrue(isinstance(UserMixin(), Hashable))
 
 
 class AnonymousUserTestCase(unittest.TestCase):
