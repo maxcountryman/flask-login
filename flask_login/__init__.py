@@ -7,8 +7,6 @@
     :copyright: (c) 2011 by Matthew Frazier.
     :license: MIT/X11, see LICENSE for more details.
 '''
-
-from .__about__ import __version__
 from .config import (COOKIE_NAME, COOKIE_DURATION, COOKIE_SECURE,
                      COOKIE_HTTPONLY, LOGIN_MESSAGE, LOGIN_MESSAGE_CATEGORY,
                      REFRESH_MESSAGE, REFRESH_MESSAGE_CATEGORY, ID_ATTRIBUTE,
@@ -31,7 +29,6 @@ __all__ = [
     FlaskLoginClient.__name__,
     UserMixin.__name__,
     AnonymousUserMixin.__name__,
-    __version__,
     'COOKIE_NAME',
     'COOKIE_DURATION',
     'COOKIE_SECURE',
