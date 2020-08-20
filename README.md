@@ -84,11 +84,6 @@ def request_loader(request):
 
     user = User()
     user.id = email
-
-    # DO NOT ever store passwords in plaintext and always compare password
-    # hashes using constant-time comparison!
-    user.is_authenticated = request.form['password'] == users[email]['password']
-
     return user
 ```
 
