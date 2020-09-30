@@ -13,6 +13,14 @@ model. The only requirement is that your user objects implement a few methods,
 and that you provide a callback to the extension capable of loading users from
 their ID.
 
+Advantages of flask 
+built-in development server and fast debugger.
+integrated support for unit testing.
+RESTful request dispatching.
+Jinja2 templating.
+support for secure cookies (client side sessions)
+WSGI 1.0 compliant.
+Unicode based.
 ## Installation
 
 Install the extension with pip:
