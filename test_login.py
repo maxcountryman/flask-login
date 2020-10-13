@@ -710,6 +710,29 @@ class LoginTestCase(unittest.TestCase):
             self.assertLess(difference, timedelta(seconds=10), fail_msg)
             self.assertGreater(difference, timedelta(seconds=-10), fail_msg)
 
+    def test_remember_me_uses_session_cookie(self):
+        name = self.app.config['REMEMBER_COOKIE_NAME'] = 'myname'
+        self.app.config['REMEMBER_COOKIE_DURATION'] = 'session'
+        path = self.app.config['REMEMBER_COOKIE_PATH'] = '/mypath'
+        domain = self.app.config['REMEMBER_COOKIE_DOMAIN'] = '.localhost.local'
+
+        with self.app.test_client() as c:
+            c.get('/login-notch-remember')
+
+            # TODO: Is there a better way to test this?
+            self.assertIn(domain, c.cookie_jar._cookies,
+                          'Custom domain not found as cookie domain')
+            domain_cookie = c.cookie_jar._cookies[domain]
+            self.assertIn(path, domain_cookie,
+                          'Custom path not found as cookie path')
+            path_cookie = domain_cookie[path]
+            self.assertIn(name, path_cookie,
+                          'Custom name not found as cookie name')
+            cookie = path_cookie[name]
+
+            # make sure this is a session cookie
+            self.assertIsNone(cookie.expires)
+
     def test_remember_me_custom_duration_uses_custom_cookie(self):
         name = self.app.config['REMEMBER_COOKIE_NAME'] = 'myname'
         self.app.config['REMEMBER_COOKIE_DURATION'] = 172800

@@ -441,15 +441,19 @@ class LoginManager(object):
         # prepare data
         data = encode_cookie(text_type(session['_user_id']))
 
-        if isinstance(duration, int):
-            duration = timedelta(seconds=duration)
+        if duration == "session":
+            # make sure the cookie is not persisted
+            expires = None
+        else:
+            if isinstance(duration, int):
+                duration = timedelta(seconds=duration)
 
-        try:
-            expires = datetime.utcnow() + duration
-        except TypeError:
-            raise Exception('REMEMBER_COOKIE_DURATION must be a ' +
-                            'datetime.timedelta, instead got: {0}'.format(
-                                duration))
+            try:
+                expires = datetime.utcnow() + duration
+            except TypeError:
+                raise Exception('REMEMBER_COOKIE_DURATION must be a ' +
+                                'datetime.timedelta, instead got: {0}'.format(
+                                    duration))
 
         # actually set it
         response.set_cookie(cookie_name,
