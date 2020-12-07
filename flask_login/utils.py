@@ -6,6 +6,7 @@
 '''
 
 
+from flask_login.mixins import AnonymousUserMixin
 import hmac
 from hashlib import sha512
 from functools import wraps
@@ -390,3 +391,11 @@ def _secret_key(key=None):
         key = key.encode('latin1')  # ensure bytes
 
     return key
+
+
+def is_authentificate():
+    user = _get_user()
+    if type(user) == AnonymousUserMixin:
+        return False
+    else:
+        return True

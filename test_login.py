@@ -43,8 +43,11 @@ from flask_login.__about__ import (__title__, __description__, __url__,
                                    __version_info__, __version__, __author__,
                                    __author_email__, __maintainer__,
                                    __license__, __copyright__)
-from flask_login.utils import _secret_key, _user_context_processor
-
+from flask_login.utils import (
+    _secret_key,
+    _user_context_processor,
+    is_authentificate
+)
 
 # be compatible with py3k
 if str is not bytes:
@@ -424,6 +427,15 @@ class LoginTestCase(unittest.TestCase):
             result = c.get(url)
             self.assertEqual(user_name, result.data.decode('utf-8'))
 
+    def test_login_is_authentificate(self):
+        with self.app.test_request_context():
+            login_user(notch)
+            self.assertTrue(is_authentificate())
+
+    def test_not_login_is_authentificate(self):
+        with self.app.test_request_context():
+            self.assertFalse(is_authentificate())
+
     #
     # Logout
     #
@@ -447,6 +459,13 @@ class LoginTestCase(unittest.TestCase):
             with listen_to(user_logged_out) as listener:
                 logout_user()
                 listener.assert_heard_one(self.app, user=ANY)
+
+    def test_logout_is_authentificate(self):
+        with self.app.test_request_context():
+            login_user(notch)
+            with listen_to(user_logged_out):
+                logout_user()
+                self.assertFalse(is_authentificate())
 
     #
     # Unauthorized
