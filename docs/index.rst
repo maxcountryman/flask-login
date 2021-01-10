@@ -207,6 +207,16 @@ If you would like to customize the process further, decorate a function with
         # do stuff
         return a_response
 
+For example: You are using Flask Login with Flask Restful.
+In your API (blueprint named as api) you don't wanna redirect to login page but return Unauthorized status code .::
+
+    from flask import redirect, url_for, request
+    from http import HTTPStatus
+    @login_manager.unauthorized_handler
+    def unauthorized():
+        if request.blueprint == 'api':
+            abort(HTTPStatus.UNAUTHORIZED)
+        return redirect(url_for('site.login'))
 
 Login using Authorization header
 ================================
