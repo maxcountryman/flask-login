@@ -5,7 +5,6 @@ except ImportError:
     import unittest
 
 import base64
-import collections
 from datetime import timedelta, datetime
 from contextlib import contextmanager
 try:
