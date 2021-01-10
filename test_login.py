@@ -1027,7 +1027,7 @@ class LoginTestCase(unittest.TestCase):
     def test_session_not_modified(self):
         with self.app.test_client() as c:
             # Within the request we think we didn't modify the session.
-            self.assertEquals(
+            self.assertEqual(
                 u'modified=False',
                 c.get('/empty_session').data.decode('utf-8'))
             # But after the request, the session could be modified by the
