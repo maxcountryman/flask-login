@@ -2,7 +2,7 @@
 
 blinker==1.4
 coverage==5.5
-mock==2.0.0; python_version == "2.7"
+mock==4.0.3; python_version == "2.7"
 pytest==6.1.2; python_version > "2.7"
 pytest<5.0; python_version == "2.7"
 pycodestyle==2.7.0
