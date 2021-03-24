@@ -19,7 +19,6 @@ jobs:
           - {name: '3.6', python: '3.6', tox: py36}
           - {name: '3.5', python: '3.5', tox: py35}
           - {name: PyPy, python: pypy3, tox: pypy3}
-          - {name: '2.7', python: '2.7', tox: py27}
           - {name: Style, python: '3.8', tox: style}
     steps:
       - uses: actions/checkout@v2
