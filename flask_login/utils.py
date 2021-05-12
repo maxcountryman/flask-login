@@ -10,7 +10,6 @@ import hmac
 from hashlib import sha512
 from functools import wraps
 from werkzeug.local import LocalProxy
-from werkzeug.security import safe_str_cmp
 from werkzeug.urls import url_decode, url_encode
 
 from flask import (_request_ctx_stack, current_app, request, session, url_for,
@@ -60,7 +59,7 @@ def decode_cookie(cookie, key=None):
     except ValueError:
         return
 
-    if safe_str_cmp(_cookie_digest(payload, key=key), digest):
+    if hmac.compare_digest(_cookie_digest(payload, key=key), digest):
         return payload
 
 
