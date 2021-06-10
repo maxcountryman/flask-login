@@ -10,8 +10,6 @@ jobs:
   tests:
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       fail-fast: false
       matrix:
@@ -40,7 +38,7 @@ jobs:
           key: pip|${{ runner.os }}|${{ matrix.python }}|${{ hashFiles('*requirements.txt') }}
       - run: pip install tox coveralls
       - run: tox -e ${{ matrix.tox }}
-      - run: coveralls --service=github
+      - run: coveralls
         env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: ${{ matrix.tox != 'style' }}
