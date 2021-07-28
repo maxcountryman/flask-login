@@ -38,7 +38,7 @@ jobs:
           key: pip|${{ runner.os }}|${{ matrix.python }}|${{ hashFiles('*requirements.txt') }}
       - run: pip install tox coveralls
       - run: tox -e ${{ matrix.tox }}
-      - run: coveralls
+      - run: coveralls --service=gihtub
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         if: ${{ matrix.tox != 'style' }}
