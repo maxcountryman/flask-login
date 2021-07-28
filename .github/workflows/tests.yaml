@@ -14,13 +14,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - {name: '3.9', python: '3.9', tox: py39}
           - {name: '3.8', python: '3.8', tox: py38}
           - {name: '3.7', python: '3.7', tox: py37}
           - {name: '3.6', python: '3.6', tox: py36}
           - {name: '3.5', python: '3.5', tox: py35}
           - {name: PyPy, python: pypy3, tox: pypy3}
-          - {name: '2.7', python: '2.7', tox: py27}
-          - {name: Style, python: '3.8', tox: style}
+          - {name: Style, python: '3.9', tox: style}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -38,8 +38,7 @@ jobs:
           key: pip|${{ runner.os }}|${{ matrix.python }}|${{ hashFiles('*requirements.txt') }}
       - run: pip install tox coveralls
       - run: tox -e ${{ matrix.tox }}
-      - run: coveralls --service=gihtub
+      - run: coveralls --service=github
         env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: ${{ matrix.tox != 'style' }}

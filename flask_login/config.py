@@ -25,19 +25,19 @@ COOKIE_HTTPONLY = False
 COOKIE_SAMESITE = None
 
 #: The default flash message to display when users need to log in.
-LOGIN_MESSAGE = u'Please log in to access this page.'
+LOGIN_MESSAGE = 'Please log in to access this page.'
 
 #: The default flash message category to display when users need to log in.
 LOGIN_MESSAGE_CATEGORY = 'message'
 
 #: The default flash message to display when users need to reauthenticate.
-REFRESH_MESSAGE = u'Please reauthenticate to access this page.'
+REFRESH_MESSAGE = 'Please reauthenticate to access this page.'
 
 #: The default flash message category to display when users need to
 #: reauthenticate.
 REFRESH_MESSAGE_CATEGORY = 'message'
 
-#: The default attribute to retreive the unicode id of the user
+#: The default attribute to retreive the str id of the user
 ID_ATTRIBUTE = 'get_id'
 
 #: Default name of the auth header (``Authorization``)
