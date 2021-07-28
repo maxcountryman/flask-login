@@ -9,6 +9,7 @@
 import hmac
 from hashlib import sha512
 from functools import wraps
+from urllib.parse import urlparse, urlunparse
 from werkzeug.local import LocalProxy
 from werkzeug.security import safe_str_cmp
 from werkzeug.urls import url_decode, url_encode
@@ -16,7 +17,6 @@ from werkzeug.urls import url_decode, url_encode
 from flask import (_request_ctx_stack, current_app, request, session, url_for,
                    has_request_context)
 
-from ._compat import text_type, urlparse, urlunparse
 from .config import COOKIE_NAME, EXEMPT_METHODS
 from .signals import user_logged_in, user_logged_out, user_login_confirmed
 
@@ -28,17 +28,17 @@ current_user = LocalProxy(lambda: _get_user())
 
 def encode_cookie(payload, key=None):
     '''
-    This will encode a ``unicode`` value into a cookie, and sign that cookie
+    This will encode a ``str`` value into a cookie, and sign that cookie
     with the app's secret key.
 
-    :param payload: The value to encode, as `unicode`.
-    :type payload: unicode
+    :param payload: The value to encode, as `str`.
+    :type payload: str
 
     :param key: The key to use when creating the cookie digest. If not
                 specified, the SECRET_KEY value from app config will be used.
     :type key: str
     '''
-    return u'{0}|{1}'.format(payload, _cookie_digest(payload, key=key))
+    return '{0}|{1}'.format(payload, _cookie_digest(payload, key=key))
 
 
 def decode_cookie(cookie, key=None):
@@ -54,7 +54,7 @@ def decode_cookie(cookie, key=None):
     :type key: str
     '''
     try:
-        payload, digest = cookie.rsplit(u'|', 1)
+        payload, digest = cookie.rsplit('|', 1)
         if hasattr(digest, 'decode'):
             digest = digest.decode('ascii')  # pragma: no cover
     except ValueError:
@@ -372,7 +372,7 @@ def _create_identifier():
         user_agent = user_agent.encode('utf-8')
     base = '{0}|{1}'.format(_get_remote_addr(), user_agent)
     if str is bytes:
-        base = text_type(base, 'utf-8', errors='replace')  # pragma: no cover
+        base = str(base, 'utf-8', errors='replace')  # pragma: no cover
     h = sha512()
     h.update(base.encode('utf8'))
     return h.hexdigest()
@@ -386,7 +386,7 @@ def _secret_key(key=None):
     if key is None:
         key = current_app.config['SECRET_KEY']
 
-    if isinstance(key, text_type):  # pragma: no cover
+    if isinstance(key, str):  # pragma: no cover
         key = key.encode('latin1')  # ensure bytes
 
     return key

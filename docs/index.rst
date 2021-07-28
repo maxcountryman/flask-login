@@ -43,7 +43,7 @@ Configuring your Application
 The most important part of an application that uses Flask-Login is the
 `LoginManager` class. You should create one for your application somewhere in
 your code, like this::
-    
+
     from flask_login import LoginManager
     login_manager = LoginManager()
 
@@ -70,7 +70,7 @@ How it Works
 ============
 You will need to provide a `~LoginManager.user_loader` callback. This callback
 is used to reload the user object from the user ID stored in the session. It
-should take the `unicode` ID of a user, and return the corresponding user
+should take the `str` ID of a user, and return the corresponding user
 object. For example::
 
     @login_manager.user_loader
@@ -102,10 +102,10 @@ and methods:
     users should return `False` instead.)
 
 `get_id()`
-    This method must return a `unicode` that uniquely identifies this user,
+    This method must return a `str` that uniquely identifies this user,
     and can be used to load the user from the `~LoginManager.user_loader`
-    callback. Note that this **must** be a `unicode` - if the ID is natively
-    an `int` or some other type, you will need to convert it to `unicode`.
+    callback. Note that this **must** be a `str` - if the ID is natively
+    an `int` or some other type, you will need to convert it to `str`.
 
 To make implementing a user class easier, you can inherit from `UserMixin`,
 which provides default implementations for all of these properties and methods.
@@ -325,7 +325,7 @@ Then the `~UserMixin.get_id` method of your User class would return the
 alternative id instead of the user's primary ID::
 
     def get_id(self):
-        return unicode(self.alternative_id)
+        return str(self.alternative_id)
 
 This way you are free to change the user's alternative id to a new randomly
 generated value when the user changes their password, which would ensure their
