@@ -15,11 +15,11 @@ COOKIE_NAME = 'remember_token'
 #: The default time before the "remember me" cookie expires (365 days).
 COOKIE_DURATION = timedelta(days=365)
 
-#: Whether the "remember me" cookie requires Secure; defaults to ``None``
-COOKIE_SECURE = None
+#: Whether the "remember me" cookie requires Secure; defaults to ``False``
+COOKIE_SECURE = False
 
-#: Whether the "remember me" cookie uses HttpOnly or not; defaults to ``False``
-COOKIE_HTTPONLY = False
+#: Whether the "remember me" cookie uses HttpOnly or not; defaults to ``True``
+COOKIE_HTTPONLY = True
 
 #: Whether the "remember me" cookie requires same origin; defaults to ``None``
 COOKIE_SAMESITE = None
