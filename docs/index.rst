@@ -403,6 +403,9 @@ The details of the cookie can be customized in the application settings.
                                        request, which bumps the lifetime. Works like
                                        Flask's `SESSION_REFRESH_EACH_REQUEST`.
                                        **Default:** `False`
+`REMEMBER_COOKIE_SAMESITE`             Restricts the "Remember Me" cookie to first-party
+                                       or same-site context.
+                                       **Default:** `None`
 ====================================== =================================================
 
 
