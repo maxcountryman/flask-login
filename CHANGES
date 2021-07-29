@@ -21,6 +21,7 @@ Unreleased
 - Document `REMEMBER_COOKIE_SAMESITE` config #577
 - Revise setup.py to use README.md for long description #598
 - Various documentation corrections #484, #482, #487, #534
+- Encode `SECRET_KEY` using `utf-8` #599
 
 Version 0.5.0
 -------------
