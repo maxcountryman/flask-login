@@ -1,20 +1,12 @@
 # -*- coding: utf-8 -*-
-try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
+import unittest
 
 import base64
 from datetime import timedelta, datetime
 from contextlib import contextmanager
-try:
-    from mock import ANY, patch, Mock
-except ImportError:
-    from unittest.mock import ANY, patch, Mock
-try:
-    from collections.abc import Hashable
-except ImportError:
-    from collections import Hashable
+
+from unittest.mock import ANY, patch, Mock
+from collections.abc import Hashable
 from semantic_version import Version
 
 
@@ -47,11 +39,6 @@ from flask_login.__about__ import (__title__, __description__, __url__,
                                    __author_email__, __maintainer__,
                                    __license__, __copyright__)
 from flask_login.utils import _secret_key, _user_context_processor
-
-
-# be compatible with py3k
-if str is not bytes:
-    unicode = str
 
 
 @contextmanager
@@ -119,12 +106,12 @@ class User(UserMixin):
         return self.active
 
 
-notch = User(u'Notch', 1)
-steve = User(u'Steve', 2)
-creeper = User(u'Creeper', 3, False)
-germanjapanese = User(u'Müller', u'佐藤')  # Unicode user_id
+notch = User('Notch', 1)
+steve = User('Steve', 2)
+creeper = User('Creeper', 3, False)
+germanjapanese = User('Müller', '佐藤')  # str user_id
 
-USERS = {1: notch, 2: steve, 3: creeper, u'佐藤': germanjapanese}
+USERS = {1: notch, 2: steve, 3: creeper, '佐藤': germanjapanese}
 
 
 class AboutTestCase(unittest.TestCase):
@@ -226,10 +213,10 @@ class MethodViewLoginTestCase(unittest.TestCase):
             ]
 
             def options(self):
-                return u''
+                return ''
 
             def get(self):
-                return u''
+                return ''
 
         self.app.add_url_rule('/secret',
                               view_func=SecretEndpoint.as_view('secret'))
@@ -255,7 +242,7 @@ class LoginTestCase(unittest.TestCase):
 
         @self.app.route('/')
         def index():
-            return u'Welcome!'
+            return 'Welcome!'
 
         @self.app.route('/secret')
         def secret():
@@ -263,21 +250,21 @@ class LoginTestCase(unittest.TestCase):
 
         @self.app.route('/login-notch')
         def login_notch():
-            return unicode(login_user(notch))
+            return str(login_user(notch))
 
         @self.app.route('/login-notch-remember')
         def login_notch_remember():
-            return unicode(login_user(notch, remember=True))
+            return str(login_user(notch, remember=True))
 
         @self.app.route('/login-notch-remember-custom')
         def login_notch_remember_custom():
             duration = timedelta(hours=7)
-            return unicode(login_user(notch, remember=True, duration=duration))
+            return str(login_user(notch, remember=True, duration=duration))
 
         @self.app.route('/login-notch-permanent')
         def login_notch_permanent():
             session.permanent = True
-            return unicode(login_user(notch))
+            return str(login_user(notch))
 
         @self.app.route('/needs-refresh')
         def needs_refresh():
@@ -286,21 +273,21 @@ class LoginTestCase(unittest.TestCase):
         @self.app.route('/confirm-login')
         def _confirm_login():
             confirm_login()
-            return u''
+            return ''
 
         @self.app.route('/username')
         def username():
             if current_user.is_authenticated:
                 return current_user.name
-            return u'Anonymous'
+            return 'Anonymous'
 
         @self.app.route('/is-fresh')
         def is_fresh():
-            return unicode(login_fresh())
+            return str(login_fresh())
 
         @self.app.route('/logout')
         def logout():
-            return unicode(logout_user())
+            return str(logout_user())
 
         @self.login_manager.user_loader
         def load_user(user_id):
@@ -327,7 +314,7 @@ class LoginTestCase(unittest.TestCase):
 
         @self.app.route('/empty_session')
         def empty_session():
-            return unicode(u'modified=%s' % session.modified)
+            return str('modified=%s' % session.modified)
 
         # This will help us with the possibility of typoes in the tests. Now
         # we shouldn't have to check each response to help us set up state
@@ -357,19 +344,19 @@ class LoginTestCase(unittest.TestCase):
     def test_defaults_anonymous(self):
         with self.app.test_client() as c:
             result = c.get('/username')
-            self.assertEqual(u'Anonymous', result.data.decode('utf-8'))
+            self.assertEqual('Anonymous', result.data.decode('utf-8'))
 
     def test_login_user(self):
         with self.app.test_request_context():
             result = login_user(notch)
             self.assertTrue(result)
-            self.assertEqual(current_user.name, u'Notch')
+            self.assertEqual(current_user.name, 'Notch')
 
     def test_login_user_not_fresh(self):
         with self.app.test_request_context():
             result = login_user(notch, fresh=False)
             self.assertTrue(result)
-            self.assertEqual(current_user.name, u'Notch')
+            self.assertEqual(current_user.name, 'Notch')
             self.assertIs(login_fresh(), False)
 
     def test_login_user_emits_signal(self):
@@ -387,7 +374,7 @@ class LoginTestCase(unittest.TestCase):
     def test_login_inactive_user_forced(self):
         with self.app.test_request_context():
             login_user(creeper, force=True)
-            self.assertEqual(current_user.name, u'Creeper')
+            self.assertEqual(current_user.name, 'Creeper')
 
     def test_login_user_with_header(self):
         user_id = 2
@@ -402,7 +389,7 @@ class LoginTestCase(unittest.TestCase):
 
     def test_login_invalid_user_with_header(self):
         user_id = 9000
-        user_name = u'Anonymous'
+        user_name = 'Anonymous'
         self.login_manager._request_callback = None
         with self.app.test_client() as c:
             basic_fmt = 'Basic {0}'
@@ -421,7 +408,7 @@ class LoginTestCase(unittest.TestCase):
 
     def test_login_invalid_user_with_request(self):
         user_id = 9000
-        user_name = u'Anonymous'
+        user_name = 'Anonymous'
         with self.app.test_client() as c:
             url = '/username?user_id={user_id}'.format(user_id=user_id)
             result = c.get(url)
@@ -463,7 +450,7 @@ class LoginTestCase(unittest.TestCase):
     def test_unauthorized_flashes_message_with_login_view(self):
         self.login_manager.login_view = '/login'
 
-        expected_message = self.login_manager.login_message = u'Log in!'
+        expected_message = self.login_manager.login_message = 'Log in!'
         expected_category = self.login_manager.login_message_category = 'login'
 
         with self.app.test_client() as c:
@@ -473,14 +460,14 @@ class LoginTestCase(unittest.TestCase):
 
     def test_unauthorized_flash_message_localized(self):
         def _gettext(msg):
-            if msg == u'Log in!':
-                return u'Einloggen'
+            if msg == 'Log in!':
+                return 'Einloggen'
 
         self.login_manager.login_view = '/login'
         self.login_manager.localize_callback = _gettext
-        self.login_manager.login_message = u'Log in!'
+        self.login_manager.login_message = 'Log in!'
 
-        expected_message = u'Einloggen'
+        expected_message = 'Einloggen'
         expected_category = self.login_manager.login_message_category = 'login'
 
         with self.app.test_client() as c:
@@ -497,7 +484,7 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             result = c.get('/secret')
             self.assertEqual(result.status_code, 401)
-            self.assertEqual(u'This is secret!', result.data.decode('utf-8'))
+            self.assertEqual('This is secret!', result.data.decode('utf-8'))
 
     def test_unauthorized_aborts_with_401(self):
         with self.app.test_client() as c:
@@ -572,17 +559,17 @@ class LoginTestCase(unittest.TestCase):
             @self.app.route('/protected')
             @login_required
             def protected():
-                return u'Access Granted'
+                return 'Access Granted'
 
             @first.route('/protected')
             @login_required
             def first_protected():
-                return u'Access Granted'
+                return 'Access Granted'
 
             @second.route('/protected')
             @login_required
             def second_protected():
-                return u'Access Granted'
+                return 'Access Granted'
 
             self.app.register_blueprint(first, url_prefix='/first')
             self.app.register_blueprint(second, url_prefix='/second')
@@ -621,7 +608,7 @@ class LoginTestCase(unittest.TestCase):
             @self.app.route('/protected')
             @login_required
             def protected():
-                return u'Access Granted'
+                return 'Access Granted'
 
             set_login_view('app_login')
 
@@ -640,14 +627,14 @@ class LoginTestCase(unittest.TestCase):
             c.get('/login-notch')
             result = c.get('/username')
 
-            self.assertEqual(u'Notch', result.data.decode('utf-8'))
+            self.assertEqual('Notch', result.data.decode('utf-8'))
 
     def test_logout_persists(self):
         with self.app.test_client() as c:
             c.get('/login-notch')
             c.get('/logout')
             result = c.get('/username')
-            self.assertEqual(result.data.decode('utf-8'), u'Anonymous')
+            self.assertEqual(result.data.decode('utf-8'), 'Anonymous')
 
     def test_incorrect_id_logs_out(self):
         # Ensure that any attempt to reload the user by the ID
@@ -661,27 +648,27 @@ class LoginTestCase(unittest.TestCase):
             c.get('/login-notch')
             result = c.get('/username')
 
-            self.assertEqual(u'Anonymous', result.data.decode('utf-8'))
+            self.assertEqual('Anonymous', result.data.decode('utf-8'))
 
     def test_authentication_is_fresh(self):
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
             result = c.get('/is-fresh')
-            self.assertEqual(u'True', result.data.decode('utf-8'))
+            self.assertEqual('True', result.data.decode('utf-8'))
 
     def test_remember_me(self):
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
             self._delete_session(c)
             result = c.get('/username')
-            self.assertEqual(u'Notch', result.data.decode('utf-8'))
+            self.assertEqual('Notch', result.data.decode('utf-8'))
 
     def test_remember_me_custom_duration(self):
         with self.app.test_client() as c:
             c.get('/login-notch-remember-custom')
             self._delete_session(c)
             result = c.get('/username')
-            self.assertEqual(u'Notch', result.data.decode('utf-8'))
+            self.assertEqual('Notch', result.data.decode('utf-8'))
 
     def test_remember_me_uses_custom_cookie_parameters(self):
         name = self.app.config['REMEMBER_COOKIE_NAME'] = 'myname'
@@ -775,7 +762,7 @@ class LoginTestCase(unittest.TestCase):
         @self.app.route('/login-notch-remember-custom-invalid')
         def login_notch_remember_custom_invalid():
             duration = '123'
-            return unicode(login_user(notch, remember=True, duration=duration))
+            return str(login_user(notch, remember=True, duration=duration))
 
         with self.app.test_client() as c:
             result = c.get('/login-notch-remember-custom-invalid')
@@ -849,7 +836,7 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
             self._delete_session(c)
-            self.assertEqual(u'False', c.get('/is-fresh').data.decode('utf-8'))
+            self.assertEqual('False', c.get('/is-fresh').data.decode('utf-8'))
 
     def test_login_persists_with_signle_x_forwarded_for(self):
         self.app.config['SESSION_PROTECTION'] = 'strong'
@@ -857,10 +844,10 @@ class LoginTestCase(unittest.TestCase):
             c.get('/login-notch', headers=[('X-Forwarded-For', '10.1.1.1')])
             result = c.get('/username',
                            headers=[('X-Forwarded-For', '10.1.1.1')])
-            self.assertEqual(u'Notch', result.data.decode('utf-8'))
+            self.assertEqual('Notch', result.data.decode('utf-8'))
             result = c.get('/username',
                            headers=[('X-Forwarded-For', '10.1.1.1')])
-            self.assertEqual(u'Notch', result.data.decode('utf-8'))
+            self.assertEqual('Notch', result.data.decode('utf-8'))
 
     def test_login_persists_with_many_x_forwarded_for(self):
         self.app.config['SESSION_PROTECTION'] = 'strong'
@@ -869,10 +856,10 @@ class LoginTestCase(unittest.TestCase):
                   headers=[('X-Forwarded-For', '10.1.1.1')])
             result = c.get('/username',
                            headers=[('X-Forwarded-For', '10.1.1.1')])
-            self.assertEqual(u'Notch', result.data.decode('utf-8'))
+            self.assertEqual('Notch', result.data.decode('utf-8'))
             result = c.get('/username',
                            headers=[('X-Forwarded-For', '10.1.1.1, 10.1.1.2')])
-            self.assertEqual(u'Notch', result.data.decode('utf-8'))
+            self.assertEqual('Notch', result.data.decode('utf-8'))
 
     def test_user_loaded_from_cookie_fired(self):
         with self.app.test_client() as c:
@@ -916,24 +903,24 @@ class LoginTestCase(unittest.TestCase):
             c.get('/login-notch-remember')
             c.get('/logout')
             result = c.get('/username')
-            self.assertEqual(result.data.decode('utf-8'), u'Anonymous')
+            self.assertEqual(result.data.decode('utf-8'), 'Anonymous')
 
     def test_logout_stays_logged_out_with_remember_me_custom_duration(self):
         with self.app.test_client() as c:
             c.get('/login-notch-remember-custom')
             c.get('/logout')
             result = c.get('/username')
-            self.assertEqual(result.data.decode('utf-8'), u'Anonymous')
+            self.assertEqual(result.data.decode('utf-8'), 'Anonymous')
 
     def test_needs_refresh_uses_handler(self):
         @self.login_manager.needs_refresh_handler
         def _on_refresh():
-            return u'Needs Refresh!'
+            return 'Needs Refresh!'
 
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
             result = c.get('/needs-refresh')
-            self.assertEqual(u'Needs Refresh!', result.data.decode('utf-8'))
+            self.assertEqual('Needs Refresh!', result.data.decode('utf-8'))
 
     def test_needs_refresh_fires_needs_refresh_signal(self):
         with self.app.test_client() as c:
@@ -945,7 +932,7 @@ class LoginTestCase(unittest.TestCase):
     def test_needs_refresh_fires_flash_when_redirect_to_refresh_view(self):
         self.login_manager.refresh_view = '/refresh_view'
 
-        self.login_manager.needs_refresh_message = u'Refresh'
+        self.login_manager.needs_refresh_message = 'Refresh'
         self.login_manager.needs_refresh_message_category = 'refresh'
         category_filter = [self.login_manager.needs_refresh_message_category]
 
@@ -957,13 +944,13 @@ class LoginTestCase(unittest.TestCase):
 
     def test_needs_refresh_flash_message_localized(self):
         def _gettext(msg):
-            if msg == u'Refresh':
-                return u'Aktualisieren'
+            if msg == 'Refresh':
+                return 'Aktualisieren'
 
         self.login_manager.refresh_view = '/refresh_view'
         self.login_manager.localize_callback = _gettext
 
-        self.login_manager.needs_refresh_message = u'Refresh'
+        self.login_manager.needs_refresh_message = 'Refresh'
         self.login_manager.needs_refresh_message_category = 'refresh'
         category_filter = [self.login_manager.needs_refresh_message_category]
 
@@ -971,7 +958,7 @@ class LoginTestCase(unittest.TestCase):
             c.get('/login-notch-remember')
             c.get('/needs-refresh')
             msgs = get_flashed_messages(category_filter=category_filter)
-            self.assertIn(u'Aktualisieren', msgs)
+            self.assertIn('Aktualisieren', msgs)
         self.login_manager.localize_callback = None
 
     def test_needs_refresh_aborts_401(self):
@@ -1013,9 +1000,9 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
             self._delete_session(c)
-            self.assertEqual(u'False', c.get('/is-fresh').data.decode('utf-8'))
+            self.assertEqual('False', c.get('/is-fresh').data.decode('utf-8'))
             c.get('/confirm-login')
-            self.assertEqual(u'True', c.get('/is-fresh').data.decode('utf-8'))
+            self.assertEqual('True', c.get('/is-fresh').data.decode('utf-8'))
 
     def test_user_login_confirmed_signal_fired(self):
         with self.app.test_client() as c:
@@ -1027,7 +1014,7 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             # Within the request we think we didn't modify the session.
             self.assertEqual(
-                u'modified=False',
+                'modified=False',
                 c.get('/empty_session').data.decode('utf-8'))
             # But after the request, the session could be modified by the
             # "after_request" handlers that call _update_remember_cookie.
@@ -1042,7 +1029,7 @@ class LoginTestCase(unittest.TestCase):
                 sess['_user_id'] = None
             c.set_cookie(domain, self.remember_cookie_name, 'foo')
             result = c.get('/username')
-            self.assertEqual(u'Anonymous', result.data.decode('utf-8'))
+            self.assertEqual('Anonymous', result.data.decode('utf-8'))
 
     #
     # Session Protection
@@ -1052,18 +1039,18 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
             username_result = c.get('/username')
-            self.assertEqual(u'Notch', username_result.data.decode('utf-8'))
+            self.assertEqual('Notch', username_result.data.decode('utf-8'))
             fresh_result = c.get('/is-fresh')
-            self.assertEqual(u'True', fresh_result.data.decode('utf-8'))
+            self.assertEqual('True', fresh_result.data.decode('utf-8'))
 
     def test_session_protection_strong_passes_successive_requests(self):
         self.app.config['SESSION_PROTECTION'] = 'strong'
         with self.app.test_client() as c:
             c.get('/login-notch-remember')
             username_result = c.get('/username')
-            self.assertEqual(u'Notch', username_result.data.decode('utf-8'))
+            self.assertEqual('Notch', username_result.data.decode('utf-8'))
             fresh_result = c.get('/is-fresh')
-            self.assertEqual(u'True', fresh_result.data.decode('utf-8'))
+            self.assertEqual('True', fresh_result.data.decode('utf-8'))
 
     def test_session_protection_basic_marks_session_unfresh(self):
         self.app.config['SESSION_PROTECTION'] = 'basic'
@@ -1071,9 +1058,9 @@ class LoginTestCase(unittest.TestCase):
             c.get('/login-notch-remember')
             username_result = c.get('/username',
                                     headers=[('User-Agent', 'different')])
-            self.assertEqual(u'Notch', username_result.data.decode('utf-8'))
+            self.assertEqual('Notch', username_result.data.decode('utf-8'))
             fresh_result = c.get('/is-fresh')
-            self.assertEqual(u'False', fresh_result.data.decode('utf-8'))
+            self.assertEqual('False', fresh_result.data.decode('utf-8'))
 
     def test_session_protection_basic_fires_signal(self):
         self.app.config['SESSION_PROTECTION'] = 'basic'
@@ -1114,9 +1101,9 @@ class LoginTestCase(unittest.TestCase):
             c.get('/login-notch-permanent')
             username_result = c.get('/username', headers=[('User-Agent',
                                                            'different')])
-            self.assertEqual(u'Notch', username_result.data.decode('utf-8'))
+            self.assertEqual('Notch', username_result.data.decode('utf-8'))
             fresh_result = c.get('/is-fresh')
-            self.assertEqual(u'False', fresh_result.data.decode('utf-8'))
+            self.assertEqual('False', fresh_result.data.decode('utf-8'))
 
     def test_permanent_strong_session_protection_fires_signal(self):
         self.app.config['SESSION_PROTECTION'] = 'strong'
@@ -1137,7 +1124,7 @@ class LoginTestCase(unittest.TestCase):
             c.get('/login-notch-remember')
             username_result = c.get('/username', headers=[('User-Agent',
                                                            'different')])
-            self.assertEqual(u'Anonymous',
+            self.assertEqual('Anonymous',
                              username_result.data.decode('utf-8'))
             with c.session_transaction() as sess:
                 self.assertIn('foo', sess)
@@ -1172,7 +1159,7 @@ class LoginTestCase(unittest.TestCase):
             # access user with no session data
             with listen_to(session_protected) as session_listener:
                 results = c.get('/username')
-                self.assertEqual(results.data.decode('utf-8'), u'Anonymous')
+                self.assertEqual(results.data.decode('utf-8'), 'Anonymous')
                 session_listener.assert_heard_none(self.app)
 
             # verify no session data has been set
@@ -1190,7 +1177,7 @@ class LoginTestCase(unittest.TestCase):
             # access user with no session data
             with listen_to(session_protected) as session_listener:
                 results = c.get('/username')
-                self.assertEqual(results.data.decode('utf-8'), u'Anonymous')
+                self.assertEqual(results.data.decode('utf-8'), 'Anonymous')
                 session_listener.assert_heard_none(self.app)
 
             # verify no session data has been set
@@ -1212,7 +1199,7 @@ class LoginTestCase(unittest.TestCase):
             with listen_to(user_accessed) as listener:
                 result = c.get('/username')
                 listener.assert_heard_one(self.app)
-                self.assertEqual(result.data.decode('utf-8'), u'Notch')
+                self.assertEqual(result.data.decode('utf-8'), 'Notch')
 
     #
     # View Decorators
@@ -1221,7 +1208,7 @@ class LoginTestCase(unittest.TestCase):
         @self.app.route('/protected')
         @login_required
         def protected():
-            return u'Access Granted'
+            return 'Access Granted'
 
         with self.app.test_client() as c:
             result = c.get('/protected')
@@ -1229,20 +1216,20 @@ class LoginTestCase(unittest.TestCase):
 
             c.get('/login-notch')
             result2 = c.get('/protected')
-            self.assertIn(u'Access Granted', result2.data.decode('utf-8'))
+            self.assertIn('Access Granted', result2.data.decode('utf-8'))
 
     def test_decorators_are_disabled(self):
         @self.app.route('/protected')
         @login_required
         @fresh_login_required
         def protected():
-            return u'Access Granted'
+            return 'Access Granted'
 
         self.app.config['LOGIN_DISABLED'] = True
 
         with self.app.test_client() as c:
             result = c.get('/protected')
-            self.assertIn(u'Access Granted', result.data.decode('utf-8'))
+            self.assertIn('Access Granted', result.data.decode('utf-8'))
 
     def test_fresh_login_required_decorator(self):
         @self.app.route('/very-protected')
@@ -1256,7 +1243,7 @@ class LoginTestCase(unittest.TestCase):
 
             c.get('/login-notch-remember')
             logged_in_result = c.get('/very-protected')
-            self.assertEqual(u'Access Granted',
+            self.assertEqual('Access Granted',
                              logged_in_result.data.decode('utf-8'))
 
             self._delete_session(c)
@@ -1265,7 +1252,7 @@ class LoginTestCase(unittest.TestCase):
 
             c.get('/confirm-login')
             refreshed_result = c.get('/very-protected')
-            self.assertEqual(u'Access Granted',
+            self.assertEqual('Access Granted',
                              refreshed_result.data.decode('utf-8'))
 
     #
@@ -1275,16 +1262,16 @@ class LoginTestCase(unittest.TestCase):
                      "wait for upstream implementing RFC 5987")
     def test_chinese_user_agent(self):
         with self.app.test_client() as c:
-            result = c.get('/', headers=[('User-Agent', u'中文')])
-            self.assertEqual(u'Welcome!', result.data.decode('utf-8'))
+            result = c.get('/', headers=[('User-Agent', '中文')])
+            self.assertEqual('Welcome!', result.data.decode('utf-8'))
 
     @unittest.skipIf(Version(werkzeug_version) >= Version('0.9', partial=True),
                      "wait for upstream implementing RFC 5987")
     def test_russian_cp1251_user_agent(self):
         with self.app.test_client() as c:
-            headers = [('User-Agent', u'ЯЙЮя'.encode('cp1251'))]
+            headers = [('User-Agent', 'ЯЙЮя'.encode('cp1251'))]
             response = c.get('/', headers=headers)
-            self.assertEqual(response.data.decode('utf-8'), u'Welcome!')
+            self.assertEqual(response.data.decode('utf-8'), 'Welcome!')
 
     def test_user_context_processor(self):
         with self.app.test_request_context():
@@ -1307,21 +1294,21 @@ class LoginViaRequestTestCase(unittest.TestCase):
 
         @self.app.route('/')
         def index():
-            return u'Welcome!'
+            return 'Welcome!'
 
         @self.app.route('/login-notch')
         def login_notch():
-            return unicode(login_user(notch))
+            return str(login_user(notch))
 
         @self.app.route('/username')
         def username():
             if current_user.is_authenticated:
                 return current_user.name
-            return u'Anonymous', 401
+            return 'Anonymous', 401
 
         @self.app.route('/logout')
         def logout():
-            return unicode(logout_user())
+            return str(logout_user())
 
         @self.login_manager.request_loader
         def load_user_from_request(request):
@@ -1372,7 +1359,7 @@ class LoginViaRequestTestCase(unittest.TestCase):
             self.assertEqual(user_name, result.data.decode('utf-8'))
             url = '/username?user_id={user_id}'.format(user_id=user_id)
             result = c.get(url)
-            self.assertEqual(u'Steve', result.data.decode('utf-8'))
+            self.assertEqual('Steve', result.data.decode('utf-8'))
 
     def test_login_invalid_user_with_request(self):
         user_id = 9000
@@ -1386,7 +1373,7 @@ class LoginViaRequestTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             url = '/login-notch'
             result = c.get(url)
-            self.assertEqual(u'True', result.data.decode('utf-8'))
+            self.assertEqual('True', result.data.decode('utf-8'))
             url = '/username?user_id={user_id}'.format(user_id=user_id)
             result = c.get(url)
             self.assertEqual(result.status_code, 401)
@@ -1400,7 +1387,7 @@ class LoginViaRequestTestCase(unittest.TestCase):
             self.assertEqual(user_name, result.data.decode('utf-8'))
             url = '/username'
             result = c.get(url)
-            self.assertEqual(u'Anonymous', result.data.decode('utf-8'))
+            self.assertEqual('Anonymous', result.data.decode('utf-8'))
 
 
 class TestLoginUrlGeneration(unittest.TestCase):
@@ -1462,16 +1449,16 @@ class CookieEncodingTestCase(unittest.TestCase):
         # COOKIE = u'1|7d276051c1eec578ed86f6b8478f7f7d803a7970'
 
         # Due to the restriction of 80 chars I have to break up the hash in two
-        h1 = u'0e9e6e9855fbe6df7906ec4737578a1d491b38d3fd5246c1561016e189d6516'
-        h2 = u'043286501ca43257c938e60aad77acec5ce916b94ca9d00c0bb6f9883ae4b82'
-        h3 = u'ae'
-        COOKIE = u'1|' + h1 + h2 + h3
+        h1 = '0e9e6e9855fbe6df7906ec4737578a1d491b38d3fd5246c1561016e189d6516'
+        h2 = '043286501ca43257c938e60aad77acec5ce916b94ca9d00c0bb6f9883ae4b82'
+        h3 = 'ae'
+        COOKIE = '1|' + h1 + h2 + h3
 
         with app.test_request_context():
-            self.assertEqual(COOKIE, encode_cookie(u'1'))
-            self.assertEqual(u'1', decode_cookie(COOKIE))
-            self.assertIsNone(decode_cookie(u'Foo|BAD_BASH'))
-            self.assertIsNone(decode_cookie(u'no bar'))
+            self.assertEqual(COOKIE, encode_cookie('1'))
+            self.assertEqual('1', decode_cookie(COOKIE))
+            self.assertIsNone(decode_cookie('Foo|BAD_BASH'))
+            self.assertIsNone(decode_cookie('no bar'))
 
     def test_cookie_encoding_with_key(self):
         app = Flask(__name__)
@@ -1481,16 +1468,16 @@ class CookieEncodingTestCase(unittest.TestCase):
         # COOKIE = u'1|7d276051c1eec578ed86f6b8478f7f7d803a7970'
 
         # Due to the restriction of 80 chars I have to break up the hash in two
-        h1 = u'0e9e6e9855fbe6df7906ec4737578a1d491b38d3fd5246c1561016e189d6516'
-        h2 = u'043286501ca43257c938e60aad77acec5ce916b94ca9d00c0bb6f9883ae4b82'
-        h3 = u'ae'
-        COOKIE = u'1|' + h1 + h2 + h3
+        h1 = '0e9e6e9855fbe6df7906ec4737578a1d491b38d3fd5246c1561016e189d6516'
+        h2 = '043286501ca43257c938e60aad77acec5ce916b94ca9d00c0bb6f9883ae4b82'
+        h3 = 'ae'
+        COOKIE = '1|' + h1 + h2 + h3
 
         with app.test_request_context():
-            self.assertEqual(COOKIE, encode_cookie(u'1', key=key))
-            self.assertEqual(u'1', decode_cookie(COOKIE, key=key))
-            self.assertIsNone(decode_cookie(u'Foo|BAD_BASH', key=key))
-            self.assertIsNone(decode_cookie(u'no bar', key=key))
+            self.assertEqual(COOKIE, encode_cookie('1', key=key))
+            self.assertEqual('1', decode_cookie(COOKIE, key=key))
+            self.assertIsNone(decode_cookie('Foo|BAD_BASH', key=key))
+            self.assertIsNone(decode_cookie('no bar', key=key))
 
 
 class SecretKeyTestCase(unittest.TestCase):
@@ -1530,7 +1517,7 @@ class UserMixinTestCase(unittest.TestCase):
 
     def test_get_id_from_id_attribute(self):
         user = ImplicitIdUser(1)
-        self.assertEqual(u'1', user.get_id())
+        self.assertEqual('1', user.get_id())
 
     def test_get_id_not_implemented(self):
         user = ExplicitIdUser('Notch')
@@ -1547,8 +1534,8 @@ class UserMixinTestCase(unittest.TestCase):
         self.assertFalse(first != same)
         self.assertTrue(first != different)
 
-        self.assertFalse(first == u'1')
-        self.assertTrue(first != u'1')
+        self.assertFalse(first == '1')
+        self.assertTrue(first != '1')
 
     def test_hashable(self):
         self.assertTrue(isinstance(UserMixin(), Hashable))
@@ -1577,27 +1564,27 @@ class UnicodeCookieUserIDTestCase(unittest.TestCase):
 
         @self.app.route('/')
         def index():
-            return u'Welcome!'
+            return 'Welcome!'
 
         @self.app.route('/login-germanjapanese-remember')
         def login_germanjapanese_remember():
-            return unicode(login_user(germanjapanese, remember=True))
+            return str(login_user(germanjapanese, remember=True))
 
         @self.app.route('/username')
         def username():
             if current_user.is_authenticated:
                 return current_user.name
-            return u'Anonymous'
+            return 'Anonymous'
 
         @self.app.route('/userid')
         def user_id():
             if current_user.is_authenticated:
                 return current_user.id
-            return u'wrong_id'
+            return 'wrong_id'
 
         @self.login_manager.user_loader
         def load_user(user_id):
-            return USERS[unicode(user_id)]
+            return USERS[str(user_id)]
 
         # This will help us with the possibility of typoes in the tests. Now
         # we shouldn't have to check each response to help us set up state
@@ -1622,14 +1609,14 @@ class UnicodeCookieUserIDTestCase(unittest.TestCase):
             c.get('/login-germanjapanese-remember')
             self._delete_session(c)
             result = c.get('/username')
-            self.assertEqual(u'Müller', result.data.decode('utf-8'))
+            self.assertEqual('Müller', result.data.decode('utf-8'))
 
     def test_remember_me_user_id(self):
         with self.app.test_client() as c:
             c.get('/login-germanjapanese-remember')
             self._delete_session(c)
             result = c.get('/userid')
-            self.assertEqual(u'佐藤', result.data.decode('utf-8'))
+            self.assertEqual('佐藤', result.data.decode('utf-8'))
 
 
 class StrictHostForRedirectsTestCase(unittest.TestCase):
@@ -1649,11 +1636,11 @@ class StrictHostForRedirectsTestCase(unittest.TestCase):
 
         @self.app.route('/')
         def index():
-            return u'Welcome!'
+            return 'Welcome!'
 
         @self.login_manager.user_loader
         def load_user(user_id):
-            return USERS[unicode(user_id)]
+            return USERS[str(user_id)]
 
         # This will help us with the possibility of typoes in the tests. Now
         # we shouldn't have to check each response to help us set up state
@@ -1749,17 +1736,17 @@ class CustomTestClientTestCase(unittest.TestCase):
 
         @self.app.route('/')
         def index():
-            return u'Welcome!'
+            return 'Welcome!'
 
         @self.app.route('/username')
         def username():
             if current_user.is_authenticated:
                 return current_user.name
-            return u'Anonymous'
+            return 'Anonymous'
 
         @self.app.route('/is-fresh')
         def is_fresh():
-            return unicode(login_fresh())
+            return str(login_fresh())
 
         @self.login_manager.user_loader
         def load_user(user_id):
@@ -1778,18 +1765,18 @@ class CustomTestClientTestCase(unittest.TestCase):
     def test_no_args_to_test_client(self):
         with self.app.test_client() as c:
             result = c.get('/username')
-            self.assertEqual(u'Anonymous', result.data.decode('utf-8'))
+            self.assertEqual('Anonymous', result.data.decode('utf-8'))
 
     def test_user_arg_to_test_client(self):
         with self.app.test_client(user=notch) as c:
             username = c.get('/username')
-            self.assertEqual(u'Notch', username.data.decode('utf-8'))
+            self.assertEqual('Notch', username.data.decode('utf-8'))
             is_fresh = c.get('/is-fresh')
-            self.assertEqual(u'True', is_fresh.data.decode('utf-8'))
+            self.assertEqual('True', is_fresh.data.decode('utf-8'))
 
     def test_fresh_login_arg_to_test_client(self):
         with self.app.test_client(user=creeper, fresh_login=False) as c:
             username = c.get('/username')
-            self.assertEqual(u'Creeper', username.data.decode('utf-8'))
+            self.assertEqual('Creeper', username.data.decode('utf-8'))
             is_fresh = c.get('/is-fresh')
-            self.assertEqual(u'False', is_fresh.data.decode('utf-8'))
+            self.assertEqual('False', is_fresh.data.decode('utf-8'))
