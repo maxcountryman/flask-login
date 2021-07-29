@@ -3,6 +3,25 @@ Flask-Login Changelog
 
 Here you can see the full list of changes between each Flask-Login release.
 
+Version 0.6.0
+-------------
+
+Unreleased
+
+- Drop support for Python 2.7 #594
+- Only flash "needs_refresh_message" if value is set #464
+- Modify `expand_login_view` to allow for subdomain and host matching for `login_view` #462
+- Add accessors for `request_loader` and `user_loader` callback functions #472
+- Change "remember_me" cookie to match Werkzeug default value #488
+- Change "remember_me" cookie to `HttpOnly`, matching Flask session cookie #488
+- Add example for using `unauthorized_handler` #492
+- Fix `assertEqual` deprecation warning in pytest #518
+- Fix `collections` deprecation warning under Python 3.8 #525
+- Replace `safe_str_cmp` with `hmac.compare_digest` #585
+- Document `REMEMBER_COOKIE_SAMESITE` config #577
+- Revise setup.py to use README.md for long description #598
+- Various documentation corrections #484, #482, #487, #534
+
 Version 0.5.0
 -------------
 
