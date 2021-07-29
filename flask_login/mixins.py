@@ -6,19 +6,15 @@
 '''
 
 
-from ._compat import PY2, text_type
-
-
-class UserMixin(object):
+class UserMixin:
     '''
     This provides default implementations for the methods that Flask-Login
     expects user objects to have.
     '''
 
-    if not PY2:  # pragma: no cover
-        # Python 3 implicitly set __hash__ to None if we override __eq__
-        # We set it back to its default implementation
-        __hash__ = object.__hash__
+    # Python 3 implicitly set __hash__ to None if we override __eq__
+    # We set it back to its default implementation
+    __hash__ = object.__hash__
 
     @property
     def is_active(self):
@@ -34,7 +30,7 @@ class UserMixin(object):
 
     def get_id(self):
         try:
-            return text_type(self.id)
+            return str(self.id)
         except AttributeError:
             raise NotImplementedError('No `id` attribute - override `get_id`')
 
@@ -56,7 +52,7 @@ class UserMixin(object):
         return not equal
 
 
-class AnonymousUserMixin(object):
+class AnonymousUserMixin:
     '''
     This is the default object for representing an anonymous user.
     '''

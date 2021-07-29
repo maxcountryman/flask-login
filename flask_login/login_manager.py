@@ -12,7 +12,6 @@ from datetime import datetime, timedelta
 from flask import (_request_ctx_stack, abort, current_app, flash, redirect,
                    has_app_context, request, session)
 
-from ._compat import text_type
 from .config import (COOKIE_NAME, COOKIE_DURATION, COOKIE_SECURE,
                      COOKIE_HTTPONLY, COOKIE_SAMESITE, LOGIN_MESSAGE,
                      LOGIN_MESSAGE_CATEGORY, REFRESH_MESSAGE,
@@ -179,7 +178,7 @@ class LoginManager(object):
     def user_loader(self, callback):
         '''
         This sets the callback for reloading a user from the session. The
-        function you set should take a user ID (a ``unicode``) and return a
+        function you set should take a user ID (a ``str``) and return a
         user object, or ``None`` if the user does not exist.
 
         :param callback: The callback for retrieving a user object.
@@ -296,8 +295,8 @@ class LoginManager(object):
         :param callback: The callback for retrieving a user object.
         :type callback: callable
         '''
-        print('LoginManager.header_loader is deprecated. Use ' +
-              'LoginManager.request_loader instead.')
+        print(('LoginManager.header_loader is deprecated. Use ' +
+              'LoginManager.request_loader instead.'))
         self._header_callback = callback
         return callback
 
@@ -439,7 +438,7 @@ class LoginManager(object):
             duration = config.get('REMEMBER_COOKIE_DURATION', COOKIE_DURATION)
 
         # prepare data
-        data = encode_cookie(text_type(session['_user_id']))
+        data = encode_cookie(str(session['_user_id']))
 
         if isinstance(duration, int):
             duration = timedelta(seconds=duration)
