@@ -374,7 +374,7 @@ def _create_identifier():
     if str is bytes:
         base = text_type(base, 'utf-8', errors='replace')  # pragma: no cover
     h = sha512()
-    h.update(base.encode('utf8'))
+    h.update(base.encode('utf-8'))
     return h.hexdigest()
 
 
@@ -387,6 +387,6 @@ def _secret_key(key=None):
         key = current_app.config['SECRET_KEY']
 
     if isinstance(key, text_type):  # pragma: no cover
-        key = key.encode('latin1')  # ensure bytes
+        key = key.encode('utf-8')  # ensure bytes
 
     return key
