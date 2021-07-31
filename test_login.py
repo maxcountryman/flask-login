@@ -4,6 +4,7 @@ import unittest
 import base64
 from datetime import timedelta, datetime
 from contextlib import contextmanager
+from sys import version as python_version_info
 
 from unittest.mock import ANY, patch, Mock
 from collections.abc import Hashable
@@ -1213,6 +1214,79 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             result = c.get('/protected')
             self.assertEqual(result.status_code, 401)
+
+            c.get('/login-notch')
+            result2 = c.get('/protected')
+            self.assertIn('Access Granted', result2.data.decode('utf-8'))
+
+    @unittest.skipIf(
+        Version(python_version_info[0:5]) < Version('3.7.0'),
+        "Ignore async/await")
+    def test_former_login_required_decorator_with_async(self):
+        import asyncio
+        from functools import wraps
+        from flask import current_app, request
+
+        def former_login_required(func):
+            @wraps(func)
+            def decorated_view(*args, **kwargs):
+                # func(*args, **kwargs) will break with async/await.
+                if request.method in set(['OPTIONS']):
+                    return func(*args, **kwargs)
+                elif current_app.config.get('LOGIN_DISABLED'):
+                    return func(*args, **kwargs)
+                elif not current_user.is_authenticated:
+                    return current_app.login_manager.unauthorized()
+                return func(*args, **kwargs)
+            return decorated_view
+
+        @self.app.route('/protected')
+        @former_login_required
+        async def protected():
+            await asyncio.sleep(0)
+            return 'Access Granted'
+
+        with self.app.test_client() as c:
+            self.app.config['LOGIN_DISABLED'] = True
+
+            result = c.get('/protected')
+            self.assertEqual(result.status_code, 500)
+
+            self.app.config['LOGIN_DISABLED'] = False
+
+            result = c.get('/protected')
+            self.assertEqual(result.status_code, 401)
+
+            c.get('/login-notch')
+            result = c.get('/protected')
+            self.assertEqual(result.status_code, 500)
+
+    @unittest.skipIf(
+        Version(python_version_info[0:5]) < Version('3.7.0'),
+        "Ignore async/await")
+    def test_login_required_decorator_with_async(self):
+        import asyncio
+
+        @self.app.route('/protected')
+        @login_required
+        async def protected():
+            await asyncio.sleep(0)
+            return 'Access Granted'
+
+        with self.app.test_client() as c:
+            self.app.config['LOGIN_DISABLED'] = True
+
+            result = c.get('/protected')
+            self.assertEqual(result.status_code, 200)
+
+            self.app.config['LOGIN_DISABLED'] = False
+
+            result = c.get('/protected')
+            self.assertEqual(result.status_code, 401)
+
+            c.get('/login-notch')
+            result = c.get('/protected')
+            self.assertEqual(result.status_code, 200)
 
             c.get('/login-notch')
             result2 = c.get('/protected')
