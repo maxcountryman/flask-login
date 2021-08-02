@@ -4,7 +4,7 @@
     -----------------
     General utilities.
 '''
-
+import re
 
 import hmac
 from hashlib import sha512
@@ -23,6 +23,21 @@ from .signals import user_logged_in, user_logged_out, user_login_confirmed
 #: A proxy for the current user. If no user is logged in, this will be an
 #: anonymous user
 current_user = LocalProxy(lambda: _get_user())
+# Rule regex based on:
+# https://github.com/pallets/werkzeug/blob/main/src/werkzeug/routing.py#L147-L160https://github.com/pallets/werkzeug/blob/d781b06c3fbac8eaeb3bfb61bea005a3a5288b91/src/werkzeug/routing.py#L147-L160
+_rule_re = re.compile(
+    r"""
+    <
+    (?:
+        (?:[a-zA-Z_][a-zA-Z0-9_]*)
+        (?:\(.*?\))?
+        \:
+    )?
+    (?P<name>[a-zA-Z_][a-zA-Z0-9_]*)
+    >
+    """,
+    re.VERBOSE,
+)
 
 
 def encode_cookie(payload, key=None):
@@ -96,7 +111,18 @@ def expand_login_view(login_view):
         if request.view_args is None:
             return url_for(login_view)
         else:
-            return url_for(login_view, **request.view_args)
+            # Pass the subdomain argument to `login_view` when the request
+            # route specifies a dynamic subdomain. Otherwise `login_view`s that
+            # support dynamic subdomains in Flask will fail as discussed in
+            # #462.
+            if request.url_rule and request.url_rule.subdomain:
+                # Ignore static subdomains, only match on dynamic ones
+                match_obj = _rule_re.fullmatch(request.url_rule.subdomain)
+                if match_obj and match_obj.group('name') in request.view_args:
+                    name = match_obj.group('name')
+                    subdomain_kwarg = {name: request.view_args[name]}
+                    return url_for(login_view, **subdomain_kwarg)
+            return url_for(login_view)
 
 
 def login_url(login_view, next_url=None, next_field='next'):

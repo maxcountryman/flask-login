@@ -231,7 +231,7 @@ class LoginTestCase(unittest.TestCase):
     ''' Tests for results of the login_user function '''
 
     def setUp(self):
-        self.app = Flask(__name__)
+        self.app = Flask(__name__, subdomain_matching=True)
         self.app.config['SECRET_KEY'] = 'deterministic'
         self.app.config['SESSION_PROTECTION'] = None
         self.remember_cookie_name = 'remember'
@@ -617,6 +617,82 @@ class LoginTestCase(unittest.TestCase):
                 result = c.get('/protected')
                 self.assertEqual(result.status_code, 302)
                 expected = 'http://localhost/app_login?next=%2Fprotected'
+                self.assertEqual(result.location, expected)
+
+    def test_set_login_view_dynamic_subdomain(self):
+        # Must specify SERVER_NAME explicitly to allow Flask subdomain
+        # matching
+        self.app.config['SERVER_NAME'] = 'dev.domain:5000'
+
+        with self.app.app_context():
+
+            @self.app.route('/app_login', subdomain='<tenant>')
+            def app_login(tenant):
+                return 'Login Form Goes Here for {tenant}!'.format(
+                    tenant=tenant
+                )
+
+            @self.app.route('/protected/<int:index>', subdomain='<tenant>')
+            @login_required
+            def protected(index, tenant):
+                return 'Access Granted for {tenant} on {index}'.format(
+                    tenant=tenant, index=index
+                )
+
+            set_login_view('app_login')
+
+            with self.app.test_client() as c:
+                result = c.get('http://foo.dev.domain:5000/protected/1')
+                self.assertEqual(result.status_code, 302)
+                # `index` should not be passed as arg to the `app_login` route
+                expected = 'http://foo.dev.domain:5000/app_login?next=' + \
+                    '%2Fprotected%2F1'
+                self.assertEqual(result.location, expected)
+
+    def test_set_login_view_static_subdomain(self):
+        # Must specify SERVER_NAME explicitly to allow Flask subdomain
+        # matching
+        self.app.config['SERVER_NAME'] = 'dev.domain:5000'
+
+        with self.app.app_context():
+
+            @self.app.route('/app_login', subdomain='foo')
+            def app_login():
+                return 'Login Form Goes Here!'
+
+            @self.app.route('/protected', subdomain='foo')
+            @login_required
+            def protected(index):
+                return 'Access Granted'
+
+            set_login_view('app_login')
+
+            with self.app.test_client() as c:
+                result = c.get('http://foo.dev.domain:5000/protected')
+                self.assertEqual(result.status_code, 302)
+                expected = 'http://foo.dev.domain:5000/app_login?next=' + \
+                    '%2Fprotected'
+                self.assertEqual(result.location, expected)
+
+    def test_set_login_view_arguments_not_added(self):
+        with self.app.app_context():
+
+            @self.app.route('/app_login')
+            def app_login():
+                return 'Login Form Goes Here!'
+
+            @self.app.route('/protected/<int:index>')
+            @login_required
+            def protected(index):
+                return 'Access Granted for {index}'.format(index=index)
+
+            set_login_view('app_login')
+
+            with self.app.test_client() as c:
+                result = c.get('/protected/1')
+                self.assertEqual(result.status_code, 302)
+                # `index` should not be passed as arg to the `app_login` route
+                expected = 'http://localhost/app_login?next=%2Fprotected%2F1'
                 self.assertEqual(result.location, expected)
 
     #
