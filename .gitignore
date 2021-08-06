@@ -10,6 +10,7 @@ __pycache__/
 *.egg-info
 *.swp
 
+build/
 dist/
 docs/_build/
 
