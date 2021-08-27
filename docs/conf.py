@@ -42,8 +42,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Flask-Login'
-copyright = u'2011, Matthew Frazier'
+project = 'Flask-Login'
+copyright = '2011, Matthew Frazier'
 
 module_path = os.path.join(os.path.dirname(__file__), '..', 'flask_login')
 module_path = os.path.abspath(module_path)
@@ -187,8 +187,8 @@ htmlhelp_basename = 'Flask-Logindoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Flask-Login.tex', u'Flask-Login Documentation',
-   u'Matthew Frazier', 'manual'),
+  ('index', 'Flask-Login.tex', 'Flask-Login Documentation',
+   'Matthew Frazier', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -220,8 +220,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'flask-login', u'Flask-Login Documentation',
-     [u'Matthew Frazier'], 1)
+    ('index', 'flask-login', 'Flask-Login Documentation',
+     ['Matthew Frazier'], 1)
 ]
 
 
