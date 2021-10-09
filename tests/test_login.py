@@ -1806,3 +1806,9 @@ class CustomTestClientTestCase(unittest.TestCase):
             self.assertEqual("Notch", username.data.decode("utf-8"))
             is_fresh = c.get("/is-fresh")
             self.assertEqual("False", is_fresh.data.decode("utf-8"))
+
+    def test_not_fresh_not_modified(self):
+        self.app.config["SESSION_PROTECTION"] = "basic"
+        c = self.app.test_client(user=steve, fresh_login=False)
+        r = c.get("/username")
+        assert "Set-Cookie" not in r.headers

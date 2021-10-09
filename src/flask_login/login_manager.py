@@ -387,7 +387,8 @@ class LoginManager:
         # so we can skip this
         if sess and ident != sess.get("_id", None):
             if mode == "basic" or sess.permanent:
-                sess["_fresh"] = False
+                if sess.get("_fresh") is not False:
+                    sess["_fresh"] = False
                 session_protected.send(app)
                 return False
             elif mode == "strong":
