@@ -4,7 +4,7 @@ import unittest
 import base64
 from datetime import timedelta, datetime
 from contextlib import contextmanager
-from sys import version as python_version_info
+from platform import python_version
 
 from unittest.mock import ANY, patch, Mock
 from collections.abc import Hashable
@@ -1220,7 +1220,7 @@ class LoginTestCase(unittest.TestCase):
             self.assertIn('Access Granted', result2.data.decode('utf-8'))
 
     @unittest.skipIf(
-        Version(python_version_info[0:5]) < Version('3.7.0'),
+        Version(python_version()) < Version('3.7.0'),
         "Ignore async/await")
     def test_former_login_required_decorator_with_async(self):
         import asyncio
@@ -1262,7 +1262,7 @@ class LoginTestCase(unittest.TestCase):
             self.assertEqual(result.status_code, 500)
 
     @unittest.skipIf(
-        Version(python_version_info[0:5]) < Version('3.7.0'),
+        Version(python_version()) < Version('3.7.0'),
         "Ignore async/await")
     def test_login_required_decorator_with_async(self):
         import asyncio
