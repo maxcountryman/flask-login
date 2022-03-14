@@ -287,7 +287,8 @@ Anonymous Users
 By default, when a user is not actually logged in, `current_user` is set to
 an `AnonymousUserMixin` object. It has the following properties and methods:
 
-- `is_active` and `is_authenticated` are `False`
+- `is_active` is `False`
+- `is_authenticated` is `False`
 - `is_anonymous` is `True`
 - `get_id()` returns `None`
 
