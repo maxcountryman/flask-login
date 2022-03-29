@@ -188,10 +188,10 @@ def login_user(user, remember=False, duration=None, force=False, fresh=True):
                     duration.microseconds
                     + (duration.seconds + duration.days * 24 * 3600) * 10**6
                 ) / 10.0**6
-            except AttributeError:
+            except AttributeError as e:
                 raise Exception(
-                    "duration must be a datetime.timedelta, instead" f" got: {duration}"
-                )
+                    f"duration must be a datetime.timedelta, instead got: {duration}"
+                ) from e
 
     current_app.login_manager._update_request_context_with_user(user)
     user_logged_in.send(current_app._get_current_object(), user=_get_user())

@@ -324,8 +324,8 @@ class LoginManager:
         :type callback: callable
         """
         print(
-            "LoginManager.header_loader is deprecated. Use "
-            + "LoginManager.request_loader instead."
+            "LoginManager.header_loader is deprecated. Use"
+            " LoginManager.request_loader instead."
         )
         self._header_callback = callback
         return callback
@@ -478,11 +478,11 @@ class LoginManager:
 
         try:
             expires = datetime.utcnow() + duration
-        except TypeError:
+        except TypeError as e:
             raise Exception(
                 "REMEMBER_COOKIE_DURATION must be a datetime.timedelta,"
                 f" instead got: {duration}"
-            )
+            ) from e
 
         # actually set it
         response.set_cookie(

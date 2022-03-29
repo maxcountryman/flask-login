@@ -1453,8 +1453,7 @@ class TestLoginUrlGeneration(unittest.TestCase):
             self.assertEqual("/login?next=%2Fprotected", url)
 
             expected = (
-                "https://auth.localhost/login"
-                + "?next=http%3A%2F%2Flocalhost%2Fprotected"
+                "https://auth.localhost/login?next=http%3A%2F%2Flocalhost%2Fprotected"
             )
             result = login_url("https://auth.localhost/login", PROTECTED)
             self.assertEqual(expected, result)
@@ -1532,11 +1531,15 @@ class SecretKeyTestCase(unittest.TestCase):
 
 
 class ImplicitIdUser(UserMixin):
+    __slots__ = ()
+
     def __init__(self, id):
         self.id = id
 
 
 class ExplicitIdUser(UserMixin):
+    __slots__ = ()
+
     def __init__(self, name):
         self.name = name
 

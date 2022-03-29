@@ -31,7 +31,7 @@ class UserMixin:
         try:
             return str(self.id)
         except AttributeError:
-            raise NotImplementedError("No `id` attribute - override `get_id`")
+            raise NotImplementedError("No `id` attribute - override `get_id`") from None
 
     def __eq__(self, other):
         """
