@@ -1,9 +1,9 @@
-include CHANGES
+include CHANGES.md
 include LICENSE
 include README.md
-include test_login.py
 include tox.ini
 include requirements/*.txt
 graft docs
 prune docs/_build
+graft tests
 global-exclude *.pyc
