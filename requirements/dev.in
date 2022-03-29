@@ -1,4 +1,5 @@
--r tests.in
+-r docs.in
 -r style.in
+-r tests.in
 pip-compile-multi
 tox
