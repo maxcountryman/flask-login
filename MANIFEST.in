@@ -1,6 +1,5 @@
 include CHANGES
 include LICENSE
-include Makefile
 include README.md
 include test_login.py
 include tox.ini
