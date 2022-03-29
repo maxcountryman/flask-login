@@ -4,7 +4,7 @@ import unittest
 import base64
 from datetime import timedelta, datetime
 from contextlib import contextmanager
-from sys import version as python_version_info
+import sys
 
 from unittest.mock import ANY, patch, Mock
 from collections.abc import Hashable
@@ -40,6 +40,12 @@ from flask_login.__about__ import (__title__, __description__, __url__,
                                    __author_email__, __maintainer__,
                                    __license__, __copyright__)
 from flask_login.utils import _secret_key, _user_context_processor
+
+sys_version = Version(
+    major=sys.version_info.major,
+    minor=sys.version_info.minor,
+    patch=sys.version_info.micro,
+)
 
 
 @contextmanager
@@ -1216,9 +1222,7 @@ class LoginTestCase(unittest.TestCase):
             result2 = c.get('/protected')
             self.assertIn('Access Granted', result2.data.decode('utf-8'))
 
-    @unittest.skipIf(
-        Version(python_version_info[0:5]) < Version('3.7.0'),
-        "Ignore async/await")
+    @unittest.skipIf(sys_version < Version('3.7.0'), "Ignore async/await")
     def test_former_login_required_decorator_with_async(self):
         import asyncio
         from functools import wraps
@@ -1258,9 +1262,7 @@ class LoginTestCase(unittest.TestCase):
             result = c.get('/protected')
             self.assertEqual(result.status_code, 500)
 
-    @unittest.skipIf(
-        Version(python_version_info[0:5]) < Version('3.7.0'),
-        "Ignore async/await")
+    @unittest.skipIf(sys_version < Version('3.7.0'), "Ignore async/await")
     def test_login_required_decorator_with_async(self):
         import asyncio
 
