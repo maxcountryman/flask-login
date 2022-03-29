@@ -45,11 +45,11 @@ master_doc = 'index'
 project = 'Flask-Login'
 copyright = '2011, Matthew Frazier'
 
-module_path = os.path.join(os.path.dirname(__file__), '..', 'flask_login')
-module_path = os.path.abspath(module_path)
-
 about = {}
-with open(os.path.join(os.path.dirname(__file__), '..', 'flask_login', '__about__.py')) as f:
+
+with open(
+    os.path.join(os.path.dirname(__file__), '..', "src", 'flask_login', '__about__.py')
+) as f:
     exec(f.read(), about)
 
 # The version info for the project you're documenting, acts as replacement for
