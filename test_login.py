@@ -11,11 +11,7 @@ from collections.abc import Hashable
 from semantic_version import Version
 
 
-from werkzeug import __version__ as werkzeug_version
-try:
-    from werkzeug.middleware.proxy_fix import ProxyFix
-except ImportError:
-    from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask import (
     Flask,
     Blueprint,
@@ -1222,47 +1218,9 @@ class LoginTestCase(unittest.TestCase):
             result2 = c.get('/protected')
             self.assertIn('Access Granted', result2.data.decode('utf-8'))
 
-    @unittest.skipIf(sys_version < Version('3.7.0'), "Ignore async/await")
-    def test_former_login_required_decorator_with_async(self):
-        import asyncio
-        from functools import wraps
-        from flask import current_app, request
-
-        def former_login_required(func):
-            @wraps(func)
-            def decorated_view(*args, **kwargs):
-                # func(*args, **kwargs) will break with async/await.
-                if request.method in set(['OPTIONS']):
-                    return func(*args, **kwargs)
-                elif current_app.config.get('LOGIN_DISABLED'):
-                    return func(*args, **kwargs)
-                elif not current_user.is_authenticated:
-                    return current_app.login_manager.unauthorized()
-                return func(*args, **kwargs)
-            return decorated_view
-
-        @self.app.route('/protected')
-        @former_login_required
-        async def protected():
-            await asyncio.sleep(0)
-            return 'Access Granted'
-
-        with self.app.test_client() as c:
-            self.app.config['LOGIN_DISABLED'] = True
-
-            result = c.get('/protected')
-            self.assertEqual(result.status_code, 500)
-
-            self.app.config['LOGIN_DISABLED'] = False
-
-            result = c.get('/protected')
-            self.assertEqual(result.status_code, 401)
-
-            c.get('/login-notch')
-            result = c.get('/protected')
-            self.assertEqual(result.status_code, 500)
-
-    @unittest.skipIf(sys_version < Version('3.7.0'), "Ignore async/await")
+    @unittest.skipIf(
+        not hasattr(Flask, "ensure_sync"), "Flask version before async"
+    )
     def test_login_required_decorator_with_async(self):
         import asyncio
 
@@ -1331,21 +1289,6 @@ class LoginTestCase(unittest.TestCase):
     #
     # Misc
     #
-    @unittest.skipIf(Version(werkzeug_version) >= Version('0.9', partial=True),
-                     "wait for upstream implementing RFC 5987")
-    def test_chinese_user_agent(self):
-        with self.app.test_client() as c:
-            result = c.get('/', headers=[('User-Agent', '中文')])
-            self.assertEqual('Welcome!', result.data.decode('utf-8'))
-
-    @unittest.skipIf(Version(werkzeug_version) >= Version('0.9', partial=True),
-                     "wait for upstream implementing RFC 5987")
-    def test_russian_cp1251_user_agent(self):
-        with self.app.test_client() as c:
-            headers = [('User-Agent', 'ЯЙЮя'.encode('cp1251'))]
-            response = c.get('/', headers=headers)
-            self.assertEqual(response.data.decode('utf-8'), 'Welcome!')
-
     def test_user_context_processor(self):
         with self.app.test_request_context():
             _ucp = self.app.context_processor(_user_context_processor)
@@ -1752,8 +1695,6 @@ class StrictHostForRedirectsTestCase(unittest.TestCase):
             self.assertEqual(result.location,
                              '//good.com/login?next=%2Fsecret')
 
-    @unittest.skipIf(Version(werkzeug_version) < Version('0.15', partial=True),
-                     "ProxyFix moved to werkzeug.middleware.proxy_fix in 0.15")
     def test_unauthorized_uses_host_from_x_forwarded_for_header(self):
         self.login_manager.login_view = 'login'
         self.app.config['FORCE_HOST_FOR_REDIRECTS'] = None

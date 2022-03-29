@@ -1,0 +1,5 @@
+blinker
+coverage
+asgiref
+pytest
+semantic_version

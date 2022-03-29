@@ -1,3 +1,10 @@
-include README.md LICENSE
+include CHANGES
+include LICENSE
+include Makefile
+include README.md
 include test_login.py
+include tox.ini
+include requirements/*.txt
 graft docs
+prune docs/_build
+global-exclude *.pyc
