@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 '''
     flask_login.login_manager
     -------------------------
@@ -26,7 +25,7 @@ from .utils import (login_url as make_login_url, _create_identifier,
                     make_next_param, expand_login_view)
 
 
-class LoginManager(object):
+class LoginManager:
     '''This object is used to hold the settings used for logging in. Instances
     of :class:`LoginManager` are *not* bound to specific apps, so you can
     create one in the main body of your code and then bind it to your
@@ -295,8 +294,8 @@ class LoginManager(object):
         :param callback: The callback for retrieving a user object.
         :type callback: callable
         '''
-        print(('LoginManager.header_loader is deprecated. Use ' +
-              'LoginManager.request_loader instead.'))
+        print('LoginManager.header_loader is deprecated. Use ' +
+              'LoginManager.request_loader instead.')
         self._header_callback = callback
         return callback
 
@@ -446,9 +445,10 @@ class LoginManager(object):
         try:
             expires = datetime.utcnow() + duration
         except TypeError:
-            raise Exception('REMEMBER_COOKIE_DURATION must be a ' +
-                            'datetime.timedelta, instead got: {0}'.format(
-                                duration))
+            raise Exception(
+                'REMEMBER_COOKIE_DURATION must be a datetime.timedelta,'
+                f' instead got: {duration}'
+            )
 
         # actually set it
         response.set_cookie(cookie_name,

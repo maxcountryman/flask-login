@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Flask-Login documentation build configuration file, created by
 # sphinx-quickstart on Tue Mar 15 18:40:10 2011.

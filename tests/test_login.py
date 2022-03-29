@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import unittest
 
 import base64
@@ -60,7 +59,7 @@ def listen_to(signal):
         self.assertEqual(1, len(listener.heard))
 
     '''
-    class _SignalsCaught(object):
+    class _SignalsCaught:
         def __init__(self):
             self.heard = []
 
@@ -73,17 +72,19 @@ def listen_to(signal):
             if len(self.heard) == 0:
                 raise AssertionError('No signals were fired')
             elif len(self.heard) > 1:
-                msg = '{0} signals were fired'.format(len(self.heard))
+                msg = f'{len(self.heard)} signals were fired'
                 raise AssertionError(msg)
             elif self.heard[0] != (args, kwargs):
-                msg = 'One signal was heard, but with incorrect arguments: '\
-                    'Got ({0}) expected ({1}, {2})'
-                raise AssertionError(msg.format(self.heard[0], args, kwargs))
+                raise AssertionError(
+                    'One signal was heard, but with incorrect'
+                    f' arguments: Got ({self.heard[0]}) expected'
+                    f' ({args}, {kwargs})'
+                )
 
         def assert_heard_none(self, *args, **kwargs):
             ''' The signal fired no times '''
             if len(self.heard) >= 1:
-                msg = '{0} signals were fired'.format(len(self.heard))
+                msg = f'{len(self.heard)} signals were fired'
                 raise AssertionError(msg)
 
     results = _SignalsCaught()
@@ -320,7 +321,7 @@ class LoginTestCase(unittest.TestCase):
 
         @self.app.route('/empty_session')
         def empty_session():
-            return str('modified=%s' % session.modified)
+            return f'modified={session.modified}'
 
         # This will help us with the possibility of typoes in the tests. Now
         # we shouldn't have to check each response to help us set up state
@@ -387,9 +388,8 @@ class LoginTestCase(unittest.TestCase):
         user_name = USERS[user_id].name
         self.login_manager._request_callback = None
         with self.app.test_client() as c:
-            basic_fmt = 'Basic {0}'
-            decoded = bytes.decode(base64.b64encode(str.encode(str(user_id))))
-            headers = [('Authorization', basic_fmt.format(decoded))]
+            decoded = base64.b64encode(str(user_id).encode()).decode()
+            headers = [('Authorization', f'Basic {decoded}')]
             result = c.get('/username', headers=headers)
             self.assertEqual(user_name, result.data.decode('utf-8'))
 
@@ -398,9 +398,8 @@ class LoginTestCase(unittest.TestCase):
         user_name = 'Anonymous'
         self.login_manager._request_callback = None
         with self.app.test_client() as c:
-            basic_fmt = 'Basic {0}'
-            decoded = bytes.decode(base64.b64encode(str.encode(str(user_id))))
-            headers = [('Authorization', basic_fmt.format(decoded))]
+            decoded = base64.b64encode(str(user_id).encode()).decode()
+            headers = [('Authorization', f'Basic {decoded}')]
             result = c.get('/username', headers=headers)
             self.assertEqual(user_name, result.data.decode('utf-8'))
 
@@ -408,7 +407,7 @@ class LoginTestCase(unittest.TestCase):
         user_id = 2
         user_name = USERS[user_id].name
         with self.app.test_client() as c:
-            url = '/username?user_id={user_id}'.format(user_id=user_id)
+            url = f'/username?user_id={user_id}'
             result = c.get(url)
             self.assertEqual(user_name, result.data.decode('utf-8'))
 
@@ -416,7 +415,7 @@ class LoginTestCase(unittest.TestCase):
         user_id = 9000
         user_name = 'Anonymous'
         with self.app.test_client() as c:
-            url = '/username?user_id={user_id}'.format(user_id=user_id)
+            url = f'/username?user_id={user_id}'
             result = c.get(url)
             self.assertEqual(user_name, result.data.decode('utf-8'))
 
@@ -695,8 +694,10 @@ class LoginTestCase(unittest.TestCase):
             expected_date = datetime.utcnow() + duration
             difference = expected_date - expiration_date
 
-            fail_msg = 'The expiration date {0} was far from the expected {1}'
-            fail_msg = fail_msg.format(expiration_date, expected_date)
+            fail_msg = (
+                f'The expiration date {expiration_date} was far from'
+                f' the expected {expected_date}'
+            )
             self.assertLess(difference, timedelta(seconds=10), fail_msg)
             self.assertGreater(difference, timedelta(seconds=-10), fail_msg)
 
@@ -725,8 +726,10 @@ class LoginTestCase(unittest.TestCase):
             expected_date = datetime.utcnow() + duration
             difference = expected_date - expiration_date
 
-            fail_msg = 'The expiration date {0} was far from the expected {1}'
-            fail_msg = fail_msg.format(expiration_date, expected_date)
+            fail_msg = (
+                f'The expiration date {expiration_date} was far from'
+                f' the expected {expected_date}'
+            )
             self.assertLess(difference, timedelta(seconds=10), fail_msg)
             self.assertGreater(difference, timedelta(seconds=-10), fail_msg)
 
@@ -746,8 +749,10 @@ class LoginTestCase(unittest.TestCase):
             expected_date = datetime.utcnow() + duration
             difference = expected_date - expiration_date
 
-            fail_msg = 'The expiration date {0} was far from the expected {1}'
-            fail_msg = fail_msg.format(expiration_date, expected_date)
+            fail_msg = (
+                f'The expiration date {expiration_date} was far from'
+                f' the expected {expected_date}'
+            )
             self.assertLess(difference, timedelta(seconds=10), fail_msg)
             self.assertGreater(difference, timedelta(seconds=-10), fail_msg)
 
@@ -875,15 +880,8 @@ class LoginTestCase(unittest.TestCase):
         self.login_manager._request_callback = None
         with self.app.test_client() as c:
             with listen_to(user_loaded_from_header) as listener:
-                headers = [
-                    (
-                        'Authorization',
-                        'Basic %s' % (
-                            bytes.decode(
-                                base64.b64encode(str.encode(str(user_id))))
-                        ),
-                    )
-                ]
+                decoded = base64.b64encode(str(user_id).encode()).decode()
+                headers = [('Authorization', f'Basic {decoded}')]
                 result = c.get('/username', headers=headers)
                 self.assertEqual(user_name, result.data.decode('utf-8'))
                 listener.assert_heard_one(self.app, user=USERS[user_id])
@@ -893,7 +891,7 @@ class LoginTestCase(unittest.TestCase):
         user_name = USERS[user_id].name
         with self.app.test_client() as c:
             with listen_to(user_loaded_from_request) as listener:
-                url = '/username?user_id={user_id}'.format(user_id=user_id)
+                url = f'/username?user_id={user_id}'
                 result = c.get(url)
                 self.assertEqual(user_name, result.data.decode('utf-8'))
                 listener.assert_heard_one(self.app, user=USERS[user_id])
@@ -1361,7 +1359,7 @@ class LoginViaRequestTestCase(unittest.TestCase):
         user_id = 2
         user_name = USERS[user_id].name
         with self.app.test_client() as c:
-            url = '/username?user_id={user_id}'.format(user_id=user_id)
+            url = f'/username?user_id={user_id}'
             result = c.get(url)
             self.assertEqual(user_name, result.data.decode('utf-8'))
 
@@ -1373,14 +1371,14 @@ class LoginViaRequestTestCase(unittest.TestCase):
             url = '/username'
             result = c.get(url)
             self.assertEqual(user_name, result.data.decode('utf-8'))
-            url = '/username?user_id={user_id}'.format(user_id=user_id)
+            url = f'/username?user_id={user_id}'
             result = c.get(url)
             self.assertEqual('Steve', result.data.decode('utf-8'))
 
     def test_login_invalid_user_with_request(self):
         user_id = 9000
         with self.app.test_client() as c:
-            url = '/username?user_id={user_id}'.format(user_id=user_id)
+            url = f'/username?user_id={user_id}'
             result = c.get(url)
             self.assertEqual(result.status_code, 401)
 
@@ -1390,7 +1388,7 @@ class LoginViaRequestTestCase(unittest.TestCase):
             url = '/login-notch'
             result = c.get(url)
             self.assertEqual('True', result.data.decode('utf-8'))
-            url = '/username?user_id={user_id}'.format(user_id=user_id)
+            url = f'/username?user_id={user_id}'
             result = c.get(url)
             self.assertEqual(result.status_code, 401)
 
@@ -1398,7 +1396,7 @@ class LoginViaRequestTestCase(unittest.TestCase):
         user_id = 2
         user_name = USERS[user_id].name
         with self.app.test_client() as c:
-            url = '/username?user_id={user_id}'.format(user_id=user_id)
+            url = f'/username?user_id={user_id}'
             result = c.get(url)
             self.assertEqual(user_name, result.data.decode('utf-8'))
             url = '/username'

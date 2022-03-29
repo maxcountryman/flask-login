@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 '''
     flask_login.utils
     -----------------
@@ -37,7 +36,7 @@ def encode_cookie(payload, key=None):
                 specified, the SECRET_KEY value from app config will be used.
     :type key: str
     '''
-    return '{0}|{1}'.format(payload, _cookie_digest(payload, key=key))
+    return f'{payload}|{_cookie_digest(payload, key=key)}'
 
 
 def decode_cookie(cookie, key=None):
@@ -183,8 +182,10 @@ def login_user(user, remember=False, duration=None, force=False, fresh=True):
                                                  duration.days * 24 * 3600) *
                                                 10**6) / 10.0**6
             except AttributeError:
-                raise Exception('duration must be a datetime.timedelta, '
-                                'instead got: {0}'.format(duration))
+                raise Exception(
+                    'duration must be a datetime.timedelta, instead'
+                    f' got: {duration}'
+                )
 
     current_app.login_manager._update_request_context_with_user(user)
     user_logged_in.send(current_app._get_current_object(), user=_get_user())
@@ -375,7 +376,7 @@ def _create_identifier():
     user_agent = request.headers.get('User-Agent')
     if user_agent is not None:
         user_agent = user_agent.encode('utf-8')
-    base = '{0}|{1}'.format(_get_remote_addr(), user_agent)
+    base = f'{_get_remote_addr()}|{user_agent}'
     if str is bytes:
         base = str(base, 'utf-8', errors='replace')  # pragma: no cover
     h = sha512()
