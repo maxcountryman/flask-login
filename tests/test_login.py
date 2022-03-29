@@ -1,40 +1,60 @@
-import unittest
-
 import base64
-from datetime import timedelta, datetime
-from contextlib import contextmanager
 import sys
-
-from unittest.mock import ANY, patch, Mock
+import unittest
 from collections.abc import Hashable
-from semantic_version import Version
+from contextlib import contextmanager
+from datetime import datetime
+from datetime import timedelta
+from unittest.mock import ANY
+from unittest.mock import Mock
+from unittest.mock import patch
 
-
-from werkzeug.middleware.proxy_fix import ProxyFix
-from flask import (
-    Flask,
-    Blueprint,
-    Response,
-    session,
-    get_flashed_messages,
-)
+from flask import Blueprint
+from flask import Flask
+from flask import get_flashed_messages
+from flask import Response
+from flask import session
 from flask.views import MethodView
-
-from flask_login import (LoginManager, UserMixin, AnonymousUserMixin,
-                         current_user, login_user, logout_user, user_logged_in,
-                         user_logged_out, user_loaded_from_cookie,
-                         user_login_confirmed, user_loaded_from_header,
-                         user_loaded_from_request, user_unauthorized,
-                         user_needs_refresh, make_next_param, login_url,
-                         login_fresh, login_required, session_protected,
-                         fresh_login_required, confirm_login, encode_cookie,
-                         decode_cookie, set_login_view, user_accessed,
-                         FlaskLoginClient)
-from flask_login.__about__ import (__title__, __description__, __url__,
-                                   __version_info__, __version__, __author__,
-                                   __author_email__, __maintainer__,
-                                   __license__, __copyright__)
-from flask_login.utils import _secret_key, _user_context_processor
+from flask_login import AnonymousUserMixin
+from flask_login import confirm_login
+from flask_login import current_user
+from flask_login import decode_cookie
+from flask_login import encode_cookie
+from flask_login import FlaskLoginClient
+from flask_login import fresh_login_required
+from flask_login import login_fresh
+from flask_login import login_required
+from flask_login import login_url
+from flask_login import login_user
+from flask_login import LoginManager
+from flask_login import logout_user
+from flask_login import make_next_param
+from flask_login import session_protected
+from flask_login import set_login_view
+from flask_login import user_accessed
+from flask_login import user_loaded_from_cookie
+from flask_login import user_loaded_from_header
+from flask_login import user_loaded_from_request
+from flask_login import user_logged_in
+from flask_login import user_logged_out
+from flask_login import user_login_confirmed
+from flask_login import user_needs_refresh
+from flask_login import user_unauthorized
+from flask_login import UserMixin
+from flask_login.__about__ import __author__
+from flask_login.__about__ import __author_email__
+from flask_login.__about__ import __copyright__
+from flask_login.__about__ import __description__
+from flask_login.__about__ import __license__
+from flask_login.__about__ import __maintainer__
+from flask_login.__about__ import __title__
+from flask_login.__about__ import __url__
+from flask_login.__about__ import __version__
+from flask_login.__about__ import __version_info__
+from flask_login.utils import _secret_key
+from flask_login.utils import _user_context_processor
+from semantic_version import Version
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 sys_version = Version(
     major=sys.version_info.major,

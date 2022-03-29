@@ -3,10 +3,7 @@
     ------------------
     This module provides default configuration values.
 '''
-
-
 from datetime import timedelta
-
 
 #: The default name of the "remember me" cookie (``remember_token``)
 COOKIE_NAME = 'remember_token'

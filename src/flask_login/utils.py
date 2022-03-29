@@ -3,21 +3,27 @@
     -----------------
     General utilities.
 '''
-
-
 import hmac
-from hashlib import sha512
 from functools import wraps
-from urllib.parse import urlparse, urlunparse
+from hashlib import sha512
+from urllib.parse import urlparse
+from urllib.parse import urlunparse
+
+from flask import _request_ctx_stack
+from flask import current_app
+from flask import has_request_context
+from flask import request
+from flask import session
+from flask import url_for
 from werkzeug.local import LocalProxy
-from werkzeug.urls import url_decode, url_encode
+from werkzeug.urls import url_decode
+from werkzeug.urls import url_encode
 
-from flask import (_request_ctx_stack, current_app, request, session, url_for,
-                   has_request_context)
-
-from .config import COOKIE_NAME, EXEMPT_METHODS
-from .signals import user_logged_in, user_logged_out, user_login_confirmed
-
+from .config import COOKIE_NAME
+from .config import EXEMPT_METHODS
+from .signals import user_logged_in
+from .signals import user_logged_out
+from .signals import user_login_confirmed
 
 #: A proxy for the current user. If no user is logged in, this will be an
 #: anonymous user

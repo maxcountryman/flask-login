@@ -3,26 +3,47 @@
     -------------------------
     The LoginManager class.
 '''
-
-
 import warnings
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 
-from flask import (_request_ctx_stack, abort, current_app, flash, redirect,
-                   has_app_context, request, session)
+from flask import _request_ctx_stack
+from flask import abort
+from flask import current_app
+from flask import flash
+from flask import has_app_context
+from flask import redirect
+from flask import request
+from flask import session
 
-from .config import (COOKIE_NAME, COOKIE_DURATION, COOKIE_SECURE,
-                     COOKIE_HTTPONLY, COOKIE_SAMESITE, LOGIN_MESSAGE,
-                     LOGIN_MESSAGE_CATEGORY, REFRESH_MESSAGE,
-                     REFRESH_MESSAGE_CATEGORY, ID_ATTRIBUTE,
-                     AUTH_HEADER_NAME, SESSION_KEYS, USE_SESSION_FOR_NEXT)
+from .config import AUTH_HEADER_NAME
+from .config import COOKIE_DURATION
+from .config import COOKIE_HTTPONLY
+from .config import COOKIE_NAME
+from .config import COOKIE_SAMESITE
+from .config import COOKIE_SECURE
+from .config import ID_ATTRIBUTE
+from .config import LOGIN_MESSAGE
+from .config import LOGIN_MESSAGE_CATEGORY
+from .config import REFRESH_MESSAGE
+from .config import REFRESH_MESSAGE_CATEGORY
+from .config import SESSION_KEYS
+from .config import USE_SESSION_FOR_NEXT
 from .mixins import AnonymousUserMixin
-from .signals import (user_loaded_from_cookie, user_loaded_from_header,
-                      user_loaded_from_request, user_unauthorized,
-                      user_needs_refresh, user_accessed, session_protected)
-from .utils import (login_url as make_login_url, _create_identifier,
-                    _user_context_processor, encode_cookie, decode_cookie,
-                    make_next_param, expand_login_view)
+from .signals import session_protected
+from .signals import user_accessed
+from .signals import user_loaded_from_cookie
+from .signals import user_loaded_from_header
+from .signals import user_loaded_from_request
+from .signals import user_needs_refresh
+from .signals import user_unauthorized
+from .utils import _create_identifier
+from .utils import _user_context_processor
+from .utils import decode_cookie
+from .utils import encode_cookie
+from .utils import expand_login_view
+from .utils import login_url as make_login_url
+from .utils import make_next_param
 
 
 class LoginManager:

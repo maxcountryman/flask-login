@@ -4,13 +4,9 @@
     This module provides signals to get notified when Flask-Login performs
     certain actions.
 '''
-
-
 from flask.signals import Namespace
 
-
 _signals = Namespace()
-
 
 #: Sent when a user is logged in. In addition to the app (which is the
 #: sender), it is passed `user`, which is the user being logged in.
