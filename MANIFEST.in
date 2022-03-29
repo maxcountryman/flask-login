@@ -1,4 +1,4 @@
-include CHANGES
+include CHANGES.md
 include LICENSE
 include README.md
 include tox.ini
