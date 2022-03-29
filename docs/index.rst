@@ -455,24 +455,29 @@ the session depending on a flag you set on the request. For example::
 
     from flask import g
     from flask.sessions import SecureCookieSessionInterface
-    from flask_login import user_loaded_from_header
+    from flask_login import user_loaded_from_request
+
+    @user_loaded_from_request.connect
+    def user_loaded_from_request(app, user=None):
+        g.login_via_request = True
+
 
     class CustomSessionInterface(SecureCookieSessionInterface):
         """Prevent creating session from API requests."""
         def save_session(self, *args, **kwargs):
-            if g.get('login_via_header'):
+            if g.get('login_via_request'):
                 return
             return super(CustomSessionInterface, self).save_session(*args,
                                                                     **kwargs)
 
     app.session_interface = CustomSessionInterface()
 
-    @user_loaded_from_header.connect
-    def user_loaded_from_header(self, user=None):
-        g.login_via_header = True
+    @user_loaded_from_request.connect
+    def user_loaded_from_request(self, user=None):
+        g.login_via_request = True
 
 This prevents setting the Flask Session cookie whenever the user authenticated
-using your `~LoginManager.header_loader`.
+using your `~LoginManager.request_loader`.
 
 Automated Testing
 =================
