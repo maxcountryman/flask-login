@@ -10,6 +10,9 @@ Unreleased
 
 - Drop support for Python 2.7, 3.5, and 3.6, which have all reached the
   end of their official support. #594, #638
+- The minimum supported version of Flask is 1.0.4, and Werkzeug is
+  1.0.1. However, projects are advised to use the latest versions of
+  both. #639
 - Only flash "needs_refresh_message" if value is set #464
 - Modify `expand_login_view` to allow for subdomain and host matching for `login_view` #462
 - Add accessors for `request_loader` and `user_loader` callback functions #472
