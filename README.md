@@ -104,7 +104,7 @@ def login():
                '''
 
     email = flask.request.form['email']
-    if flask.request.form['password'] == users[email]['password']:
+    if email in users and flask.request.form['password'] == users[email]['password']:
         user = User()
         user.id = email
         flask_login.login_user(user)
