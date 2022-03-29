@@ -135,7 +135,7 @@ failures:
 ```python
 @login_manager.unauthorized_handler
 def unauthorized_handler():
-    return 'Unauthorized'
+    return 'Unauthorized', 401
 ```
 
 Complete documentation for Flask-Login is available on [ReadTheDocs](https://flask-login.readthedocs.io/en/latest/).
