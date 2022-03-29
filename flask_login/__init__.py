@@ -27,11 +27,11 @@ from .utils import (current_user, login_url, login_fresh, login_user,
 
 
 __all__ = [
-    LoginManager.__name__,
-    FlaskLoginClient.__name__,
-    UserMixin.__name__,
-    AnonymousUserMixin.__name__,
-    __version__,
+    'LoginManager',
+    'FlaskLoginClient',
+    'UserMixin',
+    'AnonymousUserMixin',
+    '__version__',
     'COOKIE_NAME',
     'COOKIE_DURATION',
     'COOKIE_SECURE',
