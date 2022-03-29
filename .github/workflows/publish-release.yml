@@ -1,4 +1,3 @@
-
 on:
   push:
     tags:
@@ -7,20 +6,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Setup Python
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.8"
-    - name: Prepare Env
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel
-    - name: Build
-      run: python setup.py sdist bdist_wheel
-    - name: Publish
-      uses: pypa/gh-action-pypi-publish@v1.5.0
-      with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+          cache-dependency-path: 'requirements/*.txt'
+      - name: update pip
+        run: |
+          pip install -U wheel
+          pip install -U setuptools
+          python -m pip install -U pip
+      - run: pip install -r requirements/release.txt
+      - run: python -m build
+      - run: twine check dist/*
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.5.0
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
