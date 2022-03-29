@@ -21,7 +21,10 @@ setup(name=about['__title__'],
       zip_safe=False,
       platforms='any',
       python_requires=">=3.7",
-      install_requires=['Flask'],
+      install_requires=[
+          "Flask>=1.0.4",
+          "Werkzeug>=1.0.1",
+      ],
       classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
