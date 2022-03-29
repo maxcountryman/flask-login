@@ -273,7 +273,7 @@ def login_required(func):
         try:
             # current_app.ensure_sync available in Flask >= 2.0
             return current_app.ensure_sync(func)(*args, **kwargs)
-        except AttributeError:
+        except AttributeError:  # pragma: no cover
             return func(*args, **kwargs)
     return decorated_view
 
@@ -314,7 +314,7 @@ def fresh_login_required(func):
         try:
             # current_app.ensure_sync available in Flask >= 2.0
             return current_app.ensure_sync(func)(*args, **kwargs)
-        except AttributeError:
+        except AttributeError:  # pragma: no cover
             return func(*args, **kwargs)
     return decorated_view
 

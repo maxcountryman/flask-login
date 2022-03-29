@@ -20,6 +20,7 @@ setup(name=about['__title__'],
       packages=['flask_login'],
       zip_safe=False,
       platforms='any',
+      python_requires=">=3.7",
       install_requires=['Flask'],
       classifiers=[
         'Development Status :: 4 - Beta',
