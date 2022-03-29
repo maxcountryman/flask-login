@@ -1218,7 +1218,9 @@ class LoginTestCase(unittest.TestCase):
             result2 = c.get('/protected')
             self.assertIn('Access Granted', result2.data.decode('utf-8'))
 
-    @unittest.skipIf(not hasattr(Flask, "ensure_sync"), "Flask version before async")
+    @unittest.skipIf(
+        not hasattr(Flask, "ensure_sync"), "Flask version before async"
+    )
     def test_former_login_required_decorator_with_async(self):
         import asyncio
         from functools import wraps
@@ -1258,7 +1260,9 @@ class LoginTestCase(unittest.TestCase):
             result = c.get('/protected')
             self.assertEqual(result.status_code, 500)
 
-    @unittest.skipIf(not hasattr(Flask, "ensure_sync"), "Flask version before async")
+    @unittest.skipIf(
+        not hasattr(Flask, "ensure_sync"), "Flask version before async"
+    )
     def test_login_required_decorator_with_async(self):
         import asyncio
 
