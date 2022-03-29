@@ -1,8 +1,3 @@
-"""
-    flask_login.utils
-    -----------------
-    General utilities.
-"""
 import hmac
 from functools import wraps
 from hashlib import sha512

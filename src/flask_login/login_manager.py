@@ -1,8 +1,3 @@
-"""
-    flask_login.login_manager
-    -------------------------
-    The LoginManager class.
-"""
 import warnings
 from datetime import datetime
 from datetime import timedelta

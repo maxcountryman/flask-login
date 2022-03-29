@@ -1,11 +1,3 @@
-"""
-    flask_login
-    -----------
-    This module provides user session management for Flask. It lets you log
-    your users in and out in a database-independent manner.
-    :copyright: (c) 2011 by Matthew Frazier.
-    :license: MIT/X11, see LICENSE for more details.
-"""
 from .__about__ import __version__
 from .config import AUTH_HEADER_NAME
 from .config import COOKIE_DURATION

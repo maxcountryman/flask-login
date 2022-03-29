@@ -1,10 +1,3 @@
-"""
-    flask_login.mixins
-    ------------------
-    This module provides mixin objects.
-"""
-
-
 class UserMixin:
     """
     This provides default implementations for the methods that Flask-Login

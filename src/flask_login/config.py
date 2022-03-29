@@ -1,8 +1,3 @@
-"""
-    flask_login.config
-    ------------------
-    This module provides default configuration values.
-"""
 from datetime import timedelta
 
 #: The default name of the "remember me" cookie (``remember_token``)

@@ -1,9 +1,3 @@
-"""
-    flask_login.signals
-    -------------------
-    This module provides signals to get notified when Flask-Login performs
-    certain actions.
-"""
 from flask.signals import Namespace
 
 _signals = Namespace()
