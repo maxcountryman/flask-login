@@ -149,6 +149,6 @@ follow these steps:
 1. Fork this repository
 2. Make your changes
 3. Install the dev requirements with `pip install -r requirements/dev.txt`
-4. Submit a pull request after running `make check` (ensure it does not error!)
+4. Submit a pull request after running `tox` (ensure it does not error!)
 
 Please give us adequate time to review your submission. Thanks!
