@@ -8,8 +8,6 @@
 -r docs.txt
 -r style.txt
 -r tests.txt
-asgiref==3.5.0 ; python_version >= "3.7"
-    # via -r requirements/tests.in
 click==8.1.0
     # via
     #   pip-compile-multi
@@ -28,14 +26,12 @@ pip-tools==6.5.1
     # via pip-compile-multi
 platformdirs==2.5.1
     # via virtualenv
-pytest==6.2.4 ; python_version > "3.5"
-    # via -r requirements/tests.in
 six==1.16.0
     # via
     #   tox
     #   virtualenv
-tomli==2.0.1
-    # via pep517
+toml==0.10.2
+    # via tox
 toposort==1.7
     # via pip-compile-multi
 tox==3.24.5
