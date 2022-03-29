@@ -1,0 +1,4 @@
+-r tests.in
+-r style.in
+pip-compile-multi
+tox
