@@ -555,7 +555,13 @@ Configuring Login
       The name of the view to redirect to when the user needs to log in. (This
       can be an absolute URL as well, if your authentication machinery is
       external to your application.)
+   
+   .. attribute:: blueprint_login_views
 
+      This is similar to login_view, except it is used when working with blueprints. It is a 
+      dictionary that can store multiple views to redirect to for different blueprints. The redirects
+      are listed in the form of key as the blueprint's name and value as the redirect to route. 
+      
    .. attribute:: login_message
 
       The message to flash when a user is redirected to the login page.
