@@ -241,6 +241,9 @@ class LoginTestCase(unittest.TestCase):
         self.login_manager.init_app(self.app)
         self.app.config['LOGIN_DISABLED'] = False
 
+        # Disable absolute location, like Werkzeug 2.1
+        self.app.response_class.autocorrect_location_header = False
+
         @self.app.route('/')
         def index():
             return 'Welcome!'
@@ -502,8 +505,7 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             result = c.get('/secret')
             self.assertEqual(result.status_code, 302)
-            self.assertEqual(result.location,
-                             'http://localhost/login?next=%2Fsecret')
+            self.assertEqual(result.location, '/login?next=%2Fsecret')
 
     def test_unauthorized_with_next_in_session(self):
         self.login_manager.login_view = 'login'
@@ -516,8 +518,7 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             result = c.get('/secret')
             self.assertEqual(result.status_code, 302)
-            self.assertEqual(result.location,
-                             'http://localhost/login')
+            self.assertEqual(result.location, '/login')
             self.assertEqual(c.get('/login').data.decode('utf-8'), '/secret')
 
     def test_unauthorized_with_next_in_strong_session(self):
@@ -535,8 +536,7 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             result = c.get('/secret')
             self.assertEqual(result.status_code, 302)
-            self.assertEqual(result.location,
-                             'http://localhost/login')
+            self.assertEqual(result.location, '/login')
             self.assertEqual(c.get('/login').data.decode('utf-8'), '/secret')
 
     def test_unauthorized_uses_blueprint_login_view(self):
@@ -583,20 +583,17 @@ class LoginTestCase(unittest.TestCase):
 
                 result = c.get('/protected')
                 self.assertEqual(result.status_code, 302)
-                expected = ('http://localhost/'
-                            'app_login?next=%2Fprotected')
+                expected = '/app_login?next=%2Fprotected'
                 self.assertEqual(result.location, expected)
 
                 result = c.get('/first/protected')
                 self.assertEqual(result.status_code, 302)
-                expected = ('http://localhost/'
-                            'first_login?next=%2Ffirst%2Fprotected')
+                expected = '/first_login?next=%2Ffirst%2Fprotected'
                 self.assertEqual(result.location, expected)
 
                 result = c.get('/second/protected')
                 self.assertEqual(result.status_code, 302)
-                expected = ('http://localhost/'
-                            'second_login?next=%2Fsecond%2Fprotected')
+                expected = '/second_login?next=%2Fsecond%2Fprotected'
                 self.assertEqual(result.location, expected)
 
     def test_set_login_view_without_blueprints(self):
@@ -617,7 +614,7 @@ class LoginTestCase(unittest.TestCase):
 
                 result = c.get('/protected')
                 self.assertEqual(result.status_code, 302)
-                expected = 'http://localhost/app_login?next=%2Fprotected'
+                expected = '/app_login?next=%2Fprotected'
                 self.assertEqual(result.location, expected)
 
     #
@@ -978,7 +975,7 @@ class LoginTestCase(unittest.TestCase):
             c.get('/login-notch-remember')
             result = c.get('/needs-refresh')
             self.assertEqual(result.status_code, 302)
-            expected = 'http://localhost/refresh-view?next=%2Fneeds-refresh'
+            expected = '/refresh-view?next=%2Fneeds-refresh'
             self.assertEqual(result.location, expected)
 
     def test_refresh_with_next_in_session(self):
@@ -993,7 +990,7 @@ class LoginTestCase(unittest.TestCase):
             c.get('/login-notch-remember')
             result = c.get('/needs-refresh')
             self.assertEqual(result.status_code, 302)
-            self.assertEqual(result.location, 'http://localhost/refresh-view')
+            self.assertEqual(result.location, '/refresh-view')
             result = c.get('/refresh-view')
             self.assertEqual(result.data.decode('utf-8'), '/needs-refresh')
 
@@ -1737,8 +1734,7 @@ class StrictHostForRedirectsTestCase(unittest.TestCase):
         with self.app.test_client() as c:
             result = c.get('/secret', base_url='http://foo.com')
             self.assertEqual(result.status_code, 302)
-            self.assertEqual(result.location,
-                             'http://foo.com/login?next=%2Fsecret')
+            self.assertEqual(result.location, '/login?next=%2Fsecret')
 
     def test_unauthorized_uses_host_from_config_when_available(self):
         self.login_manager.login_view = 'login'
@@ -1752,7 +1748,7 @@ class StrictHostForRedirectsTestCase(unittest.TestCase):
             result = c.get('/secret', base_url='http://bad.com')
             self.assertEqual(result.status_code, 302)
             self.assertEqual(result.location,
-                             'http://good.com/login?next=%2Fsecret')
+                             '//good.com/login?next=%2Fsecret')
 
     @unittest.skipIf(Version(werkzeug_version) < Version('0.15', partial=True),
                      "ProxyFix moved to werkzeug.middleware.proxy_fix in 0.15")
@@ -1773,8 +1769,7 @@ class StrictHostForRedirectsTestCase(unittest.TestCase):
                            base_url='http://foo.com',
                            headers=headers)
             self.assertEqual(result.status_code, 302)
-            self.assertEqual(result.location,
-                             'http://proxy.com/login?next=%2Fsecret')
+            self.assertEqual(result.location, '/login?next=%2Fsecret')
 
     def test_unauthorized_ignores_host_from_x_forwarded_for_header(self):
         self.login_manager.login_view = 'login'
@@ -1792,8 +1787,7 @@ class StrictHostForRedirectsTestCase(unittest.TestCase):
                            base_url='http://foo.com',
                            headers=headers)
             self.assertEqual(result.status_code, 302)
-            self.assertEqual(result.location,
-                             'http://good.com/login?next=%2Fsecret')
+            assert result.location == '//good.com/login?next=%2Fsecret'
 
 
 class CustomTestClientTestCase(unittest.TestCase):

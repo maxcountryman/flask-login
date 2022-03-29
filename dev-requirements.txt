@@ -2,7 +2,7 @@
 
 blinker==1.4
 coverage==5.5
-flask[async]==2.0.1; python_version >= '3.7'
+flask[async]==2.1.0; python_version >= '3.7'
 pytest==6.1.2; python_version == '3.5'
 pytest==6.2.4; python_version > '3.5'
 pycodestyle==2.7.0
