@@ -1,12 +1,9 @@
 version: 2
 updates:
-- package-ecosystem: pip
+- package-ecosystem: "github-actions"
   directory: "/"
   schedule:
-    interval: daily
-    time: "13:00"
-  open-pull-requests-limit: 10
-  ignore:
-  - dependency-name: pytest
-    versions:
-    - 6.2.2
+    interval: "monthly"
+    day: "monday"
+    time: "16:00"
+    timezone: "UTC"
