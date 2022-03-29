@@ -22,7 +22,7 @@ class UserMixin:
 
     @property
     def is_authenticated(self):
-        return True
+        return self.is_active
 
     @property
     def is_anonymous(self):
