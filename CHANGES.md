@@ -4,7 +4,7 @@ Flask-Login Changelog
 Version 0.6.0
 -------------
 
-Unreleased
+Released on March 30th, 2022
 
 - Drop support for Python 2.7, 3.5, and 3.6, which have all reached the
   end of their official support. #594, #638
