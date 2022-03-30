@@ -1,37 +1,53 @@
-# -*- coding: utf-8 -*-
-'''
-    flask_login.login_manager
-    -------------------------
-    The LoginManager class.
-'''
-
-
 import warnings
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
 
-from flask import (_request_ctx_stack, abort, current_app, flash, redirect,
-                   has_app_context, request, session)
+from flask import _request_ctx_stack
+from flask import abort
+from flask import current_app
+from flask import flash
+from flask import has_app_context
+from flask import redirect
+from flask import request
+from flask import session
 
-from .config import (COOKIE_NAME, COOKIE_DURATION, COOKIE_SECURE,
-                     COOKIE_HTTPONLY, COOKIE_SAMESITE, LOGIN_MESSAGE,
-                     LOGIN_MESSAGE_CATEGORY, REFRESH_MESSAGE,
-                     REFRESH_MESSAGE_CATEGORY, ID_ATTRIBUTE,
-                     AUTH_HEADER_NAME, SESSION_KEYS, USE_SESSION_FOR_NEXT)
+from .config import AUTH_HEADER_NAME
+from .config import COOKIE_DURATION
+from .config import COOKIE_HTTPONLY
+from .config import COOKIE_NAME
+from .config import COOKIE_SAMESITE
+from .config import COOKIE_SECURE
+from .config import ID_ATTRIBUTE
+from .config import LOGIN_MESSAGE
+from .config import LOGIN_MESSAGE_CATEGORY
+from .config import REFRESH_MESSAGE
+from .config import REFRESH_MESSAGE_CATEGORY
+from .config import SESSION_KEYS
+from .config import USE_SESSION_FOR_NEXT
 from .mixins import AnonymousUserMixin
-from .signals import (user_loaded_from_cookie, user_loaded_from_header,
-                      user_loaded_from_request, user_unauthorized,
-                      user_needs_refresh, user_accessed, session_protected)
-from .utils import (login_url as make_login_url, _create_identifier,
-                    _user_context_processor, encode_cookie, decode_cookie,
-                    make_next_param, expand_login_view)
+from .signals import session_protected
+from .signals import user_accessed
+from .signals import user_loaded_from_cookie
+from .signals import user_loaded_from_header
+from .signals import user_loaded_from_request
+from .signals import user_needs_refresh
+from .signals import user_unauthorized
+from .utils import _create_identifier
+from .utils import _user_context_processor
+from .utils import decode_cookie
+from .utils import encode_cookie
+from .utils import expand_login_view
+from .utils import login_url as make_login_url
+from .utils import make_next_param
 
 
-class LoginManager(object):
-    '''This object is used to hold the settings used for logging in. Instances
+class LoginManager:
+    """This object is used to hold the settings used for logging in. Instances
     of :class:`LoginManager` are *not* bound to specific apps, so you can
     create one in the main body of your code and then bind it to your
     app in a factory function.
-    '''
+    """
+
     def __init__(self, app=None, add_context_processor=True):
         #: A class or factory function that produces an anonymous user, which
         #: is used when no one is logged in.
@@ -69,7 +85,7 @@ class LoginManager(object):
         #: The mode to use session protection in. This can be either
         #: ``'basic'`` (the default) or ``'strong'``, or ``None`` to disable
         #: it.
-        self.session_protection = 'basic'
+        self.session_protection = "basic"
 
         #: If present, used to translate flash messages ``self.login_message``
         #: and ``self.needs_refresh_message``
@@ -93,16 +109,17 @@ class LoginManager(object):
             self.init_app(app, add_context_processor)
 
     def setup_app(self, app, add_context_processor=True):  # pragma: no cover
-        '''
+        """
         This method has been deprecated. Please use
         :meth:`LoginManager.init_app` instead.
-        '''
-        warnings.warn('Warning setup_app is deprecated. Please use init_app.',
-                      DeprecationWarning)
+        """
+        warnings.warn(
+            "Warning setup_app is deprecated. Please use init_app.", DeprecationWarning
+        )
         self.init_app(app, add_context_processor)
 
     def init_app(self, app, add_context_processor=True):
-        '''
+        """
         Configures an application. This registers an `after_request` call, and
         attaches this `LoginManager` to it as `app.login_manager`.
 
@@ -112,7 +129,7 @@ class LoginManager(object):
             the app that adds a `current_user` variable to the template.
             Defaults to ``True``.
         :type add_context_processor: bool
-        '''
+        """
         app.login_manager = self
         app.after_request(self._update_remember_cookie)
 
@@ -120,7 +137,7 @@ class LoginManager(object):
             app.context_processor(_user_context_processor)
 
     def unauthorized(self):
-        '''
+        """
         This is called when the user is required to log in. If you register a
         callback with :meth:`LoginManager.unauthorized_handler`, then it will
         be called. Otherwise, it will take the following actions:
@@ -143,7 +160,7 @@ class LoginManager(object):
 
         This should be returned from a view or before/after_request function,
         otherwise the redirect will have no effect.
-        '''
+        """
         user_unauthorized.send(current_app._get_current_object())
 
         if self.unauthorized_callback:
@@ -159,16 +176,18 @@ class LoginManager(object):
 
         if self.login_message:
             if self.localize_callback is not None:
-                flash(self.localize_callback(self.login_message),
-                      category=self.login_message_category)
+                flash(
+                    self.localize_callback(self.login_message),
+                    category=self.login_message_category,
+                )
             else:
                 flash(self.login_message, category=self.login_message_category)
 
         config = current_app.config
-        if config.get('USE_SESSION_FOR_NEXT', USE_SESSION_FOR_NEXT):
+        if config.get("USE_SESSION_FOR_NEXT", USE_SESSION_FOR_NEXT):
             login_url = expand_login_view(login_view)
-            session['_id'] = self._session_identifier_generator()
-            session['next'] = make_next_param(login_url, request.url)
+            session["_id"] = self._session_identifier_generator()
+            session["next"] = make_next_param(login_url, request.url)
             redirect_url = make_login_url(login_view)
         else:
             redirect_url = make_login_url(login_view, next_url=request.url)
@@ -176,41 +195,41 @@ class LoginManager(object):
         return redirect(redirect_url)
 
     def user_loader(self, callback):
-        '''
+        """
         This sets the callback for reloading a user from the session. The
         function you set should take a user ID (a ``str``) and return a
         user object, or ``None`` if the user does not exist.
 
         :param callback: The callback for retrieving a user object.
         :type callback: callable
-        '''
+        """
         self._user_callback = callback
         return self.user_callback
 
     @property
     def user_callback(self):
-        '''Gets the user_loader callback set by user_loader decorator.'''
+        """Gets the user_loader callback set by user_loader decorator."""
         return self._user_callback
 
     def request_loader(self, callback):
-        '''
+        """
         This sets the callback for loading a user from a Flask request.
         The function you set should take Flask request object and
         return a user object, or `None` if the user does not exist.
 
         :param callback: The callback for retrieving a user object.
         :type callback: callable
-        '''
+        """
         self._request_callback = callback
         return self.request_callback
 
     @property
     def request_callback(self):
-        '''Gets the request_loader callback set by request_loader decorator.'''
+        """Gets the request_loader callback set by request_loader decorator."""
         return self._request_callback
 
     def unauthorized_handler(self, callback):
-        '''
+        """
         This will set the callback for the `unauthorized` method, which among
         other things is used by `login_required`. It takes no arguments, and
         should return a response to be sent to the user instead of their
@@ -218,12 +237,12 @@ class LoginManager(object):
 
         :param callback: The callback for unauthorized users.
         :type callback: callable
-        '''
+        """
         self.unauthorized_callback = callback
         return callback
 
     def needs_refresh_handler(self, callback):
-        '''
+        """
         This will set the callback for the `needs_refresh` method, which among
         other things is used by `fresh_login_required`. It takes no arguments,
         and should return a response to be sent to the user instead of their
@@ -231,12 +250,12 @@ class LoginManager(object):
 
         :param callback: The callback for unauthorized users.
         :type callback: callable
-        '''
+        """
         self.needs_refresh_callback = callback
         return callback
 
     def needs_refresh(self):
-        '''
+        """
         This is called when the user is logged in, but they need to be
         reauthenticated because their session is stale. If you register a
         callback with `needs_refresh_handler`, then it will be called.
@@ -254,7 +273,7 @@ class LoginManager(object):
 
         This should be returned from a view or before/after_request function,
         otherwise the redirect will have no effect.
-        '''
+        """
         user_needs_refresh.send(current_app._get_current_object())
 
         if self.needs_refresh_callback:
@@ -265,17 +284,21 @@ class LoginManager(object):
 
         if self.needs_refresh_message:
             if self.localize_callback is not None:
-                flash(self.localize_callback(self.needs_refresh_message),
-                      category=self.needs_refresh_message_category)
+                flash(
+                    self.localize_callback(self.needs_refresh_message),
+                    category=self.needs_refresh_message_category,
+                )
             else:
-                flash(self.needs_refresh_message,
-                      category=self.needs_refresh_message_category)
+                flash(
+                    self.needs_refresh_message,
+                    category=self.needs_refresh_message_category,
+                )
 
         config = current_app.config
-        if config.get('USE_SESSION_FOR_NEXT', USE_SESSION_FOR_NEXT):
+        if config.get("USE_SESSION_FOR_NEXT", USE_SESSION_FOR_NEXT):
             login_url = expand_login_view(self.refresh_view)
-            session['_id'] = self._session_identifier_generator()
-            session['next'] = make_next_param(login_url, request.url)
+            session["_id"] = self._session_identifier_generator()
+            session["next"] = make_next_param(login_url, request.url)
             redirect_url = make_login_url(self.refresh_view)
         else:
             login_url = self.refresh_view
@@ -284,7 +307,7 @@ class LoginManager(object):
         return redirect(redirect_url)
 
     def header_loader(self, callback):
-        '''
+        """
         This function has been deprecated. Please use
         :meth:`LoginManager.request_loader` instead.
 
@@ -294,26 +317,29 @@ class LoginManager(object):
 
         :param callback: The callback for retrieving a user object.
         :type callback: callable
-        '''
-        print(('LoginManager.header_loader is deprecated. Use ' +
-              'LoginManager.request_loader instead.'))
+        """
+        print(
+            "LoginManager.header_loader is deprecated. Use"
+            " LoginManager.request_loader instead."
+        )
         self._header_callback = callback
         return callback
 
     def _update_request_context_with_user(self, user=None):
-        '''Store the given user as ctx.user.'''
+        """Store the given user as ctx.user."""
 
         ctx = _request_ctx_stack.top
         ctx.user = self.anonymous_user() if user is None else user
 
     def _load_user(self):
-        '''Loads user from session or remember_me cookie as applicable'''
+        """Loads user from session or remember_me cookie as applicable"""
 
         if self._user_callback is None and self._request_callback is None:
             raise Exception(
                 "Missing user_loader or request_loader. Refer to "
                 "http://flask-login.readthedocs.io/#how-it-works "
-                "for more info.")
+                "for more info."
+            )
 
         user_accessed.send(current_app._get_current_object())
 
@@ -324,17 +350,18 @@ class LoginManager(object):
         user = None
 
         # Load user from Flask Session
-        user_id = session.get('_user_id')
+        user_id = session.get("_user_id")
         if user_id is not None and self._user_callback is not None:
             user = self._user_callback(user_id)
 
         # Load user from Remember Me Cookie or Request Loader
         if user is None:
             config = current_app.config
-            cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
-            header_name = config.get('AUTH_HEADER_NAME', AUTH_HEADER_NAME)
-            has_cookie = (cookie_name in request.cookies and
-                          session.get('_remember') != 'clear')
+            cookie_name = config.get("REMEMBER_COOKIE_NAME", COOKIE_NAME)
+            header_name = config.get("AUTH_HEADER_NAME", AUTH_HEADER_NAME)
+            has_cookie = (
+                cookie_name in request.cookies and session.get("_remember") != "clear"
+            )
             if has_cookie:
                 cookie = request.cookies[cookie_name]
                 user = self._load_user_from_remember_cookie(cookie)
@@ -351,23 +378,23 @@ class LoginManager(object):
         ident = self._session_identifier_generator()
 
         app = current_app._get_current_object()
-        mode = app.config.get('SESSION_PROTECTION', self.session_protection)
+        mode = app.config.get("SESSION_PROTECTION", self.session_protection)
 
-        if not mode or mode not in ['basic', 'strong']:
+        if not mode or mode not in ["basic", "strong"]:
             return False
 
         # if the sess is empty, it's an anonymous user or just logged out
         # so we can skip this
-        if sess and ident != sess.get('_id', None):
-            if mode == 'basic' or sess.permanent:
-                sess['_fresh'] = False
+        if sess and ident != sess.get("_id", None):
+            if mode == "basic" or sess.permanent:
+                sess["_fresh"] = False
                 session_protected.send(app)
                 return False
-            elif mode == 'strong':
+            elif mode == "strong":
                 for k in SESSION_KEYS:
                     sess.pop(k, None)
 
-                sess['_remember'] = 'clear'
+                sess["_remember"] = "clear"
                 session_protected.send(app)
                 return True
 
@@ -376,8 +403,8 @@ class LoginManager(object):
     def _load_user_from_remember_cookie(self, cookie):
         user_id = decode_cookie(cookie)
         if user_id is not None:
-            session['_user_id'] = user_id
-            session['_fresh'] = False
+            session["_user_id"] = user_id
+            session["_fresh"] = False
             user = None
             if self._user_callback:
                 user = self._user_callback(user_id)
@@ -407,16 +434,17 @@ class LoginManager(object):
 
     def _update_remember_cookie(self, response):
         # Don't modify the session unless there's something to do.
-        if '_remember' not in session and \
-                current_app.config.get('REMEMBER_COOKIE_REFRESH_EACH_REQUEST'):
-            session['_remember'] = 'set'
+        if "_remember" not in session and current_app.config.get(
+            "REMEMBER_COOKIE_REFRESH_EACH_REQUEST"
+        ):
+            session["_remember"] = "set"
 
-        if '_remember' in session:
-            operation = session.pop('_remember', None)
+        if "_remember" in session:
+            operation = session.pop("_remember", None)
 
-            if operation == 'set' and '_user_id' in session:
+            if operation == "set" and "_user_id" in session:
                 self._set_cookie(response)
-            elif operation == 'clear':
+            elif operation == "clear":
                 self._clear_cookie(response)
 
         return response
@@ -424,57 +452,60 @@ class LoginManager(object):
     def _set_cookie(self, response):
         # cookie settings
         config = current_app.config
-        cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
-        domain = config.get('REMEMBER_COOKIE_DOMAIN')
-        path = config.get('REMEMBER_COOKIE_PATH', '/')
+        cookie_name = config.get("REMEMBER_COOKIE_NAME", COOKIE_NAME)
+        domain = config.get("REMEMBER_COOKIE_DOMAIN")
+        path = config.get("REMEMBER_COOKIE_PATH", "/")
 
-        secure = config.get('REMEMBER_COOKIE_SECURE', COOKIE_SECURE)
-        httponly = config.get('REMEMBER_COOKIE_HTTPONLY', COOKIE_HTTPONLY)
-        samesite = config.get('REMEMBER_COOKIE_SAMESITE', COOKIE_SAMESITE)
+        secure = config.get("REMEMBER_COOKIE_SECURE", COOKIE_SECURE)
+        httponly = config.get("REMEMBER_COOKIE_HTTPONLY", COOKIE_HTTPONLY)
+        samesite = config.get("REMEMBER_COOKIE_SAMESITE", COOKIE_SAMESITE)
 
-        if '_remember_seconds' in session:
-            duration = timedelta(seconds=session['_remember_seconds'])
+        if "_remember_seconds" in session:
+            duration = timedelta(seconds=session["_remember_seconds"])
         else:
-            duration = config.get('REMEMBER_COOKIE_DURATION', COOKIE_DURATION)
+            duration = config.get("REMEMBER_COOKIE_DURATION", COOKIE_DURATION)
 
         # prepare data
-        data = encode_cookie(str(session['_user_id']))
+        data = encode_cookie(str(session["_user_id"]))
 
         if isinstance(duration, int):
             duration = timedelta(seconds=duration)
 
         try:
             expires = datetime.utcnow() + duration
-        except TypeError:
-            raise Exception('REMEMBER_COOKIE_DURATION must be a ' +
-                            'datetime.timedelta, instead got: {0}'.format(
-                                duration))
+        except TypeError as e:
+            raise Exception(
+                "REMEMBER_COOKIE_DURATION must be a datetime.timedelta,"
+                f" instead got: {duration}"
+            ) from e
 
         # actually set it
-        response.set_cookie(cookie_name,
-                            value=data,
-                            expires=expires,
-                            domain=domain,
-                            path=path,
-                            secure=secure,
-                            httponly=httponly,
-                            samesite=samesite)
+        response.set_cookie(
+            cookie_name,
+            value=data,
+            expires=expires,
+            domain=domain,
+            path=path,
+            secure=secure,
+            httponly=httponly,
+            samesite=samesite,
+        )
 
     def _clear_cookie(self, response):
         config = current_app.config
-        cookie_name = config.get('REMEMBER_COOKIE_NAME', COOKIE_NAME)
-        domain = config.get('REMEMBER_COOKIE_DOMAIN')
-        path = config.get('REMEMBER_COOKIE_PATH', '/')
+        cookie_name = config.get("REMEMBER_COOKIE_NAME", COOKIE_NAME)
+        domain = config.get("REMEMBER_COOKIE_DOMAIN")
+        path = config.get("REMEMBER_COOKIE_PATH", "/")
         response.delete_cookie(cookie_name, domain=domain, path=path)
 
     @property
     def _login_disabled(self):
         """Legacy property, use app.config['LOGIN_DISABLED'] instead."""
         if has_app_context():
-            return current_app.config.get('LOGIN_DISABLED', False)
+            return current_app.config.get("LOGIN_DISABLED", False)
         return False
 
     @_login_disabled.setter
     def _login_disabled(self, newvalue):
         """Legacy property setter, use app.config['LOGIN_DISABLED'] instead."""
-        current_app.config['LOGIN_DISABLED'] = newvalue
+        current_app.config["LOGIN_DISABLED"] = newvalue

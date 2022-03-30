@@ -11,7 +11,7 @@ class FlaskLoginClient(FlaskClient):
         user = kwargs.pop("user", None)
         fresh = kwargs.pop("fresh_login", True)
 
-        super(FlaskLoginClient, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         if user:
             with self.session_transaction() as sess:

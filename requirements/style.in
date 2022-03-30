@@ -1,2 +1,1 @@
-pycodestyle
-pyflakes
+pre-commit
