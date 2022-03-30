@@ -27,6 +27,9 @@ Unreleased
  `import *` is not usually a good pattern in code. #485
 - `UserMixin.is_authenticated` will return whatever `is_active` returns
   by default. This prevents inactive users from logging in. #486, #530
+- Session protection will only mark the session as not fresh if it's not
+  already marked as such, avoiding modifying the session cookie
+  unnecessarily. #612
 
 Version 0.5.0
 -------------
