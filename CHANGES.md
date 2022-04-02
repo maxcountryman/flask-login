@@ -1,6 +1,13 @@
 Flask-Login Changelog
 =====================
 
+Unreleased
+----------
+
+- The new utility function `login_remembered` returns `True` if the current
+  login is remembered across sessions.
+
+
 Version 0.6.0
 -------------
 
