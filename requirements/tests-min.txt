@@ -7,23 +7,23 @@
 #
 click==7.1.2
     # via
-    #   -r requirements/tests-min.in
+    #   -r tests-min.in
     #   flask
 flask==1.0.4
-    # via -r requirements/tests-min.in
+    # via -r tests-min.in
 itsdangerous==1.1.0
     # via
-    #   -r requirements/tests-min.in
+    #   -r tests-min.in
     #   flask
-jinja2==2.10.3
+jinja2==2.11.3
     # via
-    #   -r requirements/tests-min.in
+    #   -r tests-min.in
     #   flask
 markupsafe==1.1.1
     # via
-    #   -r requirements/tests-min.in
+    #   -r tests-min.in
     #   jinja2
 werkzeug==1.0.1
     # via
-    #   -r requirements/tests-min.in
+    #   -r tests-min.in
     #   flask
