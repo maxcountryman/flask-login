@@ -142,6 +142,13 @@ def login_fresh():
     return session.get("_fresh", False)
 
 
+def login_remembered():
+    """
+    This returns ``True`` if the current login is remembered across sessions.
+    """
+    return session.get("_remembered_login", False)
+
+
 def login_user(user, remember=False, duration=None, force=False, fresh=True):
     """
     Logs a user in. You should pass the actual user object to this. If the
@@ -176,6 +183,7 @@ def login_user(user, remember=False, duration=None, force=False, fresh=True):
 
     if remember:
         session["_remember"] = "set"
+        session["_remembered_login"] = True
         if duration is not None:
             try:
                 # equal to timedelta.total_seconds() but works with Python 2.6
@@ -206,6 +214,9 @@ def logout_user():
 
     if "_fresh" in session:
         session.pop("_fresh")
+
+    if "_remembered_login" in session:
+        session.pop("_remembered_login")
 
     if "_id" in session:
         session.pop("_id")
