@@ -66,6 +66,9 @@ to see how to set a secret key.
 "How to generate good secret keys" section to generate your own secret key.
 DO NOT use the example one.
 
+For a complete understanding of available configuration keys, please refer to
+the `source code`_.
+
 How it Works
 ============
 You will need to provide a `~LoginManager.user_loader` callback. This callback
@@ -658,6 +661,7 @@ signals in your code.
    marked non-fresh or deleted. It receives no additional arguments besides
    the app.
 
+.. _source code: https://github.com/maxcountryman/flask-login/tree/main/src/flask_login
 .. _Flask documentation on signals: http://flask.pocoo.org/docs/signals/
 .. _this Flask Snippet: https://web.archive.org/web/20120517003641/http://flask.pocoo.org/snippets/62/
 .. _Flask documentation on sessions: http://flask.pocoo.org/docs/quickstart/#sessions
