@@ -406,7 +406,6 @@ class LoginManager:
         if user_id is not None:
             session["_user_id"] = user_id
             session["_fresh"] = False
-            session["_remembered_login"] = True
             user = None
             if self._user_callback:
                 user = self._user_callback(user_id)
