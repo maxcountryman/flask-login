@@ -158,9 +158,7 @@ def login_remembered():
     """
     config = current_app.config
     cookie_name = config.get("REMEMBER_COOKIE_NAME", COOKIE_NAME)
-    has_cookie = (
-        cookie_name in request.cookies and session.get("_remember") != "clear"
-    )
+    has_cookie = cookie_name in request.cookies and session.get("_remember") != "clear"
     if has_cookie:
         cookie = request.cookies[cookie_name]
         user_id = decode_cookie(cookie)
@@ -207,8 +205,8 @@ def login_user(user, remember=False, duration=None, force=False, fresh=True):
                 # equal to timedelta.total_seconds() but works with Python 2.6
                 session["_remember_seconds"] = (
                     duration.microseconds
-                    + (duration.seconds + duration.days * 24 * 3600) * 10**6
-                ) / 10.0**6
+                    + (duration.seconds + duration.days * 24 * 3600) * 10 ** 6
+                ) / 10.0 ** 6
             except AttributeError as e:
                 raise Exception(
                     f"duration must be a datetime.timedelta, instead got: {duration}"
