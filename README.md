@@ -138,7 +138,8 @@ def unauthorized_handler():
     return 'Unauthorized', 401
 ```
 
-Complete documentation for Flask-Login is available on [ReadTheDocs](https://flask-login.readthedocs.io/en/latest/).
+Documentation for Flask-Login is available on [ReadTheDocs](https://flask-login.readthedocs.io/en/latest/).
+For complete understanding of available configuration, please refer to the [source code](https://github.com/maxcountryman/flask-login).
 
 
 ## Contributing
