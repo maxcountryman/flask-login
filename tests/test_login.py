@@ -1787,6 +1787,10 @@ class CustomTestClientTestCase(unittest.TestCase):
         @self.app.route("/is-remembered")
         def is_remembered():
             return str(login_remembered())
+        
+        @self.app.route("/login-notch-remember")
+        def login_notch_remember():
+            return str(login_user(notch, remember=True))
 
         @self.login_manager.user_loader
         def load_user(user_id):
@@ -1824,9 +1828,8 @@ class CustomTestClientTestCase(unittest.TestCase):
             self.assertEqual("False", is_fresh.data.decode("utf-8"))
 
     def test_remembered_login_arg_to_test_client(self):
-        with self.app.test_client(user=notch, remembered_login=True) as c:
-            username = c.get("/username")
-            self.assertEqual("Notch", username.data.decode("utf-8"))
+        with self.app.test_client() as c:
+            c.get("/login-notch-remember")
             is_remembered = c.get("/is-remembered")
             self.assertEqual("True", is_remembered.data.decode("utf-8"))
 
