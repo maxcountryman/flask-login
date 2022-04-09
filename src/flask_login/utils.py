@@ -146,7 +146,16 @@ def login_remembered():
     """
     This returns ``True`` if the current login is remembered across sessions.
     """
-    return session.get("_remembered_login", False)
+    config = current_app.config
+    cookie_name = config.get("REMEMBER_COOKIE_NAME", COOKIE_NAME)
+    has_cookie = (
+        cookie_name in request.cookies and session.get("_remember") != "clear"
+    )
+    if has_cookie:
+        cookie = request.cookies[cookie_name]
+        user_id = decode_cookie(cookie)
+        return user_id is not None
+    return False
 
 
 def login_user(user, remember=False, duration=None, force=False, fresh=True):
@@ -183,7 +192,6 @@ def login_user(user, remember=False, duration=None, force=False, fresh=True):
 
     if remember:
         session["_remember"] = "set"
-        session["_remembered_login"] = True
         if duration is not None:
             try:
                 # equal to timedelta.total_seconds() but works with Python 2.6
@@ -214,9 +222,6 @@ def logout_user():
 
     if "_fresh" in session:
         session.pop("_fresh")
-
-    if "_remembered_login" in session:
-        session.pop("_remembered_login")
 
     if "_id" in session:
         session.pop("_id")
