@@ -388,13 +388,6 @@ class LoginTestCase(unittest.TestCase):
             self.assertEqual(current_user.name, "Notch")
             self.assertIs(login_fresh(), False)
 
-    def test_login_user_remembered(self):
-        with self.app.test_request_context():
-            result = login_user(notch, remember=True)
-            self.assertTrue(result)
-            self.assertEqual(current_user.name, "Notch")
-            self.assertIs(login_remembered(), True)
-
     def test_login_user_emits_signal(self):
         with self.app.test_request_context():
             with listen_to(user_logged_in) as listener:
@@ -1787,7 +1780,7 @@ class CustomTestClientTestCase(unittest.TestCase):
         @self.app.route("/is-remembered")
         def is_remembered():
             return str(login_remembered())
-        
+
         @self.app.route("/login-notch-remember")
         def login_notch_remember():
             return str(login_user(notch, remember=True))
