@@ -179,11 +179,11 @@ def login_user(user, remember=False, duration=None, force=False, fresh=True):
     user_id = getattr(user, current_app.login_manager.id_attribute)()
     session["_user_id"] = user_id
     session["_fresh"] = fresh
-    session["_remembered_login"] = False
     session["_id"] = current_app.login_manager._session_identifier_generator()
 
     if remember:
         session["_remember"] = "set"
+        session["_remembered_login"] = True
         if duration is not None:
             try:
                 # equal to timedelta.total_seconds() but works with Python 2.6
