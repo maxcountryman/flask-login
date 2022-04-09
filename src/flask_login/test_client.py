@@ -10,7 +10,6 @@ class FlaskLoginClient(FlaskClient):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop("user", None)
         fresh = kwargs.pop("fresh_login", True)
-        remembered = kwargs.pop("remembered_login", False)
 
         super().__init__(*args, **kwargs)
 
@@ -18,4 +17,3 @@ class FlaskLoginClient(FlaskClient):
             with self.session_transaction() as sess:
                 sess["_user_id"] = user.get_id()
                 sess["_fresh"] = fresh
-                sess["_remembered_login"] = remembered
