@@ -152,6 +152,20 @@ def login_fresh():
     return session.get("_fresh", False)
 
 
+def login_remembered():
+    """
+    This returns ``True`` if the current login is remembered across sessions.
+    """
+    config = current_app.config
+    cookie_name = config.get("REMEMBER_COOKIE_NAME", COOKIE_NAME)
+    has_cookie = cookie_name in request.cookies and session.get("_remember") != "clear"
+    if has_cookie:
+        cookie = request.cookies[cookie_name]
+        user_id = decode_cookie(cookie)
+        return user_id is not None
+    return False
+
+
 def login_user(user, remember=False, duration=None, force=False, fresh=True):
     """
     Logs a user in. You should pass the actual user object to this. If the

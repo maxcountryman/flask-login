@@ -23,6 +23,7 @@ from flask_login import encode_cookie
 from flask_login import FlaskLoginClient
 from flask_login import fresh_login_required
 from flask_login import login_fresh
+from flask_login import login_remembered
 from flask_login import login_required
 from flask_login import login_url
 from flask_login import login_user
@@ -377,6 +378,8 @@ class LoginTestCase(unittest.TestCase):
             result = login_user(notch)
             self.assertTrue(result)
             self.assertEqual(current_user.name, "Notch")
+            self.assertIs(login_fresh(), True)
+            self.assertIs(login_remembered(), False)
 
     def test_login_user_not_fresh(self):
         with self.app.test_request_context():
@@ -1774,6 +1777,14 @@ class CustomTestClientTestCase(unittest.TestCase):
         def is_fresh():
             return str(login_fresh())
 
+        @self.app.route("/is-remembered")
+        def is_remembered():
+            return str(login_remembered())
+
+        @self.app.route("/login-notch-remember")
+        def login_notch_remember():
+            return str(login_user(notch, remember=True))
+
         @self.login_manager.user_loader
         def load_user(user_id):
             return USERS[int(user_id)]
@@ -1799,6 +1810,8 @@ class CustomTestClientTestCase(unittest.TestCase):
             self.assertEqual("Notch", username.data.decode("utf-8"))
             is_fresh = c.get("/is-fresh")
             self.assertEqual("True", is_fresh.data.decode("utf-8"))
+            is_remembered = c.get("/is-remembered")
+            self.assertEqual("False", is_remembered.data.decode("utf-8"))
 
     def test_fresh_login_arg_to_test_client(self):
         with self.app.test_client(user=notch, fresh_login=False) as c:
@@ -1806,6 +1819,12 @@ class CustomTestClientTestCase(unittest.TestCase):
             self.assertEqual("Notch", username.data.decode("utf-8"))
             is_fresh = c.get("/is-fresh")
             self.assertEqual("False", is_fresh.data.decode("utf-8"))
+
+    def test_remembered_login_arg_to_test_client(self):
+        with self.app.test_client() as c:
+            c.get("/login-notch-remember")
+            is_remembered = c.get("/is-remembered")
+            self.assertEqual("True", is_remembered.data.decode("utf-8"))
 
     def test_not_fresh_not_modified(self):
         self.app.config["SESSION_PROTECTION"] = "basic"

@@ -29,6 +29,7 @@ from .utils import decode_cookie
 from .utils import encode_cookie
 from .utils import fresh_login_required
 from .utils import login_fresh
+from .utils import login_remembered
 from .utils import login_required
 from .utils import login_url
 from .utils import login_user
@@ -68,6 +69,7 @@ __all__ = [
     "encode_cookie",
     "fresh_login_required",
     "login_fresh",
+    "login_remembered",
     "login_required",
     "login_url",
     "login_user",
