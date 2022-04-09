@@ -11,6 +11,7 @@ from flask import request
 from flask import session
 from flask import url_for
 from werkzeug.local import LocalProxy
+from werkzeug.routing import parse_rule
 from werkzeug.urls import url_decode
 from werkzeug.urls import url_encode
 
@@ -94,10 +95,19 @@ def expand_login_view(login_view):
     if login_view.startswith(("https://", "http://", "/")):
         return login_view
     else:
-        if request.view_args is None:
-            return url_for(login_view)
+        try:
+            url_rule = request.url_rule.subdomain or request.url_rule.host
+        except AttributeError:
+            url_rule = None
+        if request.view_args and url_rule:
+            args = {}
+            for _, _, key in parse_rule(url_rule):
+                if not key or key not in request.view_args:
+                    continue
+                args[key] = request.view_args[key]
+            return url_for(login_view, **args)
         else:
-            return url_for(login_view, **request.view_args)
+            return url_for(login_view)
 
 
 def login_url(login_view, next_url=None, next_field="next"):
