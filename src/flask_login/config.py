@@ -40,7 +40,6 @@ SESSION_KEYS = {
     "_user_id",
     "_remember",
     "_remember_seconds",
-    "_remembered_login",
     "_id",
     "_fresh",
     "next",
