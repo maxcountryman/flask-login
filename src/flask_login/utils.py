@@ -205,8 +205,8 @@ def login_user(user, remember=False, duration=None, force=False, fresh=True):
                 # equal to timedelta.total_seconds() but works with Python 2.6
                 session["_remember_seconds"] = (
                     duration.microseconds
-                    + (duration.seconds + duration.days * 24 * 3600) * 10 ** 6
-                ) / 10.0 ** 6
+                    + (duration.seconds + duration.days * 24 * 3600) * 10**6
+                ) / 10.0**6
             except AttributeError as e:
                 raise Exception(
                     f"duration must be a datetime.timedelta, instead got: {duration}"
