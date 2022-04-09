@@ -153,7 +153,7 @@ implementation of `is_safe_url` see `this Flask Snippet`_.
 It's that simple. You can then access the logged-in user with the
 `current_user` proxy, which is available in every template::
 
-    {% if current_user.is_authenticated() %}
+    {% if current_user.is_authenticated %}
       Hi {{ current_user.name }}!
     {% endif %}
 
