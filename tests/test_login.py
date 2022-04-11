@@ -312,6 +312,10 @@ class LoginTestCase(unittest.TestCase):
         def is_fresh():
             return str(login_fresh())
 
+        @self.app.route("/is-remembered")
+        def is_remembered():
+            return str(login_remembered())
+
         @self.app.route("/logout")
         def logout():
             return str(logout_user())
@@ -379,7 +383,6 @@ class LoginTestCase(unittest.TestCase):
             self.assertTrue(result)
             self.assertEqual(current_user.name, "Notch")
             self.assertIs(login_fresh(), True)
-            self.assertIs(login_remembered(), False)
 
     def test_login_user_not_fresh(self):
         with self.app.test_request_context():
@@ -673,23 +676,33 @@ class LoginTestCase(unittest.TestCase):
 
     def test_authentication_is_fresh(self):
         with self.app.test_client() as c:
-            c.get("/login-notch-remember")
-            result = c.get("/is-fresh")
-            self.assertEqual("True", result.data.decode("utf-8"))
+            c.get("/login-notch")
+            fresh_result = c.get("/is-fresh")
+            self.assertEqual("True", fresh_result.data.decode("utf-8"))
+            remembered_result = c.get("/is-remembered")
+            self.assertEqual("False", remembered_result.data.decode("utf-8"))
 
     def test_remember_me(self):
         with self.app.test_client() as c:
             c.get("/login-notch-remember")
             self._delete_session(c)
-            result = c.get("/username")
-            self.assertEqual("Notch", result.data.decode("utf-8"))
+            username_result = c.get("/username")
+            self.assertEqual("Notch", username_result.data.decode("utf-8"))
+            fresh_result = c.get("/is-fresh")
+            self.assertEqual("False", fresh_result.data.decode("utf-8"))
+            remembered_result = c.get("/is-remembered")
+            self.assertEqual("True", remembered_result.data.decode("utf-8"))
 
     def test_remember_me_custom_duration(self):
         with self.app.test_client() as c:
             c.get("/login-notch-remember-custom")
             self._delete_session(c)
-            result = c.get("/username")
-            self.assertEqual("Notch", result.data.decode("utf-8"))
+            username_result = c.get("/username")
+            self.assertEqual("Notch", username_result.data.decode("utf-8"))
+            fresh_result = c.get("/is-fresh")
+            self.assertEqual("False", fresh_result.data.decode("utf-8"))
+            remembered_result = c.get("/is-remembered")
+            self.assertEqual("True", remembered_result.data.decode("utf-8"))
 
     def test_remember_me_uses_custom_cookie_parameters(self):
         name = self.app.config["REMEMBER_COOKIE_NAME"] = "myname"
@@ -871,6 +884,7 @@ class LoginTestCase(unittest.TestCase):
             c.get("/login-notch-remember")
             self._delete_session(c)
             self.assertEqual("False", c.get("/is-fresh").data.decode("utf-8"))
+            self.assertEqual("True", c.get("/is-remembered").data.decode("utf-8"))
 
     def test_login_persists_with_signle_x_forwarded_for(self):
         self.app.config["SESSION_PROTECTION"] = "strong"
@@ -1025,8 +1039,10 @@ class LoginTestCase(unittest.TestCase):
             c.get("/login-notch-remember")
             self._delete_session(c)
             self.assertEqual("False", c.get("/is-fresh").data.decode("utf-8"))
+            self.assertEqual("True", c.get("/is-remembered").data.decode("utf-8"))
             c.get("/confirm-login")
             self.assertEqual("True", c.get("/is-fresh").data.decode("utf-8"))
+            self.assertEqual("True", c.get("/is-remembered").data.decode("utf-8"))
 
     def test_user_login_confirmed_signal_fired(self):
         with self.app.test_client() as c:
@@ -1777,10 +1793,6 @@ class CustomTestClientTestCase(unittest.TestCase):
         def is_fresh():
             return str(login_fresh())
 
-        @self.app.route("/is-remembered")
-        def is_remembered():
-            return str(login_remembered())
-
         @self.app.route("/login-notch-remember")
         def login_notch_remember():
             return str(login_user(notch, remember=True))
@@ -1810,8 +1822,6 @@ class CustomTestClientTestCase(unittest.TestCase):
             self.assertEqual("Notch", username.data.decode("utf-8"))
             is_fresh = c.get("/is-fresh")
             self.assertEqual("True", is_fresh.data.decode("utf-8"))
-            is_remembered = c.get("/is-remembered")
-            self.assertEqual("False", is_remembered.data.decode("utf-8"))
 
     def test_fresh_login_arg_to_test_client(self):
         with self.app.test_client(user=notch, fresh_login=False) as c:
@@ -1819,12 +1829,6 @@ class CustomTestClientTestCase(unittest.TestCase):
             self.assertEqual("Notch", username.data.decode("utf-8"))
             is_fresh = c.get("/is-fresh")
             self.assertEqual("False", is_fresh.data.decode("utf-8"))
-
-    def test_remembered_login_arg_to_test_client(self):
-        with self.app.test_client() as c:
-            c.get("/login-notch-remember")
-            is_remembered = c.get("/is-remembered")
-            self.assertEqual("True", is_remembered.data.decode("utf-8"))
 
     def test_not_fresh_not_modified(self):
         self.app.config["SESSION_PROTECTION"] = "basic"
