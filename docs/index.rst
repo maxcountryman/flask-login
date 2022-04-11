@@ -508,12 +508,8 @@ logged in with this user!
             # this request has user 1 already logged in!
             resp = client.get("/")
 
-Other supported keyword arguments are:
-
-- ``fresh_login`` (``bool``, default ``True``): whether the current login is
-  fresh
-- ``remembered_login`` (``bool``, default ``False``): whether the current login
-  is remembered across sessions
+You may also pass ``fresh_login`` (``bool``, defaults to ``True``) to mark the
+current login as fresh or non-fresh.
 
 Note that you must use keyword arguments, not positional arguments. E.g.
 ``test_client(user=user)`` will work, but ``test_client(user)``
