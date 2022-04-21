@@ -296,7 +296,7 @@ def login_required(func):
             pass
         elif not current_user.is_authenticated:
             return current_app.login_manager.unauthorized()
-        
+
         # flask 1.x compatibility
         # current_app.ensure_sync is only available in Flask >= 2.0
         if callable(getattr(current_app, "ensure_sync", None)):
