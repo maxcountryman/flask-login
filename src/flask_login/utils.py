@@ -300,8 +300,8 @@ def login_required(func):
         # flask 1.x compatibility
         # current_app.ensure_sync is only available in Flask >= 2.0
         if callable(getattr(current_app, "ensure_sync", None)):
-            return current_app.ensure_sync(fn)(*args, **kwargs)
-        return fn(*args, **kwargs)
+            return current_app.ensure_sync(func)(*args, **kwargs)
+        return func(*args, **kwargs)
 
     return decorated_view
 
