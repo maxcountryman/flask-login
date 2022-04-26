@@ -1779,10 +1779,6 @@ class CustomTestClientTestCase(unittest.TestCase):
         self.app.config["LOGIN_DISABLED"] = False
         self.app.test_client_class = FlaskLoginClient
 
-        @self.app.route("/")
-        def index():
-            return "Welcome!"
-
         @self.app.route("/username")
         def username():
             if current_user.is_authenticated:
@@ -1792,10 +1788,6 @@ class CustomTestClientTestCase(unittest.TestCase):
         @self.app.route("/is-fresh")
         def is_fresh():
             return str(login_fresh())
-
-        @self.app.route("/login-notch-remember")
-        def login_notch_remember():
-            return str(login_user(notch, remember=True))
 
         @self.login_manager.user_loader
         def load_user(user_id):
@@ -1830,8 +1822,45 @@ class CustomTestClientTestCase(unittest.TestCase):
             is_fresh = c.get("/is-fresh")
             self.assertEqual("False", is_fresh.data.decode("utf-8"))
 
-    def test_not_fresh_not_modified(self):
+    def test_session_protection_modes(self):
+        # Disabled
+        self.app.config["SESSION_PROTECTION"] = None
+        with self.app.test_client(user=notch, fresh_login=False) as c:
+            username = c.get("/username")
+            self.assertEqual("Notch", username.data.decode("utf-8"))
+            is_fresh = c.get("/is-fresh")
+            self.assertEqual("False", is_fresh.data.decode("utf-8"))
+
+        with self.app.test_client(user=notch, fresh_login=True) as c:
+            username = c.get("/username")
+            self.assertEqual("Notch", username.data.decode("utf-8"))
+            is_fresh = c.get("/is-fresh")
+            self.assertEqual("True", is_fresh.data.decode("utf-8"))
+
+        # Enabled with mode: basic
         self.app.config["SESSION_PROTECTION"] = "basic"
-        c = self.app.test_client(user=steve, fresh_login=False)
-        r = c.get("/username")
-        assert "Set-Cookie" not in r.headers
+        with self.app.test_client(user=notch, fresh_login=False) as c:
+            username = c.get("/username")
+            self.assertEqual("Notch", username.data.decode("utf-8"))
+            is_fresh = c.get("/is-fresh")
+            self.assertEqual("False", is_fresh.data.decode("utf-8"))
+
+        with self.app.test_client(user=notch, fresh_login=True) as c:
+            username = c.get("/username")
+            self.assertEqual("Notch", username.data.decode("utf-8"))
+            is_fresh = c.get("/is-fresh")
+            self.assertEqual("False", is_fresh.data.decode("utf-8"))
+
+        # Enabled with mode: strong
+        self.app.config["SESSION_PROTECTION"] = "strong"
+        with self.app.test_client(user=notch, fresh_login=False) as c:
+            username = c.get("/username")
+            self.assertEqual("Anonymous", username.data.decode("utf-8"))
+            is_fresh = c.get("/is-fresh")
+            self.assertEqual("False", is_fresh.data.decode("utf-8"))
+
+        with self.app.test_client(user=notch, fresh_login=True) as c:
+            username = c.get("/username")
+            self.assertEqual("Anonymous", username.data.decode("utf-8"))
+            is_fresh = c.get("/is-fresh")
+            self.assertEqual("False", is_fresh.data.decode("utf-8"))
