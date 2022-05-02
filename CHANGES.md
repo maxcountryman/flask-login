@@ -4,11 +4,13 @@ Flask-Login Changelog
 Version 0.6.1
 -------------
 
-Unreleased
+Released on May 1st, 2022
 
 - Only preserve subdomain or host view args in unauthorized redirect #663
 - The new utility function `login_remembered` returns `True` if the current
   login is remembered across sessions. #654
+- Fix side effect potentially executing view twice for same request. #666
+- Clarify usage of FlaskLoginClient test client in docs. #668
 
 Version 0.6.0
 -------------
