@@ -486,8 +486,8 @@ using your `~LoginManager.request_loader`.
 Automated Testing
 =================
 To make it easier for you to write automated tests, Flask-Login provides a
-custom test client class that will set the user's login cookie for you.
-To use this custom test client class, assign it to the
+simple, custom test client class that will set the user's login cookie for you:
+`~FlaskLoginClient`. To use this custom test client class, assign it to the
 :attr:`test_client_class <flask.Flask.test_client_class>` attribute
 on your application object, like this::
 
@@ -502,11 +502,11 @@ logged in with this user!
 
 .. code-block:: python
 
-    def test_simple(self):
+    def test_request_with_logged_in_user():
         user = User.query.get(1)
         with app.test_client(user=user) as client:
-            # this request has user 1 already logged in!
-            resp = client.get("/")
+            # This request has user 1 already logged in!
+            client.get("/")
 
 You may also pass ``fresh_login`` (``bool``, defaults to ``True``) to mark the
 current login as fresh or non-fresh.
@@ -514,6 +514,12 @@ current login as fresh or non-fresh.
 Note that you must use keyword arguments, not positional arguments. E.g.
 ``test_client(user=user)`` will work, but ``test_client(user)``
 will not.
+
+Due to the way this custom test client class is implemented, you may have to
+disable **session protection** to have your tests work properly. If session
+protection is enabled, login sessions will be marked non-fresh in `basic` mode
+or outright rejected in `strong` mode when performing requests with the test
+client.
 
 Localization
 ============
