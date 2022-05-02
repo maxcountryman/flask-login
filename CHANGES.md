@@ -10,6 +10,7 @@ Released on May 1st, 2022
 - The new utility function `login_remembered` returns `True` if the current
   login is remembered across sessions. #654
 - Fix side effect potentially executing view twice for same request. #666
+- Clarify usage of FlaskLoginClient test client in docs. #668
 
 Version 0.6.0
 -------------
