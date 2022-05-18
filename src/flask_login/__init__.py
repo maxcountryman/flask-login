@@ -1,5 +1,4 @@
 from .__about__ import __version__
-from .config import AUTH_HEADER_NAME
 from .config import COOKIE_DURATION
 from .config import COOKIE_HTTPONLY
 from .config import COOKIE_NAME
@@ -38,7 +37,6 @@ from .utils import set_login_view
 
 __all__ = [
     "__version__",
-    "AUTH_HEADER_NAME",
     "COOKIE_DURATION",
     "COOKIE_HTTPONLY",
     "COOKIE_NAME",
@@ -75,20 +73,3 @@ __all__ = [
     "make_next_param",
     "set_login_view",
 ]
-
-
-def __getattr__(name):
-    if name == "user_loaded_from_header":
-        import warnings
-        from .signals import _user_loaded_from_header
-
-        warnings.warn(
-            "'user_loaded_from_header' is deprecated and will be"
-            " removed in Flask-Login 0.7. Use"
-            " 'user_loaded_from_request' instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return _user_loaded_from_header
-
-    raise AttributeError(name)

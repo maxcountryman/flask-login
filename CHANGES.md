@@ -6,6 +6,8 @@ Version 0.7.0
 
 Unreleased
 
+- Remove previously deprecated code. #694
+
 Version 0.6.2
 -------------
 
