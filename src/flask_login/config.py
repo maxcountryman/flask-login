@@ -45,6 +45,12 @@ SESSION_KEYS = {
     "next",
 }
 
+#: A set of session keys that should not be purged from the session when
+#: `login_user` is called. Use this set to preseve specific values in the
+#: session between unauthenticated and authenticated states. By default, the
+#: session data is cleared on login.
+PRESERVED_SESSION_KEYS = set()
+
 #: A set of HTTP methods which are exempt from `login_required` and
 #: `fresh_login_required`. By default, this is just ``OPTIONS``.
 EXEMPT_METHODS = {"OPTIONS"}
