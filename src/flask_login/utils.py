@@ -18,6 +18,7 @@ from werkzeug.urls import url_encode
 from .config import COOKIE_NAME
 from .config import EXEMPT_METHODS
 from .config import PRESERVED_SESSION_KEYS
+from .config import SESSION_KEYS
 from .signals import user_logged_in
 from .signals import user_logged_out
 from .signals import user_login_confirmed
@@ -431,6 +432,10 @@ def _secret_key(key=None):
 
 
 def _clear_session():
-    preserved_keys = current_app.config.get("PRESERVED_SESSION_KEYS", PRESERVED_SESSION_KEYS)
-    for key in set(session.keys()).difference(preserved_keys):
+    preserved_keys = current_app.config.get(
+        "PRESERVED_SESSION_KEYS", PRESERVED_SESSION_KEYS
+    )
+    for key in set(session.keys()).difference(
+        SESSION_KEYS | preserved_keys | {"_permanent"}
+    ):
         del session[key]
