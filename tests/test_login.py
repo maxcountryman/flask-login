@@ -1154,6 +1154,7 @@ class LoginTestCase(unittest.TestCase):
 
     def test_session_protection_strong_deletes_session(self):
         self.app.config["SESSION_PROTECTION"] = "strong"
+        self.app.config["PRESERVED_SESSION_KEYS"] = {"foo"}
         with self.app.test_client() as c:
             # write some unrelated data in the session, to ensure it does not
             # get destroyed
