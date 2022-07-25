@@ -4,14 +4,13 @@ from hashlib import sha512
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
 
-from flask import _request_ctx_stack
 from flask import current_app
+from flask import g
 from flask import has_request_context
 from flask import request
 from flask import session
 from flask import url_for
 from werkzeug.local import LocalProxy
-from werkzeug.routing import parse_rule
 from werkzeug.urls import url_decode
 from werkzeug.urls import url_encode
 
@@ -94,20 +93,8 @@ def expand_login_view(login_view):
     """
     if login_view.startswith(("https://", "http://", "/")):
         return login_view
-    else:
-        try:
-            url_rule = request.url_rule.subdomain or request.url_rule.host
-        except AttributeError:
-            url_rule = None
-        if request.view_args and url_rule:
-            args = {}
-            for _, _, key in parse_rule(url_rule):
-                if not key or key not in request.view_args:
-                    continue
-                args[key] = request.view_args[key]
-            return url_for(login_view, **args)
-        else:
-            return url_for(login_view)
+
+    return url_for(login_view)
 
 
 def login_url(login_view, next_url=None, next_field="next"):
@@ -380,10 +367,13 @@ def set_login_view(login_view, blueprint=None):
 
 
 def _get_user():
-    if has_request_context() and not hasattr(_request_ctx_stack.top, "user"):
-        current_app.login_manager._load_user()
+    if has_request_context():
+        if "_login_user" not in g:
+            current_app.login_manager._load_user()
 
-    return getattr(_request_ctx_stack.top, "user", None)
+        return g._login_user
+
+    return None
 
 
 def _cookie_digest(payload, key=None):

@@ -2,10 +2,10 @@ import warnings
 from datetime import datetime
 from datetime import timedelta
 
-from flask import _request_ctx_stack
 from flask import abort
 from flask import current_app
 from flask import flash
+from flask import g
 from flask import has_app_context
 from flask import redirect
 from flask import request
@@ -328,8 +328,10 @@ class LoginManager:
     def _update_request_context_with_user(self, user=None):
         """Store the given user as ctx.user."""
 
-        ctx = _request_ctx_stack.top
-        ctx.user = self.anonymous_user() if user is None else user
+        if user is None:
+            user = self.anonymous_user()
+
+        g._login_user = user
 
     def _load_user(self):
         """Loads user from session or remember_me cookie as applicable"""
