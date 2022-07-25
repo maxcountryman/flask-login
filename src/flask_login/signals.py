@@ -16,7 +16,7 @@ user_loaded_from_cookie = _signals.signal("loaded-from-cookie")
 
 #: Sent when the user is loaded from the header. In addition to the app (which
 #: is the #: sender), it is passed `user`, which is the user being reloaded.
-user_loaded_from_header = _signals.signal("loaded-from-header")
+_user_loaded_from_header = _signals.signal("loaded-from-header")
 
 #: Sent when the user is loaded from the request. In addition to the app (which
 #: is the #: sender), it is passed `user`, which is the user being reloaded.
@@ -43,3 +43,19 @@ user_accessed = _signals.signal("accessed")
 #: marked non-fresh or deleted. It receives no additional arguments besides
 #: the app.
 session_protected = _signals.signal("session-protected")
+
+
+def __getattr__(name):
+    if name == "user_loaded_from_header":
+        import warnings
+
+        warnings.warn(
+            "'user_loaded_from_header' is deprecated and will be"
+            " removed in Flask-Login 0.7. Use"
+            " 'user_loaded_from_request' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return _user_loaded_from_header
+
+    raise AttributeError(name)

@@ -10,6 +10,12 @@ Unreleased
 - Revert change to `expand_login_view` that attempted to preserve a
   dynamic subdomain value. Such values should be handled using
   `app.url_value_preprocessor` and `app.url_defaults`. #691
+- Ensure deprecation warnings are present for deprecated features that
+  will be removed in the next feature release.
+  - Use `request_loader` instead of `header_loader`.
+  - Use `user_loaded_from_request` instead of `user_loaded_from_header`.
+  - Use `app.config["LOGIN_DISABLED"]` instead of `_login_disabled`.
+  - Use `init_app` instead of `setup_app`.
 
 Version 0.6.1
 -------------

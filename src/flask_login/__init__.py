@@ -15,7 +15,6 @@ from .mixins import UserMixin
 from .signals import session_protected
 from .signals import user_accessed
 from .signals import user_loaded_from_cookie
-from .signals import user_loaded_from_header
 from .signals import user_loaded_from_request
 from .signals import user_logged_in
 from .signals import user_logged_out
@@ -55,7 +54,6 @@ __all__ = [
     "session_protected",
     "user_accessed",
     "user_loaded_from_cookie",
-    "user_loaded_from_header",
     "user_loaded_from_request",
     "user_logged_in",
     "user_logged_out",
@@ -77,3 +75,20 @@ __all__ = [
     "make_next_param",
     "set_login_view",
 ]
+
+
+def __getattr__(name):
+    if name == "user_loaded_from_header":
+        import warnings
+        from .signals import _user_loaded_from_header
+
+        warnings.warn(
+            "'user_loaded_from_header' is deprecated and will be"
+            " removed in Flask-Login 0.7. Use"
+            " 'user_loaded_from_request' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return _user_loaded_from_header
+
+    raise AttributeError(name)
