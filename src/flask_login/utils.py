@@ -4,8 +4,8 @@ from hashlib import sha512
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
 
-from flask import _request_ctx_stack
 from flask import current_app
+from flask import g
 from flask import has_request_context
 from flask import request
 from flask import session
@@ -367,10 +367,13 @@ def set_login_view(login_view, blueprint=None):
 
 
 def _get_user():
-    if has_request_context() and not hasattr(_request_ctx_stack.top, "user"):
-        current_app.login_manager._load_user()
+    if has_request_context():
+        if "_login_user" not in g:
+            current_app.login_manager._load_user()
 
-    return getattr(_request_ctx_stack.top, "user", None)
+        return g._login_user
+
+    return None
 
 
 def _cookie_digest(payload, key=None):

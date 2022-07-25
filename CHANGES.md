@@ -6,6 +6,7 @@ Version 0.6.2
 
 Unreleased
 
+- Fix compatibility with Werkzeug 2.2 and Flask 2.2. #691
 - Revert change to `expand_login_view` that attempted to preserve a
   dynamic subdomain value. Such values should be handled using
   `app.url_value_preprocessor` and `app.url_defaults`. #691
