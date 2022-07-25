@@ -4,7 +4,7 @@ Flask-Login Changelog
 Version 0.6.2
 -------------
 
-Unreleased
+Released on July 25th, 2022
 
 - Fix compatibility with Werkzeug 2.2 and Flask 2.2. #691
 - Revert change to `expand_login_view` that attempted to preserve a
