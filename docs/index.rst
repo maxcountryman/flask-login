@@ -543,7 +543,7 @@ Configuring Login
 
 .. autoclass:: LoginManager
 
-   .. automethod:: setup_app
+   .. automethod:: init_app
 
    .. automethod:: unauthorized
 
@@ -553,7 +553,7 @@ Configuring Login
 
    .. automethod:: user_loader
 
-   .. automethod:: header_loader
+   .. automethod:: request_loader
 
    .. attribute:: anonymous_user
 

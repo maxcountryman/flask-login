@@ -1,4 +1,3 @@
-import warnings
 from datetime import datetime
 from datetime import timedelta
 
@@ -28,7 +27,6 @@ from .mixins import AnonymousUserMixin
 from .signals import session_protected
 from .signals import user_accessed
 from .signals import user_loaded_from_cookie
-from .signals import user_loaded_from_header
 from .signals import user_loaded_from_request
 from .signals import user_needs_refresh
 from .signals import user_unauthorized
@@ -113,8 +111,13 @@ class LoginManager:
         This method has been deprecated. Please use
         :meth:`LoginManager.init_app` instead.
         """
+        import warnings
+
         warnings.warn(
-            "Warning setup_app is deprecated. Please use init_app.", DeprecationWarning
+            "'setup_app' is deprecated and will be removed in"
+            " Flask-Login 0.7. Use 'init_app' instead.",
+            DeprecationWarning,
+            stacklevel=2,
         )
         self.init_app(app, add_context_processor)
 
@@ -318,9 +321,13 @@ class LoginManager:
         :param callback: The callback for retrieving a user object.
         :type callback: callable
         """
-        print(
-            "LoginManager.header_loader is deprecated. Use"
-            " LoginManager.request_loader instead."
+        import warnings
+
+        warnings.warn(
+            "'header_loader' is deprecated and will be removed in"
+            " Flask-Login 0.7. Use 'request_loader' instead.",
+            DeprecationWarning,
+            stacklevel=2,
         )
         self._header_callback = callback
         return callback
@@ -422,7 +429,10 @@ class LoginManager:
             user = self._header_callback(header)
             if user is not None:
                 app = current_app._get_current_object()
-                user_loaded_from_header.send(app, user=user)
+
+                from .signals import _user_loaded_from_header
+
+                _user_loaded_from_header.send(app, user=user)
                 return user
         return None
 
@@ -504,6 +514,16 @@ class LoginManager:
     @property
     def _login_disabled(self):
         """Legacy property, use app.config['LOGIN_DISABLED'] instead."""
+        import warnings
+
+        warnings.warn(
+            "'_login_disabled' is deprecated and will be removed in"
+            " Flask-Login 0.7. Use 'LOGIN_DISABLED' in 'app.config'"
+            " instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+
         if has_app_context():
             return current_app.config.get("LOGIN_DISABLED", False)
         return False
@@ -511,4 +531,13 @@ class LoginManager:
     @_login_disabled.setter
     def _login_disabled(self, newvalue):
         """Legacy property setter, use app.config['LOGIN_DISABLED'] instead."""
+        import warnings
+
+        warnings.warn(
+            "'_login_disabled' is deprecated and will be removed in"
+            " Flask-Login 0.7. Use 'LOGIN_DISABLED' in 'app.config'"
+            " instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         current_app.config["LOGIN_DISABLED"] = newvalue

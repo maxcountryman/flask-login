@@ -1,4 +1,3 @@
-import base64
 import sys
 import unittest
 from collections.abc import Hashable
@@ -34,7 +33,6 @@ from flask_login import session_protected
 from flask_login import set_login_view
 from flask_login import user_accessed
 from flask_login import user_loaded_from_cookie
-from flask_login import user_loaded_from_header
 from flask_login import user_loaded_from_request
 from flask_login import user_logged_in
 from flask_login import user_logged_out
@@ -207,13 +205,6 @@ class InitializationTestCase(unittest.TestCase):
 
         self.assertIsInstance(login_manager, LoginManager)
 
-    def test_login_disabled_is_set(self):
-        login_manager = LoginManager(self.app, add_context_processor=True)
-        self.assertFalse(login_manager._login_disabled)
-        with self.app.app_context():
-            login_manager._login_disabled = True
-            self.assertTrue(login_manager._login_disabled)
-
     def test_no_user_loader_raises(self):
         login_manager = LoginManager(self.app, add_context_processor=True)
         with self.app.test_request_context():
@@ -324,16 +315,6 @@ class LoginTestCase(unittest.TestCase):
         def load_user(user_id):
             return USERS[int(user_id)]
 
-        @self.login_manager.header_loader
-        def load_user_from_header(header_value):
-            if header_value.startswith("Basic "):
-                header_value = header_value.replace("Basic ", "", 1)
-            try:
-                user_id = base64.b64decode(header_value)
-            except TypeError:
-                pass
-            return USERS.get(int(user_id))
-
         @self.login_manager.request_loader
         def load_user_from_request(request):
             user_id = request.args.get("user_id")
@@ -407,26 +388,6 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_request_context():
             login_user(creeper, force=True)
             self.assertEqual(current_user.name, "Creeper")
-
-    def test_login_user_with_header(self):
-        user_id = 2
-        user_name = USERS[user_id].name
-        self.login_manager._request_callback = None
-        with self.app.test_client() as c:
-            decoded = base64.b64encode(str(user_id).encode()).decode()
-            headers = [("Authorization", f"Basic {decoded}")]
-            result = c.get("/username", headers=headers)
-            self.assertEqual(user_name, result.data.decode("utf-8"))
-
-    def test_login_invalid_user_with_header(self):
-        user_id = 9000
-        user_name = "Anonymous"
-        self.login_manager._request_callback = None
-        with self.app.test_client() as c:
-            decoded = base64.b64encode(str(user_id).encode()).decode()
-            headers = [("Authorization", f"Basic {decoded}")]
-            result = c.get("/username", headers=headers)
-            self.assertEqual(user_name, result.data.decode("utf-8"))
 
     def test_login_user_with_request(self):
         user_id = 2
@@ -913,18 +874,6 @@ class LoginTestCase(unittest.TestCase):
             with listen_to(user_loaded_from_cookie) as listener:
                 c.get("/username")
                 listener.assert_heard_one(self.app, user=notch)
-
-    def test_user_loaded_from_header_fired(self):
-        user_id = 1
-        user_name = USERS[user_id].name
-        self.login_manager._request_callback = None
-        with self.app.test_client() as c:
-            with listen_to(user_loaded_from_header) as listener:
-                decoded = base64.b64encode(str(user_id).encode()).decode()
-                headers = [("Authorization", f"Basic {decoded}")]
-                result = c.get("/username", headers=headers)
-                self.assertEqual(user_name, result.data.decode("utf-8"))
-                listener.assert_heard_one(self.app, user=USERS[user_id])
 
     def test_user_loaded_from_request_fired(self):
         user_id = 1
