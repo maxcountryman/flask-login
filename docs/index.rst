@@ -9,13 +9,11 @@ extended periods of time.
 
 It will:
 
-- Store the active user's ID in the session, and let you log them in and out
-  easily.
-- Let you restrict views to logged-in (or logged-out) users.
+- Store the active user's ID in the `Flask Session`_, and let you easily log
+  them in and out.
+- Let you restrict views to logged-in (or logged-out) users. (`login_required`)
 - Handle the normally-tricky "remember me" functionality.
 - Help protect your users' sessions from being stolen by cookie thieves.
-- Possibly integrate with Flask-Principal or other authorization extensions
-  later on.
 
 However, it does not:
 
@@ -220,32 +218,6 @@ In your API (blueprint named as api) you don't wanna redirect to login page but 
         if request.blueprint == 'api':
             abort(HTTPStatus.UNAUTHORIZED)
         return redirect(url_for('site.login'))
-
-Login using Authorization header
-================================
-
-.. Caution::
-   This method will be deprecated; use the `~LoginManager.request_loader`
-   below instead.
-
-Sometimes you want to support Basic Auth login using the `Authorization`
-header, such as for api requests. To support login via header you will need
-to provide a `~LoginManager.header_loader` callback. This callback should behave
-the same as your `~LoginManager.user_loader` callback, except that it accepts
-a header value instead of a user id. For example::
-
-    @login_manager.header_loader
-    def load_user_from_header(header_val):
-        header_val = header_val.replace('Basic ', '', 1)
-        try:
-            header_val = base64.b64decode(header_val)
-        except TypeError:
-            pass
-        return User.query.filter_by(api_key=header_val).first()
-
-By default the `Authorization` header's value is passed to your
-`~LoginManager.header_loader` callback. You can change the header used with
-the `AUTH_HEADER_NAME` configuration.
 
 
 Custom Login using Request Loader
@@ -673,6 +645,7 @@ signals in your code.
    the app.
 
 .. _source code: https://github.com/maxcountryman/flask-login/tree/main/src/flask_login
-.. _Flask documentation on signals: http://flask.pocoo.org/docs/signals/
+.. _Flask documentation on signals: https://flask.palletsprojects.com/en/2.1.x/signals/
 .. _this Flask Snippet: https://web.archive.org/web/20120517003641/http://flask.pocoo.org/snippets/62/
-.. _Flask documentation on sessions: http://flask.pocoo.org/docs/quickstart/#sessions
+.. _Flask Session: https://flask.palletsprojects.com/en/2.1.x/api/#sessions
+.. _Flask documentation on sessions: https://flask.palletsprojects.com/en/2.1.x/quickstart/#sessions

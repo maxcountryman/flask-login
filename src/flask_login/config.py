@@ -31,9 +31,6 @@ REFRESH_MESSAGE_CATEGORY = "message"
 #: The default attribute to retreive the str id of the user
 ID_ATTRIBUTE = "get_id"
 
-#: Default name of the auth header (``Authorization``)
-AUTH_HEADER_NAME = "Authorization"
-
 #: A set of session keys that are populated by Flask-Login. Use this set to
 #: purge keys safely and accurately.
 SESSION_KEYS = {

@@ -5,12 +5,10 @@ from flask import abort
 from flask import current_app
 from flask import flash
 from flask import g
-from flask import has_app_context
 from flask import redirect
 from flask import request
 from flask import session
 
-from .config import AUTH_HEADER_NAME
 from .config import COOKIE_DURATION
 from .config import COOKIE_HTTPONLY
 from .config import COOKIE_NAME
@@ -97,29 +95,12 @@ class LoginManager:
 
         self._user_callback = None
 
-        self._header_callback = None
-
         self._request_callback = None
 
         self._session_identifier_generator = _create_identifier
 
         if app is not None:
             self.init_app(app, add_context_processor)
-
-    def setup_app(self, app, add_context_processor=True):  # pragma: no cover
-        """
-        This method has been deprecated. Please use
-        :meth:`LoginManager.init_app` instead.
-        """
-        import warnings
-
-        warnings.warn(
-            "'setup_app' is deprecated and will be removed in"
-            " Flask-Login 0.7. Use 'init_app' instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self.init_app(app, add_context_processor)
 
     def init_app(self, app, add_context_processor=True):
         """
@@ -309,29 +290,6 @@ class LoginManager:
 
         return redirect(redirect_url)
 
-    def header_loader(self, callback):
-        """
-        This function has been deprecated. Please use
-        :meth:`LoginManager.request_loader` instead.
-
-        This sets the callback for loading a user from a header value.
-        The function you set should take an authentication token and
-        return a user object, or `None` if the user does not exist.
-
-        :param callback: The callback for retrieving a user object.
-        :type callback: callable
-        """
-        import warnings
-
-        warnings.warn(
-            "'header_loader' is deprecated and will be removed in"
-            " Flask-Login 0.7. Use 'request_loader' instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        self._header_callback = callback
-        return callback
-
     def _update_request_context_with_user(self, user=None):
         """Store the given user as ctx.user."""
 
@@ -367,7 +325,6 @@ class LoginManager:
         if user is None:
             config = current_app.config
             cookie_name = config.get("REMEMBER_COOKIE_NAME", COOKIE_NAME)
-            header_name = config.get("AUTH_HEADER_NAME", AUTH_HEADER_NAME)
             has_cookie = (
                 cookie_name in request.cookies and session.get("_remember") != "clear"
             )
@@ -376,9 +333,6 @@ class LoginManager:
                 user = self._load_user_from_remember_cookie(cookie)
             elif self._request_callback:
                 user = self._load_user_from_request(request)
-            elif header_name in request.headers:
-                header = request.headers[header_name]
-                user = self._load_user_from_header(header)
 
         return self._update_request_context_with_user(user)
 
@@ -421,18 +375,6 @@ class LoginManager:
             if user is not None:
                 app = current_app._get_current_object()
                 user_loaded_from_cookie.send(app, user=user)
-                return user
-        return None
-
-    def _load_user_from_header(self, header):
-        if self._header_callback:
-            user = self._header_callback(header)
-            if user is not None:
-                app = current_app._get_current_object()
-
-                from .signals import _user_loaded_from_header
-
-                _user_loaded_from_header.send(app, user=user)
                 return user
         return None
 
@@ -510,34 +452,3 @@ class LoginManager:
         domain = config.get("REMEMBER_COOKIE_DOMAIN")
         path = config.get("REMEMBER_COOKIE_PATH", "/")
         response.delete_cookie(cookie_name, domain=domain, path=path)
-
-    @property
-    def _login_disabled(self):
-        """Legacy property, use app.config['LOGIN_DISABLED'] instead."""
-        import warnings
-
-        warnings.warn(
-            "'_login_disabled' is deprecated and will be removed in"
-            " Flask-Login 0.7. Use 'LOGIN_DISABLED' in 'app.config'"
-            " instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-
-        if has_app_context():
-            return current_app.config.get("LOGIN_DISABLED", False)
-        return False
-
-    @_login_disabled.setter
-    def _login_disabled(self, newvalue):
-        """Legacy property setter, use app.config['LOGIN_DISABLED'] instead."""
-        import warnings
-
-        warnings.warn(
-            "'_login_disabled' is deprecated and will be removed in"
-            " Flask-Login 0.7. Use 'LOGIN_DISABLED' in 'app.config'"
-            " instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        current_app.config["LOGIN_DISABLED"] = newvalue
