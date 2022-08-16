@@ -137,7 +137,6 @@ function.
 
             next = flask.request.args.get('next')
             # is_safe_url should check if the url is safe for redirects.
-            # See http://flask.pocoo.org/snippets/62/ for an example.
             if not is_safe_url(next):
                 return flask.abort(400)
 
@@ -645,7 +644,7 @@ signals in your code.
    the app.
 
 .. _source code: https://github.com/maxcountryman/flask-login/tree/main/src/flask_login
-.. _Flask documentation on signals: https://flask.palletsprojects.com/en/2.1.x/signals/
-.. _this Flask Snippet: https://web.archive.org/web/20120517003641/http://flask.pocoo.org/snippets/62/
-.. _Flask Session: https://flask.palletsprojects.com/en/2.1.x/api/#sessions
-.. _Flask documentation on sessions: https://flask.palletsprojects.com/en/2.1.x/quickstart/#sessions
+.. _Flask documentation on signals: https://flask.palletsprojects.com/en/latest/signals/
+.. _this Flask Snippet: https://stackoverflow.com/questions/60532973/how-do-i-get-a-is-safe-url-function-to-use-with-flask-and-how-does-it-work
+.. _Flask Session: https://flask.palletsprojects.com/en/latest/api/#sessions
+.. _Flask documentation on sessions: https://flask.palletsprojects.com/en/latest/quickstart/#sessions
