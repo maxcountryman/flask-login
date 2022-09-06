@@ -1,8 +1,8 @@
 # Contributor Guidelines
 
-Flask-Login is open source and will happily consider pull requests with bugfixes, documentation improvements, and ocassionally new features. Note that major changes will generally not be accepted.
+Flask-Login is open source and will happily consider pull requests with bugfixes, documentation improvements, and occasionally new features. Note that major changes will generally not be accepted.
 
-Before you submit an issue or pull request, please read the following guidlines.
+Before you submit an issue or pull request, please read the following guidelines.
 
 ## Submitting Issues
 
