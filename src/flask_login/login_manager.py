@@ -423,8 +423,8 @@ class LoginManager:
         # prepare data
         data = encode_cookie(str(session["_user_id"]))
 
-        if isinstance(duration, int):
-            duration = timedelta(seconds=duration)
+        if isinstance(duration, int) or isinstance(duration, str):
+            duration = timedelta(seconds=int(duration))
 
         try:
             expires = datetime.utcnow() + duration
