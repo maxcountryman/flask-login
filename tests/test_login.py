@@ -328,7 +328,7 @@ class LoginTestCase(unittest.TestCase):
         def empty_session():
             return f"modified={session.modified}"
 
-        # This will help us with the possibility of typoes in the tests. Now
+        # This will help us with the possibility of typos in the tests. Now
         # we shouldn't have to check each response to help us set up state
         # (such as login pages) to make sure it worked: we will always
         # get an exception raised (rather than return a 404 response)
@@ -1315,7 +1315,7 @@ class LoginViaRequestTestCase(unittest.TestCase):
                 pass
             return USERS.get(user_id)
 
-        # This will help us with the possibility of typoes in the tests. Now
+        # This will help us with the possibility of typos in the tests. Now
         # we shouldn't have to check each response to help us set up state
         # (such as login pages) to make sure it worked: we will always
         # get an exception raised (rather than return a 404 response)
@@ -1590,7 +1590,7 @@ class UnicodeCookieUserIDTestCase(unittest.TestCase):
         def load_user(user_id):
             return USERS[str(user_id)]
 
-        # This will help us with the possibility of typoes in the tests. Now
+        # This will help us with the possibility of typos in the tests. Now
         # we shouldn't have to check each response to help us set up state
         # (such as login pages) to make sure it worked: we will always
         # get an exception raised (rather than return a 404 response)
@@ -1646,7 +1646,7 @@ class StrictHostForRedirectsTestCase(unittest.TestCase):
         def load_user(user_id):
             return USERS[str(user_id)]
 
-        # This will help us with the possibility of typoes in the tests. Now
+        # This will help us with the possibility of typos in the tests. Now
         # we shouldn't have to check each response to help us set up state
         # (such as login pages) to make sure it worked: we will always
         # get an exception raised (rather than return a 404 response)
@@ -1742,7 +1742,7 @@ class CustomTestClientTestCase(unittest.TestCase):
         def load_user(user_id):
             return USERS[int(user_id)]
 
-        # This will help us with the possibility of typoes in the tests. Now
+        # This will help us with the possibility of typos in the tests. Now
         # we shouldn't have to check each response to help us set up state
         # (such as login pages) to make sure it worked: we will always
         # get an exception raised (rather than return a 404 response)
