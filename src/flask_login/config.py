@@ -28,7 +28,7 @@ REFRESH_MESSAGE = "Please reauthenticate to access this page."
 #: reauthenticate.
 REFRESH_MESSAGE_CATEGORY = "message"
 
-#: The default attribute to retreive the str id of the user
+#: The default attribute to retrieve the str id of the user
 ID_ATTRIBUTE = "get_id"
 
 #: A set of session keys that are populated by Flask-Login. Use this set to

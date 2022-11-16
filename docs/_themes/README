@@ -18,7 +18,7 @@ The following themes exist:
 - 'flask' - the standard flask documentation theme for large
   projects
 - 'flask_small' - small one-page theme.  Intended to be used by
-  very small addon libraries for flask.
+  very small add-on libraries for flask.
 
 The following options exist for the flask_small theme:
 
