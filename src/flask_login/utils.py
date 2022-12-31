@@ -281,7 +281,9 @@ def login_required(func):
     def decorated_view(*args, **kwargs):
         if request.method in EXEMPT_METHODS or current_app.config.get("LOGIN_DISABLED"):
             pass
-        elif not current_user.is_authenticated:
+        elif not current_user.is_authenticated or not current_user.is_active:
+            if not current_user.is_anonymous:
+                logout_user()
             return current_app.login_manager.unauthorized()
 
         # flask 1.x compatibility
