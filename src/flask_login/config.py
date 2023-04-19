@@ -47,6 +47,6 @@ SESSION_KEYS = {
 EXEMPT_METHODS = {"OPTIONS"}
 
 #: If true, the page the user is attempting to access is stored in the session
-#: rather than a url parameter when redirecting to the login view; defaults to
+#: rather than a URL parameter when redirecting to the login view; defaults to
 #: ``False``.
 USE_SESSION_FOR_NEXT = False

@@ -302,7 +302,7 @@ class LoginManager:
         """Loads user from session or remember_me cookie as applicable"""
 
         if self._user_callback is None and self._request_callback is None:
-            raise Exception(
+            raise RuntimeError(
                 "Missing user_loader or request_loader. Refer to "
                 "http://flask-login.readthedocs.io/#how-it-works "
                 "for more info."
@@ -354,7 +354,7 @@ class LoginManager:
                     sess["_fresh"] = False
                 session_protected.send(app)
                 return False
-            elif mode == "strong":
+            if mode == "strong":
                 for k in SESSION_KEYS:
                     sess.pop(k, None)
 
@@ -428,11 +428,11 @@ class LoginManager:
 
         try:
             expires = datetime.utcnow() + duration
-        except TypeError as e:
-            raise Exception(
+        except TypeError as error:
+            raise RuntimeError(
                 "REMEMBER_COOKIE_DURATION must be a datetime.timedelta,"
                 f" instead got: {duration}"
-            ) from e
+            ) from error
 
         # actually set it
         response.set_cookie(

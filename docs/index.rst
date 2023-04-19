@@ -136,7 +136,7 @@ function.
             flask.flash('Logged in successfully.')
 
             next = flask.request.args.get('next')
-            # is_safe_url should check if the url is safe for redirects.
+            # is_safe_url should check if the URL is safe for redirects.
             # See http://flask.pocoo.org/snippets/62/ for an example.
             if not is_safe_url(next):
                 return flask.abort(400)
@@ -228,7 +228,7 @@ the `~LoginManager.request_loader` callback. This callback should behave the
 same as your `~LoginManager.user_loader` callback, except that it accepts the
 Flask request instead of a user_id.
 
-For example, to support login from both a url argument and from Basic Auth
+For example, to support login from both a URL argument and from Basic Auth
 using the `Authorization` header::
 
     @login_manager.request_loader
@@ -279,7 +279,7 @@ Remember Me
 By default, when the user closes their browser the Flask Session is deleted
 and the user is logged out. "Remember Me" prevents the user from accidentally
 being logged out when they close their browser. This does **NOT** mean
-remembering or pre-filling the user's username or password in a login form
+remembering or prefilling the user's username or password in a login form
 after the user has logged out.
 
 "Remember Me" functionality can be tricky to implement. However, Flask-Login
@@ -327,11 +327,11 @@ and they are logged back in with a "remember me" cookie, it is marked as
 "non-fresh." `login_required` does not differentiate between freshness, which
 is fine for most pages. However, sensitive actions like changing one's
 personal information should require a fresh login. (Actions like changing
-one's password should always require a password re-entry regardless.)
+one's password should always require a password reentry regardless.)
 
 `fresh_login_required`, in addition to verifying that the user is logged
 in, will also ensure that their login is fresh. If not, it will send them to
-a page where they can re-enter their credentials. You can customize its
+a page where they can reenter their credentials. You can customize its
 behavior in the same ways as you can customize `login_required`, by setting
 `LoginManager.refresh_view`, `~LoginManager.needs_refresh_message`, and
 `~LoginManager.needs_refresh_message_category`::
@@ -414,11 +414,11 @@ generated, then the request is OK.
 
 If the identifiers do not match in `basic` mode, or when the session is
 permanent, then the session will simply be marked as non-fresh, and anything
-requiring a fresh login will force the user to re-authenticate. (Of course,
+requiring a fresh login will force the user to reauthenticate. (Of course,
 you must be already using fresh logins where appropriate for this to have an
 effect.)
 
-If the identifiers do not match in `strong` mode for a non-permanent session,
+If the identifiers do not match in `strong` mode for a nonpermanent session,
 then the entire session (as well as the remember token if it exists) is
 deleted.
 

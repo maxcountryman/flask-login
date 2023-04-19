@@ -91,10 +91,10 @@ def listen_to(signal):
             """The signal fired once, and with the arguments given"""
             if len(self.heard) == 0:
                 raise AssertionError("No signals were fired")
-            elif len(self.heard) > 1:
+            if len(self.heard) > 1:
                 msg = f"{len(self.heard)} signals were fired"
                 raise AssertionError(msg)
-            elif self.heard[0] != (args, kwargs):
+            if self.heard[0] != (args, kwargs):
                 raise AssertionError(
                     "One signal was heard, but with incorrect"
                     f" arguments: Got ({self.heard[0]}) expected"

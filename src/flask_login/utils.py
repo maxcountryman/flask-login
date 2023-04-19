@@ -85,7 +85,7 @@ def make_next_param(login_url, current_url):
 
 def expand_login_view(login_view):
     """
-    Returns the url for the login view, expanding the view name to a url if
+    Returns the URL for the login view, expanding the view name to a URL if
     needed.
 
     :param login_view: The name of the login view or a URL for the login view.
@@ -103,7 +103,7 @@ def login_url(login_view, next_url=None, next_field="next"):
     provided, this will just return the URL for it. If `next_url` is provided,
     however, this will append a ``next=URL`` parameter to the query string
     so that the login view can redirect back to that URL. Flask-Login's default
-    unauthorized handler uses this function when redirecting to your login url.
+    unauthorized handler uses this function when redirecting to your login URL.
     To force the host name used, set `FORCE_HOST_FOR_REDIRECTS` to a host. This
     prevents from redirecting to external sites if request headers Host or
     X-Forwarded-For are present.
@@ -123,11 +123,11 @@ def login_url(login_view, next_url=None, next_field="next"):
         return base
 
     parsed_result = urlparse(base)
-    md = url_decode(parsed_result.query)
-    md[next_field] = make_next_param(base, next_url)
+    decoded = url_decode(parsed_result.query)
+    decoded[next_field] = make_next_param(base, next_url)
     netloc = current_app.config.get("FORCE_HOST_FOR_REDIRECTS") or parsed_result.netloc
     parsed_result = parsed_result._replace(
-        netloc=netloc, query=url_encode(md, sort=True)
+        netloc=netloc, query=url_encode(decoded, sort=True)
     )
     return urlunparse(parsed_result)
 
@@ -194,10 +194,10 @@ def login_user(user, remember=False, duration=None, force=False, fresh=True):
                     duration.microseconds
                     + (duration.seconds + duration.days * 24 * 3600) * 10**6
                 ) / 10.0**6
-            except AttributeError as e:
-                raise Exception(
+            except AttributeError as error:
+                raise RuntimeError(
                     f"duration must be a datetime.timedelta, instead got: {duration}"
-                ) from e
+                ) from error
 
     current_app.login_manager._update_request_context_with_user(user)
     user_logged_in.send(current_app._get_current_object(), user=_get_user())
@@ -297,7 +297,7 @@ def fresh_login_required(func):
     """
     If you decorate a view with this, it will ensure that the current user's
     login is fresh - i.e. their session was not restored from a 'remember me'
-    cookie. Sensitive operations, like changing a password or e-mail, should
+    cookie. Sensitive operations, like changing a password or email, should
     be protected with this, to impede the efforts of cookie thieves.
 
     If the user is not authenticated, :meth:`LoginManager.unauthorized` is
@@ -398,13 +398,13 @@ def _create_identifier():
     base = f"{_get_remote_addr()}|{user_agent}"
     if str is bytes:
         base = str(base, "utf-8", errors="replace")  # pragma: no cover
-    h = sha512()
-    h.update(base.encode("utf8"))
-    return h.hexdigest()
+    sha = sha512()
+    sha.update(base.encode("utf8"))
+    return sha.hexdigest()
 
 
 def _user_context_processor():
-    return dict(current_user=_get_user())
+    return {"current_user": _get_user()}
 
 
 def _secret_key(key=None):
