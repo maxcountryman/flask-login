@@ -136,9 +136,10 @@ function.
             flask.flash('Logged in successfully.')
 
             next = flask.request.args.get('next')
-            # is_safe_url should check if the url is safe for redirects.
-            # See http://flask.pocoo.org/snippets/62/ for an example.
-            if not is_safe_url(next):
+            # url_has_allowed_host_and_scheme should check if the url is safe
+            # for redirects, meaning it matches the request host.
+            # See Django's url_has_allowed_host_and_scheme for an example.
+            if not url_has_allowed_host_and_scheme(next, request.host):
                 return flask.abort(400)
 
             return flask.redirect(next or flask.url_for('index'))
@@ -146,7 +147,7 @@ function.
 
 *Warning:* You MUST validate the value of the `next` parameter. If you do not,
 your application will be vulnerable to open redirects. For an example
-implementation of `is_safe_url` see `this Flask Snippet`_.
+implementation of `url_has_allowed_host_and_scheme`, see Django's `Implementation <https://github.com/django/django/blob/4.0/django/utils/http.py#L239>`_.
 
 It's that simple. You can then access the logged-in user with the
 `current_user` proxy, which is available in every template::
