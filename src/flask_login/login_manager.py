@@ -93,6 +93,9 @@ class LoginManager:
 
         self.id_attribute = ID_ATTRIBUTE
 
+        #: If present, executed in ``self._load_user``
+        self._post_login_callback = None
+
         self._user_callback = None
 
         self._request_callback = None
@@ -211,6 +214,17 @@ class LoginManager:
     def request_callback(self):
         """Gets the request_loader callback set by request_loader decorator."""
         return self._request_callback
+
+    def post_login_handler(self, callback):
+        """
+        This sets the callback for executing procs after login. The
+        function you set should take a user object and return ``None``.
+
+        :param callback: The callback for executing processes after login.
+        :type callback: callable
+        """
+        self._post_login_callback = callback
+        return self._post_login_callback
 
     def unauthorized_handler(self, callback):
         """
@@ -333,6 +347,10 @@ class LoginManager:
                 user = self._load_user_from_remember_cookie(cookie)
             elif self._request_callback:
                 user = self._load_user_from_request(request)
+
+        # Execute post login callback
+        if self._post_login_callback:
+            self._post_login_callback(user)
 
         return self._update_request_context_with_user(user)
 

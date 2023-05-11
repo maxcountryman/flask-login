@@ -257,6 +257,25 @@ using the `Authorization` header::
         # finally, return None if both methods did not login the user
         return None
 
+Custom Post Login Callback
+==========================
+Sometimes, when a user is logged in, you want to execute some functions or
+processes like storing the last logged in time. In these cases, you should
+use the `~LoginManager.post_login_handler` callback. This callback accepts
+a user object and returns None.
+
+This gets executed even if the user was loaded from remeber me cookie, session
+or request.
+
+For example, to add the user id to a file after login::
+
+    from datetime import datetime
+
+    @login_manager.post_login_handler
+    def pos_login_callback(user):
+        current_datetime = datetime.now()
+        with open("login_logs.txt", "a") as logs:
+            logs.write(f"{user.id} logged in at {current_datetime}\n")
 
 Anonymous Users
 ===============

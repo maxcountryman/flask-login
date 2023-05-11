@@ -136,6 +136,7 @@ creeper = User("Creeper", 3, False)
 germanjapanese = User("Müller", "佐藤")  # str user_id
 
 USERS = {1: notch, 2: steve, 3: creeper, "佐藤": germanjapanese}
+TEST_USER_ID = None  # For post login callback test
 
 
 class AboutTestCase(unittest.TestCase):
@@ -314,6 +315,12 @@ class LoginTestCase(unittest.TestCase):
         @self.login_manager.user_loader
         def load_user(user_id):
             return USERS[int(user_id)]
+
+        @self.login_manager.post_login_handler
+        def post_login_callback(user):
+            if user:
+                global TEST_USER_ID
+                TEST_USER_ID = user.id
 
         @self.login_manager.request_loader
         def load_user_from_request(request):
@@ -1273,6 +1280,11 @@ class LoginTestCase(unittest.TestCase):
         with self.app.test_request_context():
             _ucp = self.app.context_processor(_user_context_processor)
             self.assertIsInstance(_ucp()["current_user"], AnonymousUserMixin)
+
+    def test_post_login_handler(self):
+        with self.app.test_request_context():
+            login_user(notch)
+            self.assertEqual(notch.id, TEST_USER_ID)
 
 
 class LoginViaRequestTestCase(unittest.TestCase):
