@@ -33,7 +33,7 @@ py==1.11.0
     # via tox
 pyparsing==3.0.7
     # via packaging
-requests==2.27.1
+requests==2.31.0
     # via coveralls
 six==1.16.0
     # via

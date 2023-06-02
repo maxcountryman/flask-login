@@ -82,7 +82,7 @@ pytz==2022.1
     # via babel
 pyyaml==6.0
     # via pre-commit
-requests==2.27.1
+requests==2.31.0
     # via sphinx
 semantic-version==2.9.0
     # via -r tests.in
