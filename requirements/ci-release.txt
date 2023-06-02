@@ -51,7 +51,7 @@ readme-renderer==34.0
     # via
     #   -r ci-release.in
     #   twine
-requests==2.27.1
+requests==2.31.0
     # via
     #   requests-toolbelt
     #   twine
