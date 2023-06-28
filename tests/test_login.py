@@ -1230,6 +1230,7 @@ class LoginTestCase(unittest.TestCase):
             result = c.get(
                 "/username",
             )
+            # After logout the previous session cookie is not valid anymore
             self.assertEqual("Anonymous", result.data.decode("utf-8"))
 
     #

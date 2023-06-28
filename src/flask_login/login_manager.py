@@ -350,6 +350,12 @@ class LoginManager:
         sess = session._get_current_object()
         ident = self._session_identifier_generator()
 
+        def _clear_session():
+            for k in SESSION_KEYS:
+                sess.pop(k, None)
+
+            sess["_remember"] = "clear"
+
         app = current_app._get_current_object()
         mode = app.config.get("SESSION_PROTECTION", self.session_protection)
 
@@ -364,10 +370,7 @@ class LoginManager:
 
         # check if the session is on the session cache
         if serial and self._session_block_cache.get(serial):
-            for k in SESSION_KEYS:
-                sess.pop(k, None)
-
-            sess["_remember"] = "clear"
+            _clear_session()
             session_protected.send(app)
             return True
 
@@ -378,10 +381,7 @@ class LoginManager:
                 session_protected.send(app)
                 return False
             elif mode == "strong":
-                for k in SESSION_KEYS:
-                    sess.pop(k, None)
-
-                sess["_remember"] = "clear"
+                _clear_session()
                 session_protected.send(app)
                 return True
         return False
