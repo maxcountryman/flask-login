@@ -1,4 +1,5 @@
 import hmac
+import secrets
 from functools import wraps
 from hashlib import sha512
 from urllib.parse import urlparse
@@ -184,6 +185,7 @@ def login_user(user, remember=False, duration=None, force=False, fresh=True):
     session["_user_id"] = user_id
     session["_fresh"] = fresh
     session["_id"] = current_app.login_manager._session_identifier_generator()
+    session["_serial"] = current_app.login_manager._session_nonce_generator()
 
     if remember:
         session["_remember"] = "set"
@@ -220,6 +222,9 @@ def logout_user():
 
     if "_id" in session:
         session.pop("_id")
+
+    if "_serial" in session:
+        current_app.login_manager._session_block_cache.set(session.pop("_serial"), True)
 
     cookie_name = current_app.config.get("REMEMBER_COOKIE_NAME", COOKIE_NAME)
     if cookie_name in request.cookies:
@@ -396,11 +401,15 @@ def _create_identifier():
     if user_agent is not None:
         user_agent = user_agent.encode("utf-8")
     base = f"{_get_remote_addr()}|{user_agent}"
-    if str is bytes:
+    if base is bytes:
         base = str(base, "utf-8", errors="replace")  # pragma: no cover
     h = sha512()
     h.update(base.encode("utf8"))
     return h.hexdigest()
+
+
+def _create_nonce():
+    return str(secrets.token_hex())
 
 
 def _user_context_processor():

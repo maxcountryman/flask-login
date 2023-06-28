@@ -423,6 +423,20 @@ If the identifiers do not match in `strong` mode for a non-permanent session,
 then the entire session (as well as the remember token if it exists) is
 deleted.
 
+Session Block Cache
+===================
+
+When session protection is enabled, you can configure a cache to store the session's
+tombstones (the identifiers of the sessions that have been deleted). This will add an
+extra layer of session protection, as it will prevent a session from being used again
+after a user logs out. To enable this feature, set the `SESSION_BLOCK_CACHE` setting
+to a cache object that implements a `set` and `get` methods. For example::
+
+    SESSION_BLOCK_CACHE = RedisCache()
+
+When a user logs out, the session's tombstone will be stored in the cache. Any subsequent
+requests with the same session identifier will be blocked.
+
 
 Disabling Session Cookie for APIs
 =================================

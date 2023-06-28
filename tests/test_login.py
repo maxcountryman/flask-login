@@ -130,6 +130,17 @@ class User(UserMixin):
         return self.active
 
 
+class BasicCache:
+    def __init__(self):
+        self._cache = {}
+
+    def get(self, key):
+        return self._cache.get(key)
+
+    def set(self, key, value):
+        self._cache[key] = value
+
+
 notch = User("Notch", 1)
 steve = User("Steve", 2)
 creeper = User("Creeper", 3, False)
@@ -1166,6 +1177,60 @@ class LoginTestCase(unittest.TestCase):
 
             # verify no session data has been set
             self.assertFalse(session)
+
+    def test_session_protection_block_list_not_on_cache(self):
+        self.app.config["SESSION_PROTECTION"] = "basic"
+        basic_cache = BasicCache()
+
+        with self.app.test_client() as c:
+            c.get("/login-notch")
+            result = c.get("/username")
+            serial = session["_serial"]
+            session_cookie = c.cookie_jar._cookies["localhost.local"]["/"]["session"]
+
+            self.assertEqual(notch.name, result.data.decode("utf-8"))
+
+            c.set_cookie("localhost.local", "session", session_cookie.value)
+            result = c.get("/username")
+            self.assertEqual("Notch", result.data.decode("utf-8"))
+
+            c.get("/logout")
+            # Assert that the cacha has not been set with the session serial
+            self.assertEqual(basic_cache._cache.get(serial), None)
+
+            c.set_cookie("localhost.local", "session", session_cookie.value)
+            result = c.get(
+                "/username",
+            )
+            # Even after logout the session cookie is still valid
+            self.assertEqual("Notch", result.data.decode("utf-8"))
+
+    def test_session_protection_block_list_set_on_cache(self):
+        self.app.config["SESSION_PROTECTION"] = "basic"
+        basic_cache = BasicCache()
+        self.app.login_manager._session_block_cache = basic_cache
+
+        with self.app.test_client() as c:
+            c.get("/login-notch")
+            result = c.get("/username")
+            serial = session["_serial"]
+            session_cookie = c.cookie_jar._cookies["localhost.local"]["/"]["session"]
+
+            self.assertEqual(notch.name, result.data.decode("utf-8"))
+
+            c.set_cookie("localhost.local", "session", session_cookie.value)
+            result = c.get("/username")
+            self.assertEqual("Notch", result.data.decode("utf-8"))
+
+            c.get("/logout")
+            # Assert that the cacha has been set with the session serial
+            self.assertEqual(basic_cache._cache.get(serial), True)
+
+            c.set_cookie("localhost.local", "session", session_cookie.value)
+            result = c.get(
+                "/username",
+            )
+            self.assertEqual("Anonymous", result.data.decode("utf-8"))
 
     #
     # Lazy Access User

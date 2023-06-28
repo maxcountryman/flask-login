@@ -22,6 +22,7 @@ from .config import REFRESH_MESSAGE_CATEGORY
 from .config import SESSION_KEYS
 from .config import USE_SESSION_FOR_NEXT
 from .mixins import AnonymousUserMixin
+from .session_cache import BaseSessionCache
 from .signals import session_protected
 from .signals import user_accessed
 from .signals import user_loaded_from_cookie
@@ -29,6 +30,7 @@ from .signals import user_loaded_from_request
 from .signals import user_needs_refresh
 from .signals import user_unauthorized
 from .utils import _create_identifier
+from .utils import _create_nonce
 from .utils import _user_context_processor
 from .utils import decode_cookie
 from .utils import encode_cookie
@@ -97,7 +99,11 @@ class LoginManager:
 
         self._request_callback = None
 
+        self._session_block_cache = None
+
         self._session_identifier_generator = _create_identifier
+
+        self._session_nonce_generator = _create_nonce
 
         if app is not None:
             self.init_app(app, add_context_processor)
@@ -116,6 +122,10 @@ class LoginManager:
         """
         app.login_manager = self
         app.after_request(self._update_remember_cookie)
+
+        self._session_block_cache = app.config.get(
+            "SESSION_BLOCK_CACHE", BaseSessionCache()
+        )
 
         if add_context_processor:
             app.context_processor(_user_context_processor)
@@ -348,7 +358,20 @@ class LoginManager:
 
         # if the sess is empty, it's an anonymous user or just logged out
         # so we can skip this
-        if sess and ident != sess.get("_id", None):
+        if not sess:
+            return False
+        serial = sess.get("_serial", None)
+
+        # check if the session is on the session cache
+        if serial and self._session_block_cache.get(serial):
+            for k in SESSION_KEYS:
+                sess.pop(k, None)
+
+            sess["_remember"] = "clear"
+            session_protected.send(app)
+            return True
+
+        if ident != sess.get("_id", None):
             if mode == "basic" or sess.permanent:
                 if sess.get("_fresh") is not False:
                     sess["_fresh"] = False
@@ -361,7 +384,6 @@ class LoginManager:
                 sess["_remember"] = "clear"
                 session_protected.send(app)
                 return True
-
         return False
 
     def _load_user_from_remember_cookie(self, cookie):
