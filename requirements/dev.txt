@@ -72,7 +72,7 @@ py==1.11.0
     # via
     #   pytest
     #   tox
-pygments==2.11.2
+pygments==2.15.0
     # via sphinx
 pyparsing==3.0.7
     # via packaging

@@ -43,7 +43,7 @@ pkginfo==1.8.2
     # via twine
 pycparser==2.21
     # via cffi
-pygments==2.11.2
+pygments==2.15.0
     # via readme-renderer
 pyparsing==3.0.7
     # via packaging
