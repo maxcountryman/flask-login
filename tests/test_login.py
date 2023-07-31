@@ -675,8 +675,9 @@ class LoginTestCase(unittest.TestCase):
             c.get("/login-notch-remember")
 
             cookie = c.get_cookie(key=name, domain=domain, path=path)
-            self.assertIsNotNone(cookie,
-                                 "Custom domain, path and name not found in cookies")
+            self.assertIsNotNone(
+                cookie, "Custom domain, path and name not found in cookies"
+            )
 
             expiration_date = datetime.utcfromtimestamp(cookie.expires.timestamp())
             expected_date = datetime.utcnow() + duration
@@ -700,8 +701,9 @@ class LoginTestCase(unittest.TestCase):
             c.get("/login-notch-remember-custom")
 
             cookie = c.get_cookie(key=name, domain=domain, path=path)
-            self.assertIsNotNone(cookie,
-                                 "Custom domain, path and name not found in cookies")
+            self.assertIsNotNone(
+                cookie, "Custom domain, path and name not found in cookies"
+            )
 
             expiration_date = datetime.utcfromtimestamp(cookie.expires.timestamp())
             expected_date = datetime.utcnow() + duration

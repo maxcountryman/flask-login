@@ -1,7 +1,10 @@
 import hmac
 from functools import wraps
 from hashlib import sha512
-from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
+from urllib.parse import parse_qs
+from urllib.parse import urlencode
+from urllib.parse import urlparse
+from urllib.parse import urlunparse
 
 from flask import current_app
 from flask import g
