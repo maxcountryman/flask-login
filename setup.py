@@ -4,7 +4,7 @@ from setuptools import setup
 setup(
     name="Flask-Login",
     install_requires=[
-        "Flask>=2.3.0",
+        "Flask>=1.0.4",
         "Werkzeug>=2.3.0",
     ],
 )
