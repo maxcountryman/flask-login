@@ -19,7 +19,7 @@ jobs:
           - {name: '3.9', python: '3.9', tox: py39}
           - {name: '3.8', python: '3.8', tox: py38}
           - {name: '3.7', python: '3.7', tox: py37}
-          - {name: 'PyPy', python: 'pypy-3.8', tox: pypy38}
+          - {name: 'PyPy', python: 'pypy-3.9', tox: pypy39}
           - {name: 'Minimum Versions', python: '3.9', tox: py-min}
     steps:
       - uses: actions/checkout@v3
