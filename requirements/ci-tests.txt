@@ -23,7 +23,7 @@ distlib==0.3.7
     # via virtualenv
 docopt==0.6.2
     # via coveralls
-filelock==3.12.4
+filelock==3.12.2
     # via
     #   tox
     #   virtualenv
