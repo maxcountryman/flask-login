@@ -17,7 +17,7 @@ charset-normalizer==2.0.12
     # via requests
 colorama==0.4.4
     # via twine
-cryptography==41.0.3
+cryptography==41.0.4
     # via secretstorage
 docutils==0.18.1
     # via readme-renderer
