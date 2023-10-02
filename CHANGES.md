@@ -6,6 +6,13 @@ Version 0.8.0
 
 Unreleased
 
+- Support for Flask 3.x and Werkzeug 3.0.0+
+
+Version 0.7.0
+-------------
+
+Unreleased
+
 - Remove previously deprecated code. #694
 
 Version 0.6.2
