@@ -3,3 +3,4 @@ coverage; python_version >= '3.8'
 asgiref
 pytest; python_version >= '3.8'
 semantic_version
+pluggy; python_version >= '3.8'
