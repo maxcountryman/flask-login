@@ -9,7 +9,7 @@ cfgv==3.4.0
     # via pre-commit
 distlib==0.3.7
     # via virtualenv
-filelock==3.12.2
+filelock==3.12.4
     # via virtualenv
 identify==2.5.30
     # via pre-commit

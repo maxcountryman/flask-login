@@ -4,3 +4,4 @@ itsdangerous==1.1.0
 jinja2==2.10.3
 markupsafe==1.1.1
 click==7.1.2
+tox==4.5.0
