@@ -5,3 +5,5 @@ jinja2==2.10.3
 markupsafe==1.1.1
 click==7.1.2
 tox==4.5.0
+filelock==3.12.2
+pluggy==1.2.0
