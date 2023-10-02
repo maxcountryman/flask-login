@@ -11,8 +11,8 @@ from flask import request
 from flask import session
 from flask import url_for
 from werkzeug.local import LocalProxy
-from werkzeug.urls import url_decode
-from werkzeug.urls import url_encode
+from urllib.parse import unquote
+from urllib.parse import urlencode
 
 from .config import COOKIE_NAME
 from .config import EXEMPT_METHODS
@@ -123,11 +123,11 @@ def login_url(login_view, next_url=None, next_field="next"):
         return base
 
     parsed_result = urlparse(base)
-    md = url_decode(parsed_result.query)
+    md = unquote(parsed_result.query)
     md[next_field] = make_next_param(base, next_url)
     netloc = current_app.config.get("FORCE_HOST_FOR_REDIRECTS") or parsed_result.netloc
     parsed_result = parsed_result._replace(
-        netloc=netloc, query=url_encode(md, sort=True)
+        netloc=netloc, query=urlencode(md, sort=True)
     )
     return urlunparse(parsed_result)
 

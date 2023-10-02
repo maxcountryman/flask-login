@@ -7,7 +7,7 @@
 #
 bleach==4.1.0
     # via readme-renderer
-build==0.7.0
+build==0.8.0
     # via -r ci-release.in
 certifi==2022.12.7
     # via requests
