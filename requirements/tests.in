@@ -1,5 +1,5 @@
 blinker
 coverage; python_version >= '3.8'
 asgiref
-pytest
+pytest; python_version >= '3.8'
 semantic_version
