@@ -669,24 +669,15 @@ class LoginTestCase(unittest.TestCase):
         name = self.app.config["REMEMBER_COOKIE_NAME"] = "myname"
         duration = self.app.config["REMEMBER_COOKIE_DURATION"] = timedelta(days=2)
         path = self.app.config["REMEMBER_COOKIE_PATH"] = "/mypath"
-        domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = ".localhost.local"
+        domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = "localhost.local"
 
         with self.app.test_client() as c:
             c.get("/login-notch-remember")
 
-            # TODO: Is there a better way to test this?
-            self.assertIn(
-                domain,
-                c.cookie_jar._cookies,
-                "Custom domain not found as cookie domain",
-            )
-            domain_cookie = c.cookie_jar._cookies[domain]
-            self.assertIn(path, domain_cookie, "Custom path not found as cookie path")
-            path_cookie = domain_cookie[path]
-            self.assertIn(name, path_cookie, "Custom name not found as cookie name")
-            cookie = path_cookie[name]
+            cookie = c.get_cookie(key=name, domain=domain, path=path)
+            self.assertTrue(cookie, "Custom path not found as cookie path")
 
-            expiration_date = datetime.utcfromtimestamp(cookie.expires)
+            expiration_date = datetime.utcfromtimestamp(cookie.expires.timestamp())
             expected_date = datetime.utcnow() + duration
             difference = expected_date - expiration_date
 
@@ -702,24 +693,17 @@ class LoginTestCase(unittest.TestCase):
         self.app.config["REMEMBER_COOKIE_DURATION"] = 172800
         duration = timedelta(hours=7)
         path = self.app.config["REMEMBER_COOKIE_PATH"] = "/mypath"
-        domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = ".localhost.local"
+        domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = "localhost.local"
 
         with self.app.test_client() as c:
             c.get("/login-notch-remember-custom")
 
-            # TODO: Is there a better way to test this?
-            self.assertIn(
-                domain,
-                c.cookie_jar._cookies,
-                "Custom domain not found as cookie domain",
+            cookie = c.get_cookie(key=name, domain=domain, path=path)
+            self.assertIsNotNone(
+                cookie, "Custom domain, path and name not found in cookies"
             )
-            domain_cookie = c.cookie_jar._cookies[domain]
-            self.assertIn(path, domain_cookie, "Custom path not found as cookie path")
-            path_cookie = domain_cookie[path]
-            self.assertIn(name, path_cookie, "Custom name not found as cookie name")
-            cookie = path_cookie[name]
 
-            expiration_date = datetime.utcfromtimestamp(cookie.expires)
+            expiration_date = datetime.utcfromtimestamp(cookie.expires.timestamp())
             expected_date = datetime.utcnow() + duration
             difference = expected_date - expiration_date
 
@@ -734,15 +718,15 @@ class LoginTestCase(unittest.TestCase):
         self.app.config["REMEMBER_COOKIE_DURATION"] = 172800
         duration = timedelta(seconds=172800)
         name = self.app.config["REMEMBER_COOKIE_NAME"] = "myname"
-        domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = ".localhost.local"
+        domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = "localhost.local"
 
         with self.app.test_client() as c:
             result = c.get("/login-notch-remember")
             self.assertEqual(result.status_code, 200)
 
-            cookie = c.cookie_jar._cookies[domain]["/"][name]
+            cookie = c.get_cookie(key=name, domain=domain, path="/")
 
-            expiration_date = datetime.utcfromtimestamp(cookie.expires)
+            expiration_date = datetime.utcfromtimestamp(cookie.expires.timestamp())
             expected_date = datetime.utcnow() + duration
             difference = expected_date - expiration_date
 
@@ -794,25 +778,22 @@ class LoginTestCase(unittest.TestCase):
         self.assertIn(expected_exception_message, str(cm.exception))
 
     def test_remember_me_refresh_every_request(self):
-        domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = ".localhost.local"
+        domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = "localhost.local"
         path = self.app.config["REMEMBER_COOKIE_PATH"] = "/"
 
         # No refresh
         self.app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = False
         with self.app.test_client() as c:
             c.get("/login-notch-remember")
-            self.assertIn("remember", c.cookie_jar._cookies[domain][path])
-            expiration_date_1 = datetime.utcfromtimestamp(
-                c.cookie_jar._cookies[domain][path]["remember"].expires
-            )
+            cookie = c.get_cookie(key="remember", domain=domain, path=path)
+            self.assertIsNotNone(cookie)
+            expiration_date_1 = datetime.utcfromtimestamp(cookie.expires.timestamp())
 
-            self._delete_session(c)
-
+            # self._delete_session(c)
             c.get("/username")
-            self.assertIn("remember", c.cookie_jar._cookies[domain][path])
-            expiration_date_2 = datetime.utcfromtimestamp(
-                c.cookie_jar._cookies[domain][path]["remember"].expires
-            )
+            cookie = c.get_cookie(key="remember", domain=domain, path=path)
+            self.assertIsNotNone(cookie)
+            expiration_date_2 = datetime.utcfromtimestamp(cookie.expires.timestamp())
             self.assertEqual(expiration_date_1, expiration_date_2)
 
         # With refresh (mock datetime's `utcnow`)
@@ -820,22 +801,24 @@ class LoginTestCase(unittest.TestCase):
             self.app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = True
             now = datetime.utcnow()
             mock_dt.utcnow = Mock(return_value=now)
-
+            mock_utcnow1 = mock_dt.utcnow
             with self.app.test_client() as c:
                 c.get("/login-notch-remember")
-                self.assertIn("remember", c.cookie_jar._cookies[domain][path])
+                cookie = c.get_cookie(key="remember", domain=domain, path=path)
                 expiration_date_1 = datetime.utcfromtimestamp(
-                    c.cookie_jar._cookies[domain][path]["remember"].expires
+                    cookie.expires.timestamp()
                 )
                 self.assertIsNotNone(expiration_date_1)
 
-                self._delete_session(c)
+                # self._delete_session(c)
 
                 mock_dt.utcnow = Mock(return_value=now + timedelta(seconds=1))
+                mock_utcnow2 = mock_dt.utcnow
+                self.assertNotEqual(mock_utcnow1, mock_utcnow2)
                 c.get("/username")
-                self.assertIn("remember", c.cookie_jar._cookies[domain][path])
+                cookie = c.get_cookie(key="remember", domain=domain, path=path)
                 expiration_date_2 = datetime.utcfromtimestamp(
-                    c.cookie_jar._cookies[domain][path]["remember"].expires
+                    cookie.expires.timestamp()
                 )
                 self.assertIsNotNone(expiration_date_2)
                 self.assertNotEqual(expiration_date_1, expiration_date_2)
@@ -1016,7 +999,7 @@ class LoginTestCase(unittest.TestCase):
             c.get("/login-notch-remember")
             with c.session_transaction() as sess:
                 sess["_user_id"] = None
-            c.set_cookie(domain, self.remember_cookie_name, "foo")
+            c.set_cookie(self.remember_cookie_name, "foo", domain=domain)
             result = c.get("/username")
             self.assertEqual("Anonymous", result.data.decode("utf-8"))
 
@@ -1426,9 +1409,10 @@ class TestLoginUrlGeneration(unittest.TestCase):
             result = login_url("https://auth.localhost/login", PROTECTED)
             self.assertEqual(expected, result)
 
+            url = login_url("/login?affil=cgnu", PROTECTED)
             self.assertEqual(
                 "/login?affil=cgnu&next=%2Fprotected",
-                login_url("/login?affil=cgnu", PROTECTED),
+                url,
             )
 
     def test_login_url_generation_with_view(self):

@@ -5,27 +5,25 @@
 #
 #    pip-compile-multi
 #
-asgiref==3.5.0
+asgiref==3.7.2
     # via -r requirements/tests.in
-attrs==21.4.0
-    # via pytest
-blinker==1.4
+blinker==1.6.2
     # via -r requirements/tests.in
-coverage==6.3.2
+coverage==7.3.1
     # via -r requirements/tests.in
-iniconfig==1.1.1
+exceptiongroup==1.1.3
     # via pytest
-packaging==21.3
+iniconfig==2.0.0
     # via pytest
-pluggy==1.0.0
+packaging==23.2
     # via pytest
-py==1.11.0
+pluggy==1.3.0
     # via pytest
-pyparsing==3.0.7
-    # via packaging
-pytest==7.1.1
+pytest==7.4.2
     # via -r requirements/tests.in
-semantic-version==2.9.0
+semantic-version==2.10.0
     # via -r requirements/tests.in
 tomli==2.0.1
     # via pytest
+typing-extensions==4.8.0
+    # via asgiref
