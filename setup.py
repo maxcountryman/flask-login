@@ -5,6 +5,6 @@ setup(
     name="Flask-Login",
     install_requires=[
         "Flask>=2.3.0",
-        "Werkzeug>=2.3.0",
+        "Werkzeug>=2.3.2",
     ],
 )
