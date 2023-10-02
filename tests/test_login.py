@@ -998,7 +998,7 @@ class LoginTestCase(unittest.TestCase):
             c.get("/login-notch-remember")
             with c.session_transaction() as sess:
                 sess["_user_id"] = None
-            c.set_cookie(domain, self.remember_cookie_name, "foo")
+            c.set_cookie(self.remember_cookie_name, "foo", domain=domain)
             result = c.get("/username")
             self.assertEqual("Anonymous", result.data.decode("utf-8"))
 
