@@ -1,2 +1,4 @@
 coveralls
 tox
+filelock==3.12.2; python_version < '3.8'
+filelock; python_version >= '3.8'
