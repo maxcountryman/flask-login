@@ -675,8 +675,9 @@ class LoginTestCase(unittest.TestCase):
             c.get("/login-notch-remember")
 
             cookie = c.get_cookie(key=name, domain=domain, path=path)
-            self.assertIsNotNone(cookie,
-                                 "Custom domain, path and name not found in cookies")
+            self.assertIsNotNone(
+                cookie, "Custom domain, path and name not found in cookies"
+            )
 
             expiration_date = datetime.utcfromtimestamp(cookie.expires.timestamp())
             expected_date = datetime.utcnow() + duration
@@ -700,8 +701,9 @@ class LoginTestCase(unittest.TestCase):
             c.get("/login-notch-remember-custom")
 
             cookie = c.get_cookie(key=name, domain=domain, path=path)
-            self.assertIsNotNone(cookie,
-                                 "Custom domain, path and name not found in cookies")
+            self.assertIsNotNone(
+                cookie, "Custom domain, path and name not found in cookies"
+            )
 
             expiration_date = datetime.utcfromtimestamp(cookie.expires.timestamp())
             expected_date = datetime.utcnow() + duration
@@ -789,8 +791,7 @@ class LoginTestCase(unittest.TestCase):
             self.assertIsNotNone(cookie)
             expiration_date_1 = datetime.utcfromtimestamp(cookie.expires.timestamp())
 
-            self._delete_session(c)
-
+            # self._delete_session(c)
             c.get("/username")
             cookie = c.get_cookie(key="remember", domain=domain, path=path)
             self.assertIsNotNone(cookie)
@@ -802,7 +803,7 @@ class LoginTestCase(unittest.TestCase):
             self.app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = True
             now = datetime.utcnow()
             mock_dt.utcnow = Mock(return_value=now)
-
+            mock_utcnow1 = mock_dt.utcnow
             with self.app.test_client() as c:
                 c.get("/login-notch-remember")
                 cookie = c.get_cookie(key="remember", domain=domain, path=path)
@@ -811,10 +812,12 @@ class LoginTestCase(unittest.TestCase):
                 )
                 self.assertIsNotNone(expiration_date_1)
 
-                self._delete_session(c)
+                # self._delete_session(c)
 
                 mock_dt.utcnow = Mock(return_value=now + timedelta(seconds=1))
-                c.get("/login-notch-remember")
+                mock_utcnow2 = mock_dt.utcnow
+                self.assertNotEqual(mock_utcnow1, mock_utcnow2)
+                c.get("/username")
                 cookie = c.get_cookie(key="remember", domain=domain, path=path)
                 expiration_date_2 = datetime.utcfromtimestamp(
                     cookie.expires.timestamp()
@@ -998,7 +1001,7 @@ class LoginTestCase(unittest.TestCase):
             c.get("/login-notch-remember")
             with c.session_transaction() as sess:
                 sess["_user_id"] = None
-            c.set_cookie(domain, self.remember_cookie_name, "foo")
+            c.set_cookie(self.remember_cookie_name, "foo", domain=domain)
             result = c.get("/username")
             self.assertEqual("Anonymous", result.data.decode("utf-8"))
 
@@ -1408,9 +1411,10 @@ class TestLoginUrlGeneration(unittest.TestCase):
             result = login_url("https://auth.localhost/login", PROTECTED)
             self.assertEqual(expected, result)
 
+            url = login_url("/login?affil=cgnu", PROTECTED)
             self.assertEqual(
                 "/login?affil=cgnu&next=%2Fprotected",
-                login_url("/login?affil=cgnu", PROTECTED),
+                url,
             )
 
     def test_login_url_generation_with_view(self):
