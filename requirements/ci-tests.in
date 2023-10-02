@@ -1,2 +1,5 @@
-tox
 coveralls
+tox==4.5.0; python_version < '3.8'
+pluggy==1.2.0; python_version < '3.8'
+filelock==3.12.2; python_version < '3.8'
+tox; python_version >= '3.8'
