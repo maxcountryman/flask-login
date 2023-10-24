@@ -2,6 +2,8 @@ import hmac
 import secrets
 from functools import wraps
 from hashlib import sha512
+from urllib.parse import parse_qs
+from urllib.parse import urlencode
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
 
@@ -12,8 +14,6 @@ from flask import request
 from flask import session
 from flask import url_for
 from werkzeug.local import LocalProxy
-from werkzeug.urls import url_decode
-from werkzeug.urls import url_encode
 
 from .config import COOKIE_NAME
 from .config import EXEMPT_METHODS
@@ -124,11 +124,11 @@ def login_url(login_view, next_url=None, next_field="next"):
         return base
 
     parsed_result = urlparse(base)
-    md = url_decode(parsed_result.query)
+    md = parse_qs(parsed_result.query)
     md[next_field] = make_next_param(base, next_url)
     netloc = current_app.config.get("FORCE_HOST_FOR_REDIRECTS") or parsed_result.netloc
     parsed_result = parsed_result._replace(
-        netloc=netloc, query=url_encode(md, sort=True)
+        netloc=netloc, query=urlencode(md, doseq=True)
     )
     return urlunparse(parsed_result)
 
