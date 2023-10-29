@@ -1,6 +1,13 @@
 Flask-Login Changelog
 =====================
 
+
+Version 0.6.3
+-------------
+
+Unreleased
+
+
 Version 0.6.2
 -------------
 

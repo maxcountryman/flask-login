@@ -1,7 +1,7 @@
 __title__ = "Flask-Login"
 __description__ = "User session management for Flask"
 __url__ = "https://github.com/maxcountryman/flask-login"
-__version_info__ = ("0", "6", "2")
+__version_info__ = ("0", "6", "3")
 __version__ = ".".join(__version_info__)
 __author__ = "Matthew Frazier"
 __author_email__ = "leafstormrush@gmail.com"
