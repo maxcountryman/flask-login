@@ -10,7 +10,7 @@
 -r tests.txt
 build==1.0.3
     # via pip-tools
-cachetools==5.3.1
+cachetools==5.3.2
     # via tox
 chardet==5.2.0
     # via tox
