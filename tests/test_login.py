@@ -528,7 +528,6 @@ class LoginTestCase(unittest.TestCase):
 
     def test_unauthorized_uses_blueprint_login_view(self):
         with self.app.app_context():
-
             first = Blueprint("first", "first")
             second = Blueprint("second", "second")
 
@@ -567,7 +566,6 @@ class LoginTestCase(unittest.TestCase):
             set_login_view("second_login", blueprint=second)
 
             with self.app.test_client() as c:
-
                 result = c.get("/protected")
                 self.assertEqual(result.status_code, 302)
                 expected = "/app_login?next=%2Fprotected"
@@ -598,7 +596,6 @@ class LoginTestCase(unittest.TestCase):
             set_login_view("app_login")
 
             with self.app.test_client() as c:
-
                 result = c.get("/protected")
                 self.assertEqual(result.status_code, 302)
                 expected = "/app_login?next=%2Fprotected"

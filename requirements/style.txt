@@ -9,19 +9,19 @@ cfgv==3.4.0
     # via pre-commit
 distlib==0.3.7
     # via virtualenv
-filelock==3.12.4
+filelock==3.13.0
     # via virtualenv
-identify==2.5.30
+identify==2.5.31
     # via pre-commit
 nodeenv==1.8.0
     # via pre-commit
-platformdirs==3.10.0
+platformdirs==3.11.0
     # via virtualenv
-pre-commit==3.4.0
+pre-commit==3.5.0
     # via -r requirements/style.in
 pyyaml==6.0.1
     # via pre-commit
-virtualenv==20.24.5
+virtualenv==20.24.6
     # via pre-commit
 
 # The following packages are considered to be unsafe in a requirements file:

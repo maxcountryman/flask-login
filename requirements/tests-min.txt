@@ -5,14 +5,12 @@
 #
 #    pip-compile-multi
 #
-blinker==1.6.2
+blinker==1.6.3
     # via flask
 click==8.1.7
     # via flask
 flask==2.3.0
     # via -r requirements/tests-min.in
-importlib-metadata==6.8.0
-    # via flask
 itsdangerous==2.1.2
     # via flask
 jinja2==3.1.2
@@ -25,5 +23,3 @@ werkzeug==2.3.2
     # via
     #   -r requirements/tests-min.in
     #   flask
-zipp==3.17.0
-    # via importlib-metadata

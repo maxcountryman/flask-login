@@ -349,14 +349,12 @@ def set_login_view(login_view, blueprint=None):
 
     num_login_views = len(current_app.login_manager.blueprint_login_views)
     if blueprint is not None or num_login_views != 0:
-
         (current_app.login_manager.blueprint_login_views[blueprint.name]) = login_view
 
         if (
             current_app.login_manager.login_view is not None
             and None not in current_app.login_manager.blueprint_login_views
         ):
-
             (
                 current_app.login_manager.blueprint_login_views[None]
             ) = current_app.login_manager.login_view
