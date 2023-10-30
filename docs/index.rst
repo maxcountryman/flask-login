@@ -432,7 +432,14 @@ extra layer of session protection, as it will prevent a session from being used 
 after a user logs out. To enable this feature, set the `SESSION_BLOCK_CACHE` setting
 to a cache object that implements a `set` and `get` methods. For example::
 
-    SESSION_BLOCK_CACHE = RedisCache()
+    from flask_caching.backends.redis import RedisCache
+
+    SESSION_BLOCK_CACHE = RedisCache(
+        host='localhost',
+        port=6379,
+        default_timeout=7*24*60*60,
+        key_prefix='session_block_'
+    )
 
 When a user logs out, the session's tombstone will be stored in the cache. Any subsequent
 requests with the same session identifier will be blocked.
