@@ -32,7 +32,7 @@ toposort==1.10
     # via pip-compile-multi
 tox==4.11.3
     # via -r requirements/dev.in
-wheel==0.41.2
+wheel==0.41.3
     # via pip-tools
 
 # The following packages are considered to be unsafe in a requirements file:
