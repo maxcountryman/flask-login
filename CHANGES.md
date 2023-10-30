@@ -8,6 +8,15 @@ Unreleased
 
 - Remove previously deprecated code. #694
 
+
+Version 0.6.3
+-------------
+
+Released 2023-10-30
+
+-   Compatibility with Flask 3 and Werkzeug 3. #813
+
+
 Version 0.6.2
 -------------
 
