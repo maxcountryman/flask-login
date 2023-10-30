@@ -5,7 +5,7 @@ Flask-Login Changelog
 Version 0.6.3
 -------------
 
-Unreleased
+Released 2023-10-30
 
 -   Compatibility with Flask 3 and Werkzeug 3. #813
 
