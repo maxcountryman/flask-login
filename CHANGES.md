@@ -7,6 +7,8 @@ Version 0.6.3
 
 Unreleased
 
+-   Compatibility with Flask 3 and Werkzeug 3. #813
+
 
 Version 0.6.2
 -------------

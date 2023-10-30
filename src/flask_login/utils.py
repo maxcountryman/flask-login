@@ -1,8 +1,10 @@
 import hmac
 from functools import wraps
 from hashlib import sha512
-from urllib.parse import urlparse
-from urllib.parse import urlunparse
+from urllib.parse import parse_qs
+from urllib.parse import urlencode
+from urllib.parse import urlsplit
+from urllib.parse import urlunsplit
 
 from flask import current_app
 from flask import g
@@ -11,8 +13,6 @@ from flask import request
 from flask import session
 from flask import url_for
 from werkzeug.local import LocalProxy
-from werkzeug.urls import url_decode
-from werkzeug.urls import url_encode
 
 from .config import COOKIE_NAME
 from .config import EXEMPT_METHODS
@@ -73,13 +73,13 @@ def make_next_param(login_url, current_url):
     :param current_url: The URL to reduce.
     :type current_url: str
     """
-    l_url = urlparse(login_url)
-    c_url = urlparse(current_url)
+    l_url = urlsplit(login_url)
+    c_url = urlsplit(current_url)
 
     if (not l_url.scheme or l_url.scheme == c_url.scheme) and (
         not l_url.netloc or l_url.netloc == c_url.netloc
     ):
-        return urlunparse(("", "", c_url.path, c_url.params, c_url.query, ""))
+        return urlunsplit(("", "", c_url.path, c_url.query, ""))
     return current_url
 
 
@@ -122,14 +122,14 @@ def login_url(login_view, next_url=None, next_field="next"):
     if next_url is None:
         return base
 
-    parsed_result = urlparse(base)
-    md = url_decode(parsed_result.query)
+    parsed_result = urlsplit(base)
+    md = parse_qs(parsed_result.query, keep_blank_values=True)
     md[next_field] = make_next_param(base, next_url)
     netloc = current_app.config.get("FORCE_HOST_FOR_REDIRECTS") or parsed_result.netloc
     parsed_result = parsed_result._replace(
-        netloc=netloc, query=url_encode(md, sort=True)
+        netloc=netloc, query=urlencode(md, doseq=True)
     )
-    return urlunparse(parsed_result)
+    return urlunsplit(parsed_result)
 
 
 def login_fresh():
