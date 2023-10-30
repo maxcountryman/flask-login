@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 import sys
 import unittest
 from collections.abc import Hashable
 from contextlib import contextmanager
+from dataclasses import dataclass
 from datetime import datetime
 from datetime import timedelta
+from datetime import timezone
 from unittest.mock import ANY
 from unittest.mock import Mock
 from unittest.mock import patch
@@ -54,12 +58,62 @@ from flask_login.utils import _secret_key
 from flask_login.utils import _user_context_processor
 from semantic_version import Version
 from werkzeug.middleware.proxy_fix import ProxyFix
+from werkzeug.test import Client
 
 sys_version = Version(
     major=sys.version_info.major,
     minor=sys.version_info.minor,
     patch=sys.version_info.micro,
 )
+
+# Support Werkzeug < 2.3
+new_cookie_methods = hasattr(Client, "get_cookie")
+
+
+@dataclass
+class BasicCookie:
+    key: str
+    value: str
+    expires: datetime | None
+
+
+def client_get_cookie(
+    client: Client, key: str, domain: str = "localhost", path: str = "/"
+) -> BasicCookie | None:
+    if new_cookie_methods:
+        if domain.startswith("."):
+            domain = domain[1:]
+
+        cookie = client.get_cookie(key, domain, path)
+
+        if cookie is None:
+            return None
+
+        return BasicCookie(cookie.key, cookie.value, cookie.expires)
+    else:
+        try:
+            cookie = client.cookie_jar._cookies[domain][path][key]
+
+            if cookie.expires is None:
+                expires = None
+            else:
+                expires = datetime.fromtimestamp(cookie.expires, timezone.utc)
+
+            return BasicCookie(cookie.name, cookie.value, expires)
+        except KeyError:
+            return None
+
+
+def client_set_cookie(
+    client: Client, key: str, value: str, domain: str | None = None
+) -> None:
+    if new_cookie_methods:
+        if domain.startswith("."):
+            domain = domain[1:]
+
+        client.set_cookie(key, value, domain=domain)
+    else:
+        client.set_cookie(domain, key, value)
 
 
 @contextmanager
@@ -667,32 +721,15 @@ class LoginTestCase(unittest.TestCase):
         duration = self.app.config["REMEMBER_COOKIE_DURATION"] = timedelta(days=2)
         path = self.app.config["REMEMBER_COOKIE_PATH"] = "/mypath"
         domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = ".localhost.local"
-
-        with self.app.test_client() as c:
-            c.get("/login-notch-remember")
-
-            # TODO: Is there a better way to test this?
-            self.assertIn(
-                domain,
-                c.cookie_jar._cookies,
-                "Custom domain not found as cookie domain",
-            )
-            domain_cookie = c.cookie_jar._cookies[domain]
-            self.assertIn(path, domain_cookie, "Custom path not found as cookie path")
-            path_cookie = domain_cookie[path]
-            self.assertIn(name, path_cookie, "Custom name not found as cookie name")
-            cookie = path_cookie[name]
-
-            expiration_date = datetime.utcfromtimestamp(cookie.expires)
-            expected_date = datetime.utcnow() + duration
-            difference = expected_date - expiration_date
-
-            fail_msg = (
-                f"The expiration date {expiration_date} was far from"
-                f" the expected {expected_date}"
-            )
-            self.assertLess(difference, timedelta(seconds=10), fail_msg)
-            self.assertGreater(difference, timedelta(seconds=-10), fail_msg)
+        c = self.app.test_client()
+        c.get("/login-notch-remember")
+        cookie = client_get_cookie(c, name, domain, path)
+        self.assertIsNotNone(cookie)
+        self.assertIsNotNone(cookie.expires)
+        expected_date = datetime.now(timezone.utc) + duration
+        difference = expected_date - cookie.expires
+        self.assertLess(difference, timedelta(seconds=10))
+        self.assertGreater(difference, timedelta(seconds=-10))
 
     def test_remember_me_custom_duration_uses_custom_cookie(self):
         name = self.app.config["REMEMBER_COOKIE_NAME"] = "myname"
@@ -700,55 +737,31 @@ class LoginTestCase(unittest.TestCase):
         duration = timedelta(hours=7)
         path = self.app.config["REMEMBER_COOKIE_PATH"] = "/mypath"
         domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = ".localhost.local"
-
-        with self.app.test_client() as c:
-            c.get("/login-notch-remember-custom")
-
-            # TODO: Is there a better way to test this?
-            self.assertIn(
-                domain,
-                c.cookie_jar._cookies,
-                "Custom domain not found as cookie domain",
-            )
-            domain_cookie = c.cookie_jar._cookies[domain]
-            self.assertIn(path, domain_cookie, "Custom path not found as cookie path")
-            path_cookie = domain_cookie[path]
-            self.assertIn(name, path_cookie, "Custom name not found as cookie name")
-            cookie = path_cookie[name]
-
-            expiration_date = datetime.utcfromtimestamp(cookie.expires)
-            expected_date = datetime.utcnow() + duration
-            difference = expected_date - expiration_date
-
-            fail_msg = (
-                f"The expiration date {expiration_date} was far from"
-                f" the expected {expected_date}"
-            )
-            self.assertLess(difference, timedelta(seconds=10), fail_msg)
-            self.assertGreater(difference, timedelta(seconds=-10), fail_msg)
+        c = self.app.test_client()
+        c.get("/login-notch-remember-custom")
+        cookie = client_get_cookie(c, name, domain, path)
+        self.assertIsNotNone(cookie)
+        self.assertIsNotNone(cookie.expires)
+        expected_date = datetime.now(timezone.utc) + duration
+        difference = expected_date - cookie.expires
+        self.assertLess(difference, timedelta(seconds=10))
+        self.assertGreater(difference, timedelta(seconds=-10))
 
     def test_remember_me_accepts_duration_as_int(self):
         self.app.config["REMEMBER_COOKIE_DURATION"] = 172800
         duration = timedelta(seconds=172800)
         name = self.app.config["REMEMBER_COOKIE_NAME"] = "myname"
         domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = ".localhost.local"
-
-        with self.app.test_client() as c:
-            result = c.get("/login-notch-remember")
-            self.assertEqual(result.status_code, 200)
-
-            cookie = c.cookie_jar._cookies[domain]["/"][name]
-
-            expiration_date = datetime.utcfromtimestamp(cookie.expires)
-            expected_date = datetime.utcnow() + duration
-            difference = expected_date - expiration_date
-
-            fail_msg = (
-                f"The expiration date {expiration_date} was far from"
-                f" the expected {expected_date}"
-            )
-            self.assertLess(difference, timedelta(seconds=10), fail_msg)
-            self.assertGreater(difference, timedelta(seconds=-10), fail_msg)
+        c = self.app.test_client()
+        result = c.get("/login-notch-remember")
+        self.assertEqual(result.status_code, 200)
+        cookie = client_get_cookie(c, name, domain)
+        self.assertIsNotNone(cookie)
+        self.assertIsNotNone(cookie.expires)
+        expected_date = datetime.now(timezone.utc) + duration
+        difference = expected_date - cookie.expires
+        self.assertLess(difference, timedelta(seconds=10))
+        self.assertGreater(difference, timedelta(seconds=-10))
 
     def test_remember_me_with_invalid_duration_returns_500_response(self):
         self.app.config["REMEMBER_COOKIE_DURATION"] = "123"
@@ -790,52 +803,35 @@ class LoginTestCase(unittest.TestCase):
         )
         self.assertIn(expected_exception_message, str(cm.exception))
 
-    def test_remember_me_refresh_every_request(self):
+    def test_remember_me_no_refresh_every_request(self):
         domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = ".localhost.local"
         path = self.app.config["REMEMBER_COOKIE_PATH"] = "/"
-
-        # No refresh
         self.app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = False
-        with self.app.test_client() as c:
-            c.get("/login-notch-remember")
-            self.assertIn("remember", c.cookie_jar._cookies[domain][path])
-            expiration_date_1 = datetime.utcfromtimestamp(
-                c.cookie_jar._cookies[domain][path]["remember"].expires
-            )
+        c = self.app.test_client()
+        c.get("/login-notch-remember")
+        cookie1 = client_get_cookie(c, "remember", domain, path)
+        self.assertIsNotNone(cookie1.expires)
+        self._delete_session(c)
+        c.get("/username")
+        cookie2 = client_get_cookie(c, "remember", domain, path)
+        self.assertEqual(cookie1.expires, cookie2.expires)
 
-            self._delete_session(c)
-
-            c.get("/username")
-            self.assertIn("remember", c.cookie_jar._cookies[domain][path])
-            expiration_date_2 = datetime.utcfromtimestamp(
-                c.cookie_jar._cookies[domain][path]["remember"].expires
-            )
-            self.assertEqual(expiration_date_1, expiration_date_2)
-
-        # With refresh (mock datetime's `utcnow`)
+    def test_remember_me_refresh_each_request(self):
         with patch("flask_login.login_manager.datetime") as mock_dt:
-            self.app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = True
             now = datetime.utcnow()
             mock_dt.utcnow = Mock(return_value=now)
 
-            with self.app.test_client() as c:
-                c.get("/login-notch-remember")
-                self.assertIn("remember", c.cookie_jar._cookies[domain][path])
-                expiration_date_1 = datetime.utcfromtimestamp(
-                    c.cookie_jar._cookies[domain][path]["remember"].expires
-                )
-                self.assertIsNotNone(expiration_date_1)
-
-                self._delete_session(c)
-
-                mock_dt.utcnow = Mock(return_value=now + timedelta(seconds=1))
-                c.get("/username")
-                self.assertIn("remember", c.cookie_jar._cookies[domain][path])
-                expiration_date_2 = datetime.utcfromtimestamp(
-                    c.cookie_jar._cookies[domain][path]["remember"].expires
-                )
-                self.assertIsNotNone(expiration_date_2)
-                self.assertNotEqual(expiration_date_1, expiration_date_2)
+            domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = ".localhost.local"
+            path = self.app.config["REMEMBER_COOKIE_PATH"] = "/"
+            self.app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = True
+            c = self.app.test_client()
+            c.get("/login-notch-remember")
+            cookie1 = client_get_cookie(c, "remember", domain, path)
+            self.assertIsNotNone(cookie1.expires)
+            mock_dt.utcnow.return_value = now + timedelta(seconds=1)
+            c.get("/username")
+            cookie2 = client_get_cookie(c, "remember", domain, path)
+            self.assertNotEqual(cookie1.expires, cookie2.expires)
 
     def test_remember_me_is_unfresh(self):
         with self.app.test_client() as c:
@@ -1009,13 +1005,15 @@ class LoginTestCase(unittest.TestCase):
 
     def test_invalid_remember_cookie(self):
         domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = ".localhost.local"
-        with self.app.test_client() as c:
-            c.get("/login-notch-remember")
-            with c.session_transaction() as sess:
-                sess["_user_id"] = None
-            c.set_cookie(domain, self.remember_cookie_name, "foo")
-            result = c.get("/username")
-            self.assertEqual("Anonymous", result.data.decode("utf-8"))
+        c = self.app.test_client()
+        c.get("/login-notch-remember")
+
+        with c.session_transaction() as sess:
+            sess["_user_id"] = None
+
+        client_set_cookie(c, self.remember_cookie_name, "foo", domain=domain)
+        result = c.get("/username")
+        self.assertEqual("Anonymous", result.data.decode("utf-8"))
 
     #
     # Session Protection
