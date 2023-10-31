@@ -10,6 +10,7 @@ Unreleased
 - Bump to Flask >= 2.3.0.
 - Bump to Werkzeug >= 2.3.2.
 - Remove previously deprecated code. #694
+- Use `datetime.now(timezone.utc)` instead of deprecated `datetime.utcnow`. #758
 
 
 Version 0.6.3
