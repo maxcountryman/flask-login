@@ -765,8 +765,8 @@ class LoginTestCase(unittest.TestCase):
 
     def test_remember_me_refresh_each_request(self):
         with patch("flask_login.login_manager.datetime") as mock_dt:
-            now = datetime.utcnow()
-            mock_dt.utcnow = Mock(return_value=now)
+            now = datetime.now(timezone.utc)
+            mock_dt.now = Mock(return_value=now)
 
             domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = "localhost.local"
             path = self.app.config["REMEMBER_COOKIE_PATH"] = "/"
@@ -775,7 +775,7 @@ class LoginTestCase(unittest.TestCase):
             c.get("/login-notch-remember")
             cookie1 = c.get_cookie("remember", domain, path)
             self.assertIsNotNone(cookie1.expires)
-            mock_dt.utcnow.return_value = now + timedelta(seconds=1)
+            mock_dt.now.return_value = now + timedelta(seconds=1)
             c.get("/username")
             cookie2 = c.get_cookie("remember", domain, path)
             self.assertNotEqual(cookie1.expires, cookie2.expires)

@@ -1,5 +1,6 @@
 from datetime import datetime
 from datetime import timedelta
+from datetime import timezone
 
 from flask import abort
 from flask import current_app
@@ -427,7 +428,7 @@ class LoginManager:
             duration = timedelta(seconds=duration)
 
         try:
-            expires = datetime.utcnow() + duration
+            expires = datetime.now(timezone.utc) + duration
         except TypeError as e:
             raise Exception(
                 "REMEMBER_COOKIE_DURATION must be a datetime.timedelta,"
