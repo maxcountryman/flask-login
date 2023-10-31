@@ -6,6 +6,9 @@ Version 0.7.0
 
 Unreleased
 
+- Bump to Python >= 3.8.
+- Bump to Flask >= 2.3.0.
+- Bump to Werkzeug >= 2.3.2.
 - Remove previously deprecated code. #694
 
 
