@@ -24,10 +24,6 @@ However, it does not:
 - Handle permissions beyond "logged in or not."
 - Handle user registration or account recovery.
 
-.. contents::
-   :local:
-   :backlinks: none
-
 
 Installation
 ============
