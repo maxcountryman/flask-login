@@ -1,0 +1,59 @@
+[project]
+name = "Flask-Login"
+version = "0.7.0.dev"
+description = "User authentication and session management for Flask."
+readme = "README.md"
+license = { file = "LICENSE" }
+maintainers = [{ name = "Max Countryman" }]
+authors = [{ name = "Matthew Frazier" }]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Framework :: Flask",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "flask>=2.3",
+    "werkzeug>=2.3.2",
+]
+
+[project.urls]
+Documentation = "https://flask-login.readthedocs.io"
+Source = "https://github.com/maxcountryman/flask-login/"
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.module]
+name = "flask_login"
+
+[tool.flit.sdist]
+include = [
+    "CHANGES.md",
+    "tox.ini",
+    "requirements*/",
+    "docs/",
+    "tests/",
+]
+exclude = [
+    "docs/_build/",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    "error",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["flask_login", "tests"]
+
+[tool.coverage.paths]
+source = ["src", "*/site-packages"]

@@ -10,6 +10,8 @@ Unreleased
 - Bump to Flask >= 2.3.0.
 - Bump to Werkzeug >= 2.3.2.
 - Remove previously deprecated code. #694
+- Use modern `pyproject.toml` project metadata. Use flit_core instead of setuptools as
+  build backend.
 - Use `datetime.now(timezone.utc)` instead of deprecated `datetime.utcnow`. #758
 
 
