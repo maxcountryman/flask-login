@@ -1,7 +1,7 @@
 blinker
-coverage; python_version >= '3.8'
+coverage
 asgiref==3.5.0
 pytest
 semantic_version
-pluggy; python_version >= '3.8'
-typing-extensions; python_version >= '3.8'
+pluggy
+typing-extensions
