@@ -15,6 +15,9 @@ from flask import get_flashed_messages
 from flask import Response
 from flask import session
 from flask.views import MethodView
+from semantic_version import Version
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 from flask_login import AnonymousUserMixin
 from flask_login import confirm_login
 from flask_login import current_user
@@ -53,8 +56,6 @@ from flask_login.__about__ import __version__
 from flask_login.__about__ import __version_info__
 from flask_login.utils import _secret_key
 from flask_login.utils import _user_context_processor
-from semantic_version import Version
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 sys_version = Version(
     major=sys.version_info.major,
