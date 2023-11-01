@@ -1,6 +1,6 @@
 blinker
 coverage
-asgiref==3.5.0
+asgiref==3.7.2
 pytest
 semantic_version
 pluggy
