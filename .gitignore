@@ -3,12 +3,11 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+.ruff_cache/
 .tox/
 .coverage
 .coverage.*
 htmlcov/
 docs/_build/
-*.egg-info
-build/
 dist/
 venv/

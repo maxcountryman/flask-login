@@ -1,5 +1,0 @@
-coveralls
-filelock; python_version >= '3.8'
-pluggy; python_version >= '3.8'
-tox; python_version >= '3.8'
-pyproject-api; python_version >= '3.8'
