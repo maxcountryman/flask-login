@@ -104,9 +104,9 @@ def login_url(login_view, next_url=None, next_field="next"):
     however, this will append a ``next=URL`` parameter to the query string
     so that the login view can redirect back to that URL. Flask-Login's default
     unauthorized handler uses this function when redirecting to your login url.
+
     To force the host name used, set `FORCE_HOST_FOR_REDIRECTS` to a host. This
-    prevents from redirecting to external sites if request headers Host or
-    X-Forwarded-For are present.
+    prevents from redirecting to external sites if `SERVER_NAME` is not configured.
 
     :param login_view: The name of the login view. (Alternately, the actual
                        URL to the login view.)
@@ -380,24 +380,9 @@ def _cookie_digest(payload, key=None):
     return hmac.new(key, payload.encode("utf-8"), sha512).hexdigest()
 
 
-def _get_remote_addr():
-    address = request.headers.get("X-Forwarded-For", request.remote_addr)
-    if address is not None:
-        # An 'X-Forwarded-For' header includes a comma separated list of the
-        # addresses, the first address being the actual remote address.
-        address = address.encode("utf-8").split(b",")[0].strip()
-    return address
-
-
 def _create_identifier():
-    user_agent = request.headers.get("User-Agent")
-    if user_agent is not None:
-        user_agent = user_agent.encode("utf-8")
-    base = f"{_get_remote_addr()}|{user_agent}"
-    if str is bytes:
-        base = str(base, "utf-8", errors="replace")  # pragma: no cover
     h = sha512()
-    h.update(base.encode("utf8"))
+    h.update(f"{request.remote_addr}|{request.user_agent.string}".encode())
     return h.hexdigest()
 
 

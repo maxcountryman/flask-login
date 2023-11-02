@@ -14,7 +14,6 @@ from flask import get_flashed_messages
 from flask import Response
 from flask import session
 from flask.views import MethodView
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 from flask_login import AnonymousUserMixin
 from flask_login import confirm_login
@@ -754,26 +753,6 @@ class LoginTestCase(unittest.TestCase):
             self.assertEqual("False", c.get("/is-fresh").data.decode("utf-8"))
             self.assertEqual("True", c.get("/is-remembered").data.decode("utf-8"))
 
-    def test_login_persists_with_signle_x_forwarded_for(self):
-        self.app.config["SESSION_PROTECTION"] = "strong"
-        with self.app.test_client() as c:
-            c.get("/login-notch", headers=[("X-Forwarded-For", "10.1.1.1")])
-            result = c.get("/username", headers=[("X-Forwarded-For", "10.1.1.1")])
-            self.assertEqual("Notch", result.data.decode("utf-8"))
-            result = c.get("/username", headers=[("X-Forwarded-For", "10.1.1.1")])
-            self.assertEqual("Notch", result.data.decode("utf-8"))
-
-    def test_login_persists_with_many_x_forwarded_for(self):
-        self.app.config["SESSION_PROTECTION"] = "strong"
-        with self.app.test_client() as c:
-            c.get("/login-notch", headers=[("X-Forwarded-For", "10.1.1.1")])
-            result = c.get("/username", headers=[("X-Forwarded-For", "10.1.1.1")])
-            self.assertEqual("Notch", result.data.decode("utf-8"))
-            result = c.get(
-                "/username", headers=[("X-Forwarded-For", "10.1.1.1, 10.1.1.2")]
-            )
-            self.assertEqual("Notch", result.data.decode("utf-8"))
-
     def test_user_loaded_from_cookie_fired(self):
         with self.app.test_client() as c:
             c.get("/login-notch-remember")
@@ -1031,15 +1010,6 @@ class LoginTestCase(unittest.TestCase):
             c.get("/login-notch-remember")
             with listen_to(session_protected) as listener:
                 c.get("/username", headers=[("User-Agent", "different")])
-                listener.assert_heard_one(self.app)
-
-    def test_session_protection_strong_fires_signal_x_forwarded_for(self):
-        self.app.config["SESSION_PROTECTION"] = "strong"
-
-        with self.app.test_client() as c:
-            c.get("/login-notch-remember", headers=[("X-Forwarded-For", "10.1.1.1")])
-            with listen_to(session_protected) as listener:
-                c.get("/username", headers=[("X-Forwarded-For", "10.1.1.2")])
                 listener.assert_heard_one(self.app)
 
     def test_session_protection_skip_when_off_and_anonymous(self):
@@ -1591,39 +1561,6 @@ class StrictHostForRedirectsTestCase(unittest.TestCase):
             result = c.get("/secret", base_url="http://bad.com")
             self.assertEqual(result.status_code, 302)
             self.assertEqual(result.location, "//good.com/login?next=%2Fsecret")
-
-    def test_unauthorized_uses_host_from_x_forwarded_for_header(self):
-        self.login_manager.login_view = "login"
-        self.app.config["FORCE_HOST_FOR_REDIRECTS"] = None
-        self.app.wsgi_app = ProxyFix(self.app.wsgi_app, x_host=1)
-
-        @self.app.route("/login")
-        def login():
-            return session.pop("next", "")
-
-        with self.app.test_client() as c:
-            headers = {
-                "X-Forwarded-Host": "proxy.com",
-            }
-            result = c.get("/secret", base_url="http://foo.com", headers=headers)
-            self.assertEqual(result.status_code, 302)
-            self.assertEqual(result.location, "/login?next=%2Fsecret")
-
-    def test_unauthorized_ignores_host_from_x_forwarded_for_header(self):
-        self.login_manager.login_view = "login"
-        self.app.config["FORCE_HOST_FOR_REDIRECTS"] = "good.com"
-
-        @self.app.route("/login")
-        def login():
-            return session.pop("next", "")
-
-        with self.app.test_client() as c:
-            headers = {
-                "X-Forwarded-Host": "proxy.com",
-            }
-            result = c.get("/secret", base_url="http://foo.com", headers=headers)
-            self.assertEqual(result.status_code, 302)
-            assert result.location == "//good.com/login?next=%2Fsecret"
 
 
 class CustomTestClientTestCase(unittest.TestCase):
