@@ -1,3 +1,12 @@
+import warnings
+
+warnings.warn(
+    "The '__about__' module is deprecated and will be removed in Flask-Login 1.0. Use"
+    " 'importlib.metadata' instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
 __title__ = "Flask-Login"
 __description__ = "User session management for Flask"
 __url__ = "https://github.com/maxcountryman/flask-login"
