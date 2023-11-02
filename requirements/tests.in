@@ -1,7 +1,4 @@
 blinker
 coverage
-asgiref==3.7.2
+asgiref
 pytest
-semantic_version
-pluggy
-typing-extensions

@@ -1,4 +1,3 @@
-import sys
 import unittest
 from collections.abc import Hashable
 from contextlib import contextmanager
@@ -15,7 +14,6 @@ from flask import get_flashed_messages
 from flask import Response
 from flask import session
 from flask.views import MethodView
-from semantic_version import Version
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from flask_login import AnonymousUserMixin
@@ -44,24 +42,8 @@ from flask_login import user_login_confirmed
 from flask_login import user_needs_refresh
 from flask_login import user_unauthorized
 from flask_login import UserMixin
-from flask_login.__about__ import __author__
-from flask_login.__about__ import __author_email__
-from flask_login.__about__ import __copyright__
-from flask_login.__about__ import __description__
-from flask_login.__about__ import __license__
-from flask_login.__about__ import __maintainer__
-from flask_login.__about__ import __title__
-from flask_login.__about__ import __url__
-from flask_login.__about__ import __version__
-from flask_login.__about__ import __version_info__
 from flask_login.utils import _secret_key
 from flask_login.utils import _user_context_processor
-
-sys_version = Version(
-    major=sys.version_info.major,
-    minor=sys.version_info.minor,
-    patch=sys.version_info.micro,
-)
 
 
 @contextmanager
@@ -138,22 +120,6 @@ creeper = User("Creeper", 3, False)
 germanjapanese = User("Müller", "佐藤")  # str user_id
 
 USERS = {1: notch, 2: steve, 3: creeper, "佐藤": germanjapanese}
-
-
-class AboutTestCase(unittest.TestCase):
-    """Make sure we can get version and other info."""
-
-    def test_have_about_data(self):
-        self.assertTrue(__title__ is not None)
-        self.assertTrue(__description__ is not None)
-        self.assertTrue(__url__ is not None)
-        self.assertTrue(__version_info__ is not None)
-        self.assertTrue(__version__ is not None)
-        self.assertTrue(__author__ is not None)
-        self.assertTrue(__author_email__ is not None)
-        self.assertTrue(__maintainer__ is not None)
-        self.assertTrue(__license__ is not None)
-        self.assertTrue(__copyright__ is not None)
 
 
 class StaticTestCase(unittest.TestCase):

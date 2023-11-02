@@ -1,4 +1,3 @@
-from .__about__ import __version__
 from .config import COOKIE_DURATION
 from .config import COOKIE_HTTPONLY
 from .config import COOKIE_NAME
@@ -36,7 +35,6 @@ from .utils import make_next_param
 from .utils import set_login_view
 
 __all__ = [
-    "__version__",
     "COOKIE_DURATION",
     "COOKIE_HTTPONLY",
     "COOKIE_NAME",
@@ -73,3 +71,19 @@ __all__ = [
     "make_next_param",
     "set_login_view",
 ]
+
+
+def __getattr__(name):
+    if name == "__version__":
+        import importlib.metadata
+        import warnings
+
+        warnings.warn(
+            "'__version__' is deprecated and will be removed in Flask-Login 1.0. Use"
+            " 'importlib.metadata.version(\"flask-login\")' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return importlib.metadata.version("flask-login")
+
+    raise AttributeError(name)

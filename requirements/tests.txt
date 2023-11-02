@@ -15,12 +15,6 @@ iniconfig==2.0.0
 packaging==23.2
     # via pytest
 pluggy==1.3.0
-    # via
-    #   -r tests.in
-    #   pytest
+    # via pytest
 pytest==7.4.3
-    # via -r tests.in
-semantic-version==2.10.0
-    # via -r tests.in
-typing-extensions==4.8.0
     # via -r tests.in
