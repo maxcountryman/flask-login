@@ -1,12 +1,8 @@
 import unittest
 from collections.abc import Hashable
 from contextlib import contextmanager
-from datetime import datetime
 from datetime import timedelta
-from datetime import timezone
 from unittest.mock import ANY
-from unittest.mock import Mock
-from unittest.mock import patch
 
 from flask import Blueprint
 from flask import Flask
@@ -638,11 +634,8 @@ class LoginTestCase(unittest.TestCase):
         c.get("/login-notch-remember")
         cookie = c.get_cookie(name, domain, path)
         self.assertIsNotNone(cookie)
-        self.assertIsNotNone(cookie.expires)
-        expected_date = datetime.now(timezone.utc) + duration
-        difference = expected_date - cookie.expires
-        self.assertLess(difference, timedelta(seconds=10))
-        self.assertGreater(difference, timedelta(seconds=-10))
+        self.assertIsNotNone(cookie.max_age)
+        self.assertEqual(cookie.max_age, duration.total_seconds())
 
     def test_remember_me_custom_duration_uses_custom_cookie(self):
         name = self.app.config["REMEMBER_COOKIE_NAME"] = "myname"
@@ -654,11 +647,8 @@ class LoginTestCase(unittest.TestCase):
         c.get("/login-notch-remember-custom")
         cookie = c.get_cookie(name, domain, path)
         self.assertIsNotNone(cookie)
-        self.assertIsNotNone(cookie.expires)
-        expected_date = datetime.now(timezone.utc) + duration
-        difference = expected_date - cookie.expires
-        self.assertLess(difference, timedelta(seconds=10))
-        self.assertGreater(difference, timedelta(seconds=-10))
+        self.assertIsNotNone(cookie.max_age)
+        self.assertEqual(cookie.max_age, duration.total_seconds())
 
     def test_remember_me_accepts_duration_as_int(self):
         self.app.config["REMEMBER_COOKIE_DURATION"] = 172800
@@ -670,11 +660,8 @@ class LoginTestCase(unittest.TestCase):
         self.assertEqual(result.status_code, 200)
         cookie = c.get_cookie(name, domain)
         self.assertIsNotNone(cookie)
-        self.assertIsNotNone(cookie.expires)
-        expected_date = datetime.now(timezone.utc) + duration
-        difference = expected_date - cookie.expires
-        self.assertLess(difference, timedelta(seconds=10))
-        self.assertGreater(difference, timedelta(seconds=-10))
+        self.assertIsNotNone(cookie.max_age)
+        self.assertEqual(cookie.max_age, duration.total_seconds())
 
     def test_remember_me_with_invalid_duration_returns_500_response(self):
         self.app.config["REMEMBER_COOKIE_DURATION"] = "123"
@@ -693,19 +680,6 @@ class LoginTestCase(unittest.TestCase):
             result = c.get("/login-notch-remember-custom-invalid")
             self.assertEqual(result.status_code, 500)
 
-    def test_set_cookie_with_invalid_duration_raises_exception(self):
-        self.app.config["REMEMBER_COOKIE_DURATION"] = "123"
-
-        with self.assertRaises(Exception) as cm:
-            with self.app.test_request_context():
-                session["_user_id"] = 2
-                self.login_manager._set_cookie(None)
-
-        expected_exception_message = (
-            "REMEMBER_COOKIE_DURATION must be a datetime.timedelta, instead got: 123"
-        )
-        self.assertIn(expected_exception_message, str(cm.exception))
-
     def test_set_cookie_with_invalid_custom_duration_raises_exception(self):
         with self.assertRaises(Exception) as cm:
             with self.app.test_request_context():
@@ -723,28 +697,23 @@ class LoginTestCase(unittest.TestCase):
         c = self.app.test_client()
         c.get("/login-notch-remember")
         cookie1 = c.get_cookie("remember", domain, path)
-        self.assertIsNotNone(cookie1.expires)
+        self.assertIsNotNone(cookie1.max_age)
         self._delete_session(c)
         c.get("/username")
         cookie2 = c.get_cookie("remember", domain, path)
-        self.assertEqual(cookie1.expires, cookie2.expires)
+        self.assertEqual(cookie1.max_age, cookie2.max_age)
 
     def test_remember_me_refresh_each_request(self):
-        with patch("flask_login.login_manager.datetime") as mock_dt:
-            now = datetime.now(timezone.utc)
-            mock_dt.now = Mock(return_value=now)
-
-            domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = "localhost.local"
-            path = self.app.config["REMEMBER_COOKIE_PATH"] = "/"
-            self.app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = True
-            c = self.app.test_client()
-            c.get("/login-notch-remember")
-            cookie1 = c.get_cookie("remember", domain, path)
-            self.assertIsNotNone(cookie1.expires)
-            mock_dt.now.return_value = now + timedelta(seconds=1)
-            c.get("/username")
-            cookie2 = c.get_cookie("remember", domain, path)
-            self.assertNotEqual(cookie1.expires, cookie2.expires)
+        domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = "localhost.local"
+        path = self.app.config["REMEMBER_COOKIE_PATH"] = "/"
+        self.app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = True
+        c = self.app.test_client()
+        c.get("/login-notch-remember")
+        cookie1 = c.get_cookie("remember", domain, path)
+        self.assertIsNotNone(cookie1.max_age)
+        c.get("/username")
+        cookie2 = c.get_cookie("remember", domain, path)
+        self.assertEqual(cookie1.max_age, cookie2.max_age)
 
     def test_remember_me_is_unfresh(self):
         with self.app.test_client() as c:

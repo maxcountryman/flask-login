@@ -1,7 +1,3 @@
-from datetime import datetime
-from datetime import timedelta
-from datetime import timezone
-
 from flask import abort
 from flask import current_app
 from flask import flash
@@ -417,29 +413,19 @@ class LoginManager:
         samesite = config.get("REMEMBER_COOKIE_SAMESITE", COOKIE_SAMESITE)
 
         if "_remember_seconds" in session:
-            duration = timedelta(seconds=session["_remember_seconds"])
+            # Convert float to int
+            duration = int(session["_remember_seconds"])
         else:
             duration = config.get("REMEMBER_COOKIE_DURATION", COOKIE_DURATION)
 
         # prepare data
         data = encode_cookie(str(session["_user_id"]))
 
-        if isinstance(duration, int):
-            duration = timedelta(seconds=duration)
-
-        try:
-            expires = datetime.now(timezone.utc) + duration
-        except TypeError as e:
-            raise Exception(
-                "REMEMBER_COOKIE_DURATION must be a datetime.timedelta,"
-                f" instead got: {duration}"
-            ) from e
-
         # actually set it
         response.set_cookie(
             cookie_name,
             value=data,
-            expires=expires,
+            max_age=duration,
             domain=domain,
             path=path,
             secure=secure,
