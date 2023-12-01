@@ -6,7 +6,7 @@
 #
 asgiref==3.7.2
     # via -r tests.in
-blinker==1.6.3
+blinker==1.7.0
     # via -r tests.in
 coverage==7.3.2
     # via -r tests.in

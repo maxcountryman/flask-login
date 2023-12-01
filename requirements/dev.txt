@@ -12,7 +12,7 @@ babel==2.13.1
     # via sphinx
 beautifulsoup4==4.12.2
     # via furo
-blinker==1.6.3
+blinker==1.7.0
     # via -r tests.in
 build==1.0.3
     # via pip-tools
@@ -117,7 +117,7 @@ sphinxcontrib-qthelp==1.0.6
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.9
     # via sphinx
-tox==4.11.3
+tox==4.11.4
     # via -r dev.in
 urllib3==2.0.7
     # via requests
