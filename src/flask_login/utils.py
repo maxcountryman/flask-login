@@ -16,6 +16,8 @@ from werkzeug.local import LocalProxy
 
 from .config import COOKIE_NAME
 from .config import EXEMPT_METHODS
+from .config import PRESERVED_SESSION_KEYS
+from .config import SESSION_KEYS
 from .signals import user_logged_in
 from .signals import user_logged_out
 from .signals import user_login_confirmed
@@ -180,6 +182,8 @@ def login_user(user, remember=False, duration=None, force=False, fresh=True):
     if not force and not user.is_active:
         return False
 
+    # clear the session after logging in
+    _clear_session()
     user_id = getattr(user, current_app.login_manager.id_attribute)()
     session["_user_id"] = user_id
     session["_fresh"] = fresh
@@ -398,3 +402,13 @@ def _secret_key(key=None):
         key = key.encode("latin1")  # ensure bytes
 
     return key
+
+
+def _clear_session():
+    preserved_keys = current_app.config.get(
+        "PRESERVED_SESSION_KEYS", PRESERVED_SESSION_KEYS
+    )
+    for key in set(session.keys()).difference(
+        SESSION_KEYS | preserved_keys | {"_permanent"}
+    ):
+        del session[key]
