@@ -13,7 +13,7 @@ COOKIE_SECURE = False
 COOKIE_HTTPONLY = True
 
 #: Whether the "remember me" cookie requires same origin; defaults to ``None``
-COOKIE_SAMESITE = None
+COOKIE_SAMESITE = "None"
 
 #: The default flash message to display when users need to log in.
 LOGIN_MESSAGE = "Please log in to access this page."
