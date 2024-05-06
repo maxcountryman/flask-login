@@ -44,7 +44,7 @@ furo==2023.9.10
     # via -r docs.in
 identify==2.5.31
     # via pre-commit
-idna==3.4
+idna==3.7
     # via requests
 imagesize==1.4.1
     # via sphinx
