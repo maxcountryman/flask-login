@@ -87,7 +87,7 @@ pytest==7.4.3
     # via -r tests.in
 pyyaml==6.0.1
     # via pre-commit
-requests==2.31.0
+requests==2.32.0
     # via sphinx
 snowballstemmer==2.2.0
     # via sphinx
