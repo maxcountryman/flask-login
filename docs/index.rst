@@ -445,10 +445,6 @@ the session depending on a flag you set on the request. For example::
 
     app.session_interface = CustomSessionInterface()
 
-    @user_loaded_from_request.connect
-    def user_loaded_from_request(self, user=None):
-        g.login_via_request = True
-
 This prevents setting the Flask Session cookie whenever the user authenticated
 using your `~LoginManager.request_loader`.
 
