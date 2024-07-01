@@ -4,7 +4,7 @@
 #
 #    pip-compile docs.in
 #
-alabaster==0.7.13
+alabaster==0.7.16
     # via sphinx
 babel==2.13.1
     # via sphinx
@@ -16,7 +16,7 @@ charset-normalizer==3.3.1
     # via requests
 docutils==0.20.1
     # via sphinx
-furo==2023.9.10
+furo==2024.5.6
     # via -r docs.in
 idna==3.4
     # via requests
@@ -38,7 +38,7 @@ snowballstemmer==2.2.0
     # via sphinx
 soupsieve==2.5
     # via beautifulsoup4
-sphinx==7.2.6
+sphinx==7.3.7
     # via
     #   -r docs.in
     #   furo
