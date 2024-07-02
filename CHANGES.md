@@ -17,6 +17,7 @@ Unreleased
 - Use `datetime.now(timezone.utc)` instead of deprecated `datetime.utcnow`. #758
 - Never look at the `X-Forwarded-For` header, always use `request.remote_addr`,
   requiring the developer to configure `ProxyFix` appropriately. #700
+- Remove `LOGIN_DISABLED` config. #697
 
 
 Version 0.6.3

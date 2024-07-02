@@ -187,7 +187,6 @@ class MethodViewLoginTestCase(unittest.TestCase):
         self.app = Flask(__name__)
         self.login_manager = LoginManager()
         self.login_manager.init_app(self.app)
-        self.app.config["LOGIN_DISABLED"] = False
 
         class SecretEndpoint(MethodView):
             decorators = [
@@ -220,7 +219,6 @@ class LoginTestCase(unittest.TestCase):
         self.app.config["REMEMBER_COOKIE_NAME"] = self.remember_cookie_name
         self.login_manager = LoginManager()
         self.login_manager.init_app(self.app)
-        self.app.config["LOGIN_DISABLED"] = False
 
         # Disable absolute location, like Werkzeug 2.1
         self.app.response_class.autocorrect_location_header = False
@@ -1092,13 +1090,6 @@ class LoginTestCase(unittest.TestCase):
             return "Access Granted"
 
         with self.app.test_client() as c:
-            self.app.config["LOGIN_DISABLED"] = True
-
-            result = c.get("/protected")
-            self.assertEqual(result.status_code, 200)
-
-            self.app.config["LOGIN_DISABLED"] = False
-
             result = c.get("/protected")
             self.assertEqual(result.status_code, 401)
 
@@ -1109,19 +1100,6 @@ class LoginTestCase(unittest.TestCase):
             c.get("/login-notch")
             result2 = c.get("/protected")
             self.assertIn("Access Granted", result2.data.decode("utf-8"))
-
-    def test_decorators_are_disabled(self):
-        @self.app.route("/protected")
-        @login_required
-        @fresh_login_required
-        def protected():
-            return "Access Granted"
-
-        self.app.config["LOGIN_DISABLED"] = True
-
-        with self.app.test_client() as c:
-            result = c.get("/protected")
-            self.assertIn("Access Granted", result.data.decode("utf-8"))
 
     def test_fresh_login_required_decorator(self):
         @self.app.route("/very-protected")
@@ -1165,7 +1143,6 @@ class LoginViaRequestTestCase(unittest.TestCase):
         self.app.config["REMEMBER_COOKIE_NAME"] = self.remember_cookie_name
         self.login_manager = LoginManager()
         self.login_manager.init_app(self.app)
-        self.app.config["LOGIN_DISABLED"] = False
 
         @self.app.route("/")
         def index():
@@ -1444,7 +1421,6 @@ class UnicodeCookieUserIDTestCase(unittest.TestCase):
         self.app.config["REMEMBER_COOKIE_NAME"] = self.remember_cookie_name
         self.login_manager = LoginManager()
         self.login_manager.init_app(self.app)
-        self.app.config["LOGIN_DISABLED"] = False
 
         @self.app.route("/")
         def index():
@@ -1512,7 +1488,6 @@ class StrictHostForRedirectsTestCase(unittest.TestCase):
         self.app.config["REMEMBER_COOKIE_NAME"] = self.remember_cookie_name
         self.login_manager = LoginManager()
         self.login_manager.init_app(self.app)
-        self.app.config["LOGIN_DISABLED"] = False
 
         @self.app.route("/secret")
         def secret():
@@ -1572,7 +1547,6 @@ class CustomTestClientTestCase(unittest.TestCase):
         self.app.config["REMEMBER_COOKIE_NAME"] = self.remember_cookie_name
         self.login_manager = LoginManager()
         self.login_manager.init_app(self.app)
-        self.app.config["LOGIN_DISABLED"] = False
         self.app.test_client_class = FlaskLoginClient
 
         @self.app.route("/username")
