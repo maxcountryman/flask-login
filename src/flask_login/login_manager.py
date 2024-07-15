@@ -448,8 +448,20 @@ class LoginManager:
         )
 
     def _clear_cookie(self, response):
+        # cookie settings
         config = current_app.config
         cookie_name = config.get("REMEMBER_COOKIE_NAME", COOKIE_NAME)
         domain = config.get("REMEMBER_COOKIE_DOMAIN")
         path = config.get("REMEMBER_COOKIE_PATH", "/")
-        response.delete_cookie(cookie_name, domain=domain, path=path)
+
+        secure = config.get("REMEMBER_COOKIE_SECURE", COOKIE_SECURE)
+        samesite = config.get("REMEMBER_COOKIE_SAMESITE", COOKIE_SAMESITE)
+
+        # actually delete it
+        response.delete_cookie(
+            cookie_name,
+            domain=domain,
+            path=path,
+            secure=secure,
+            samesite=samesite,
+        )
