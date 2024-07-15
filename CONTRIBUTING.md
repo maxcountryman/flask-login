@@ -6,7 +6,7 @@ Before you submit an issue or pull request, please read the following guidelines
 
 ## Submitting Issues
 
-Before you submit a new issue, **please review the [CHANGES](https://github.com/maxcountryman/flask-login/blob/master/CHANGES) document**. This is where you will find all major changes, including breaking changes, which may be causing your issue.
+Before you submit a new issue, **please review the [CHANGES.md](https://github.com/maxcountryman/flask-login/blob/main/CHANGES.md) document**. This is where you will find all major changes, including breaking changes, which may be causing your issue.
 
 Do not open a new issue before reading through CHANGES thoroughly and reviewing other open and closed issues. Duplicate issues will be closed and locked. Please do not open issues related to release deadlines: we will get to it when we can and in the meantime you are free to issue your own releases however you like.
 
