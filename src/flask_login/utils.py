@@ -198,6 +198,8 @@ def login_user(user, remember=False, duration=None, force=False, fresh=True):
                 raise Exception(
                     f"duration must be a datetime.timedelta, instead got: {duration}"
                 ) from e
+    else:
+        session["_remember"] = "unset"
 
     current_app.login_manager._update_request_context_with_user(user)
     user_logged_in.send(current_app._get_current_object(), user=_get_user())

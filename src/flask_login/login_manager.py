@@ -402,6 +402,8 @@ class LoginManager:
                 self._set_cookie(response)
             elif operation == "clear":
                 self._clear_cookie(response)
+            elif operation == "unset":
+                session["_remember"] = "unset"
 
         return response
 
