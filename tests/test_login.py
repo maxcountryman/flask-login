@@ -1665,10 +1665,11 @@ class CustomTestClientTestCase(unittest.TestCase):
 class CookieRefreshTest(unittest.TestCase):
     """
     This class tests the bug from issue #824. It makes sure that if a user is
-    logged in with their "rememeber" parameter as False, that user doesn't 
-    have any cookies, even if the "REMEMBER_COOKIE_REFRESH_EACH_REQUEST" 
+    logged in with their "rememeber" parameter as False, that user doesn't
+    have any cookies, even if the "REMEMBER_COOKIE_REFRESH_EACH_REQUEST"
     config option is True.
     """
+
     def setUp(self):
         self.app = Flask(__name__)
         self.login_manager = LoginManager()
@@ -1681,25 +1682,25 @@ class CookieRefreshTest(unittest.TestCase):
 
         @self.app.route("/login-notch0")
         def login_notch0():
-            self.app.config['REMEMBER_COOKIE_REFRESH_EACH_REQUEST'] = True
+            self.app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = True
             login_user(notch, remember=True)
             return "Hello"
 
         @self.app.route("/login-notch1")
         def login_notch1():
-            self.app.config['REMEMBER_COOKIE_REFRESH_EACH_REQUEST'] = False
+            self.app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = False
             login_user(notch, remember=True)
             return "Hello"
         
         @self.app.route("/login-notch2")
         def login_notch2():
-            self.app.config['REMEMBER_COOKIE_REFRESH_EACH_REQUEST'] = True
+            self.app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = True
             login_user(notch, remember=False)
             return "Hello"
         
         @self.app.route("/login-notch3")
         def login_notch3():
-            self.app.config['REMEMBER_COOKIE_REFRESH_EACH_REQUEST'] = False
+            self.app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = False
             login_user(notch, remember=False)
             return "Hello"
         
@@ -1713,8 +1714,8 @@ class CookieRefreshTest(unittest.TestCase):
 
         unittest.TestCase.setUp(self)
 
-    #each of these function tests one of the ways cookie rememberance
-    #configuration options can be set.
+    # each of these function tests one of the ways cookie rememberance
+    # configuration options can be set.
     def test_0(self):
         with self.app.test_client() as c:
             name = self.app.config["REMEMBER_COOKIE_NAME"] = "myname"
@@ -1725,7 +1726,7 @@ class CookieRefreshTest(unittest.TestCase):
 
             cookie = c.get_cookie(name, domain, path)
             self.assertIsNotNone(cookie)
-        
+
     def test_1(self):
         with self.app.test_client() as c:
             name = self.app.config["REMEMBER_COOKIE_NAME"] = "myname"
@@ -1736,7 +1737,7 @@ class CookieRefreshTest(unittest.TestCase):
 
             cookie = c.get_cookie(name, domain, path)
             self.assertIsNotNone(cookie)
-        
+
     def test_2(self):
         with self.app.test_client() as c:
             name = self.app.config["REMEMBER_COOKIE_NAME"] = "myname"
@@ -1747,7 +1748,7 @@ class CookieRefreshTest(unittest.TestCase):
 
             cookie = c.get_cookie(name, domain, path)
             self.assertIsNone(cookie)
-        
+
     def test_3(self):
         with self.app.test_client() as c:
             name = self.app.config["REMEMBER_COOKIE_NAME"] = "myname"
@@ -1758,4 +1759,3 @@ class CookieRefreshTest(unittest.TestCase):
             cookie = c.get_cookie(name, domain, path)
 
             self.assertIsNone(cookie)
-
