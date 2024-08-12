@@ -1691,19 +1691,19 @@ class CookieRefreshTest(unittest.TestCase):
             self.app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = False
             login_user(notch, remember=True)
             return "Hello"
-        
+
         @self.app.route("/login-notch2")
         def login_notch2():
             self.app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = True
             login_user(notch, remember=False)
             return "Hello"
-        
+
         @self.app.route("/login-notch3")
         def login_notch3():
             self.app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = False
             login_user(notch, remember=False)
             return "Hello"
-        
+
         # This will help us with the possibility of typos in the tests. Now
         # we shouldn't have to check each response to help us set up state
         # (such as login pages) to make sure it worked: we will always
