@@ -1758,3 +1758,4 @@ class CookieRefreshTest(unittest.TestCase):
             cookie = c.get_cookie(name, domain, path)
 
             self.assertIsNone(cookie)
+
