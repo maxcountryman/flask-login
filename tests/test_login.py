@@ -1660,3 +1660,101 @@ class CustomTestClientTestCase(unittest.TestCase):
             self.assertEqual("Anonymous", username.data.decode("utf-8"))
             is_fresh = c.get("/is-fresh")
             self.assertEqual("False", is_fresh.data.decode("utf-8"))
+
+
+class CookieRefreshTest(unittest.TestCase):
+    """
+    This class tests the bug from issue #824. It makes sure that if a user is
+    logged in with their "rememeber" parameter as False, that user doesn't 
+    have any cookies, even if the "REMEMBER_COOKIE_REFRESH_EACH_REQUEST" 
+    config option is True.
+    """
+    def setUp(self):
+        self.app = Flask(__name__)
+        self.login_manager = LoginManager()
+        self.login_manager.init_app(self.app)
+        self.app.config["SECRET_KEY"] = "deterministic"
+        self.app.config["LOGIN_DISABLED"] = False
+        self.remember_cookie_name = "remember"
+        self.app.config["REMEMBER_COOKIE_NAME"] = self.remember_cookie_name
+        self.app.test_client_class = FlaskLoginClient
+
+        @self.app.route("/login-notch0")
+        def login_notch0():
+            self.app.config['REMEMBER_COOKIE_REFRESH_EACH_REQUEST'] = True
+            login_user(notch, remember=True)
+            return "Hello"
+
+        @self.app.route("/login-notch1")
+        def login_notch1():
+            self.app.config['REMEMBER_COOKIE_REFRESH_EACH_REQUEST'] = False
+            login_user(notch, remember=True)
+            return "Hello"
+        
+        @self.app.route("/login-notch2")
+        def login_notch2():
+            self.app.config['REMEMBER_COOKIE_REFRESH_EACH_REQUEST'] = True
+            login_user(notch, remember=False)
+            return "Hello"
+        
+        @self.app.route("/login-notch3")
+        def login_notch3():
+            self.app.config['REMEMBER_COOKIE_REFRESH_EACH_REQUEST'] = False
+            login_user(notch, remember=False)
+            return "Hello"
+        
+        # This will help us with the possibility of typos in the tests. Now
+        # we shouldn't have to check each response to help us set up state
+        # (such as login pages) to make sure it worked: we will always
+        # get an exception raised (rather than return a 404 response)
+        @self.app.errorhandler(404)
+        def handle_404(e):
+            raise e
+
+        unittest.TestCase.setUp(self)
+
+    #each of these function tests one of the ways cookie rememberance
+    #configuration options can be set.
+    def test_0(self):
+        with self.app.test_client() as c:
+            name = self.app.config["REMEMBER_COOKIE_NAME"] = "myname"
+            path = self.app.config["REMEMBER_COOKIE_PATH"] = "/mypath"
+            domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = "localhost.local"
+
+            c.get("/login-notch0")
+
+            cookie = c.get_cookie(name, domain, path)
+            self.assertIsNotNone(cookie)
+        
+    def test_1(self):
+        with self.app.test_client() as c:
+            name = self.app.config["REMEMBER_COOKIE_NAME"] = "myname"
+            path = self.app.config["REMEMBER_COOKIE_PATH"] = "/mypath"
+            domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = "localhost.local"
+
+            c.get("/login-notch1")
+
+            cookie = c.get_cookie(name, domain, path)
+            self.assertIsNotNone(cookie)
+        
+    def test_2(self):
+        with self.app.test_client() as c:
+            name = self.app.config["REMEMBER_COOKIE_NAME"] = "myname"
+            path = self.app.config["REMEMBER_COOKIE_PATH"] = "/mypath"
+            domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = "localhost.local"
+
+            c.get("/login-notch2")
+
+            cookie = c.get_cookie(name, domain, path)
+            self.assertIsNone(cookie)
+        
+    def test_3(self):
+        with self.app.test_client() as c:
+            name = self.app.config["REMEMBER_COOKIE_NAME"] = "myname"
+            path = self.app.config["REMEMBER_COOKIE_PATH"] = "/mypath"
+            domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = "localhost.local"
+
+            c.get("/login-notch3")
+            cookie = c.get_cookie(name, domain, path)
+
+            self.assertIsNone(cookie)
