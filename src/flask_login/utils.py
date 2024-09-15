@@ -263,10 +263,6 @@ def login_required(func):
 
     ...which is essentially the code that this function adds to your views.
 
-    It can be convenient to globally turn off authentication when unit testing.
-    To enable this, if the application configuration variable `LOGIN_DISABLED`
-    is set to `True`, this decorator will be ignored.
-
     .. Note ::
 
         Per `W3 guidelines for CORS preflight requests
@@ -279,7 +275,7 @@ def login_required(func):
 
     @wraps(func)
     def decorated_view(*args, **kwargs):
-        if request.method in EXEMPT_METHODS or current_app.config.get("LOGIN_DISABLED"):
+        if request.method in EXEMPT_METHODS:
             pass
         elif not current_user.is_authenticated:
             return current_app.login_manager.unauthorized()
@@ -320,7 +316,7 @@ def fresh_login_required(func):
 
     @wraps(func)
     def decorated_view(*args, **kwargs):
-        if request.method in EXEMPT_METHODS or current_app.config.get("LOGIN_DISABLED"):
+        if request.method in EXEMPT_METHODS:
             pass
         elif not current_user.is_authenticated:
             return current_app.login_manager.unauthorized()
