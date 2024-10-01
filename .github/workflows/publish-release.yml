@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
       - uses: actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3
         with:
           python-version: '3.x'
@@ -15,6 +15,6 @@ jobs:
       - run: pip install build
       - run: python -m build
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@8a08d616893759ef8e1aa1f2785787c0b97e20d6
+        uses: pypa/gh-action-pypi-publish@897895f1e160c830e369f9779632ebc134688e1b
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
