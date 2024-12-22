@@ -258,7 +258,7 @@ def login_required(func):
     If there are only certain times you need to require that your user is
     logged in, you can do so with::
 
-        if not current_user.is_authenticated:
+        if not current_user or not current_user.is_authenticated:
             return current_app.login_manager.unauthorized()
 
     ...which is essentially the code that this function adds to your views.
@@ -277,7 +277,7 @@ def login_required(func):
     def decorated_view(*args, **kwargs):
         if request.method in EXEMPT_METHODS:
             pass
-        elif not current_user.is_authenticated:
+        elif not current_user or not current_user.is_authenticated:
             return current_app.login_manager.unauthorized()
 
         # flask 1.x compatibility
@@ -318,7 +318,7 @@ def fresh_login_required(func):
     def decorated_view(*args, **kwargs):
         if request.method in EXEMPT_METHODS:
             pass
-        elif not current_user.is_authenticated:
+        elif not current_user or not current_user.is_authenticated:
             return current_app.login_manager.unauthorized()
         elif not login_fresh():
             return current_app.login_manager.needs_refresh()
