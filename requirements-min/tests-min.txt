@@ -4,21 +4,21 @@
 #
 #    pip-compile tests-min.in
 #
-blinker==1.6.3
+blinker==1.9.0
     # via flask
 click==8.1.7
     # via flask
-flask==2.3.0
+flask==3.1.0
     # via -r tests-min.in
-itsdangerous==2.1.2
+itsdangerous==2.2.0
     # via flask
-jinja2==3.1.2
+jinja2==3.1.4
     # via flask
-markupsafe==2.1.3
+markupsafe==3.0.2
     # via
     #   jinja2
     #   werkzeug
-werkzeug==2.3.2
+werkzeug==3.1.3
     # via
     #   -r tests-min.in
     #   flask
