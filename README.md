@@ -57,7 +57,7 @@ def user_loader(id):
 ```
 
 Now we're ready to define our views. The login view will populate the session with
-authentication info. The protected view will only be avialble to authenticated users;
+authentication info. The protected view will only be available to authenticated users;
 visiting it otherwise will show an error. The logout view clearing the session.
 
 ```python
