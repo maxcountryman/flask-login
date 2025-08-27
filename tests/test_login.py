@@ -185,6 +185,7 @@ class InitializationTestCase(unittest.TestCase):
 class MethodViewLoginTestCase(unittest.TestCase):
     def setUp(self):
         self.app = Flask(__name__)
+        self.app.config["SECRET_KEY"] = "deterministic"
         self.login_manager = LoginManager()
         self.login_manager.init_app(self.app)
 
@@ -709,9 +710,7 @@ class LoginTestCase(unittest.TestCase):
             with self.app.test_request_context():
                 login_user(notch, remember=True, duration="123")
 
-        expected_exception_message = (
-            "duration must be a datetime.timedelta, instead got: 123"
-        )
+        expected_exception_message = "duration must be a datetime.timedelta, instead got: 123"
         self.assertIn(expected_exception_message, str(cm.exception))
 
     def test_remember_me_no_refresh_every_request(self):
@@ -732,7 +731,7 @@ class LoginTestCase(unittest.TestCase):
             now = datetime.now(timezone.utc)
             mock_dt.now = Mock(return_value=now)
 
-            domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = "localhost.local"
+            domain = self.app.config["REMEMBER_COOKIE_DOMAIN"] = "localhost"
             path = self.app.config["REMEMBER_COOKIE_PATH"] = "/"
             self.app.config["REMEMBER_COOKIE_REFRESH_EACH_REQUEST"] = True
             c = self.app.test_client()
@@ -886,9 +885,7 @@ class LoginTestCase(unittest.TestCase):
     def test_session_not_modified(self):
         with self.app.test_client() as c:
             # Within the request we think we didn't modify the session.
-            self.assertEqual(
-                "modified=False", c.get("/empty_session").data.decode("utf-8")
-            )
+            self.assertEqual("modified=False", c.get("/empty_session").data.decode("utf-8"))
             # But after the request, the session could be modified by the
             # "after_request" handlers that call _update_remember_cookie.
             # Ensure that if nothing changed the session is not modified.
@@ -1260,25 +1257,19 @@ class TestLoginUrlGeneration(unittest.TestCase):
             url = make_next_param("https://localhost/login", "http://localhost/profile")
             self.assertEqual("http://localhost/profile", url)
 
-            url = make_next_param(
-                "http://accounts.localhost/login", "http://localhost/profile"
-            )
+            url = make_next_param("http://accounts.localhost/login", "http://localhost/profile")
             self.assertEqual("http://localhost/profile", url)
 
     def test_login_url_generation(self):
         with self.app.test_request_context():
             PROTECTED = "http://localhost/protected"
 
-            self.assertEqual(
-                "/login?n=%2Fprotected", login_url("/login", PROTECTED, "n")
-            )
+            self.assertEqual("/login?n=%2Fprotected", login_url("/login", PROTECTED, "n"))
 
             url = login_url("/login", PROTECTED)
             self.assertEqual("/login?next=%2Fprotected", url)
 
-            expected = (
-                "https://auth.localhost/login?next=http%3A%2F%2Flocalhost%2Fprotected"
-            )
+            expected = "https://auth.localhost/login?next=http%3A%2F%2Flocalhost%2Fprotected"
             result = login_url("https://auth.localhost/login", PROTECTED)
             self.assertEqual(expected, result)
 
@@ -1290,9 +1281,7 @@ class TestLoginUrlGeneration(unittest.TestCase):
 
     def test_login_url_generation_with_view(self):
         with self.app.test_request_context():
-            self.assertEqual(
-                "/login?next=%2Fprotected", login_url("login", "/protected")
-            )
+            self.assertEqual("/login?next=%2Fprotected", login_url("login", "/protected"))
 
     def test_login_url_no_next_url(self):
         self.assertEqual(login_url("/foo"), "/foo")

@@ -326,9 +326,7 @@ class LoginManager:
         if user is None:
             config = current_app.config
             cookie_name = config.get("REMEMBER_COOKIE_NAME", COOKIE_NAME)
-            has_cookie = (
-                cookie_name in request.cookies and session.get("_remember") != "clear"
-            )
+            has_cookie = cookie_name in request.cookies and session.get("_remember") != "clear"
             if has_cookie:
                 cookie = request.cookies[cookie_name]
                 user = self._load_user_from_remember_cookie(cookie)
@@ -389,23 +387,27 @@ class LoginManager:
         return None
 
     def _update_remember_cookie(self, response):
-        # Don't modify the session unless there's something to do.
-        if "_remember" not in session and current_app.config.get(
-            "REMEMBER_COOKIE_REFRESH_EACH_REQUEST"
-        ):
-            session["_remember"] = "set"
+        config = current_app.config
+        cookie_name = config.get("REMEMBER_COOKIE_NAME", COOKIE_NAME)
+        has_cookie = cookie_name in request.cookies and session.get("_remember") != "clear"
+        refresh = current_app.config.get("REMEMBER_COOKIE_REFRESH_EACH_REQUEST") and has_cookie
 
-        if "_remember" in session:
-            operation = session.pop("_remember", None)
+        operation = session.pop("_remember", None)
+        if not operation and not refresh:
+            return response
 
-            if operation == "set" and "_user_id" in session:
-                self._set_cookie(response)
-            elif operation == "clear":
-                self._clear_cookie(response)
+        if operation == "clear":
+            self._clear_cookie(response)
+
+        if operation == "set" or refresh:
+            self._set_cookie(response)
 
         return response
 
     def _set_cookie(self, response):
+        if "_user_id" not in session:
+            return
+
         # cookie settings
         config = current_app.config
         cookie_name = config.get("REMEMBER_COOKIE_NAME", COOKIE_NAME)
@@ -431,8 +433,7 @@ class LoginManager:
             expires = datetime.now(timezone.utc) + duration
         except TypeError as e:
             raise Exception(
-                "REMEMBER_COOKIE_DURATION must be a datetime.timedelta,"
-                f" instead got: {duration}"
+                f"REMEMBER_COOKIE_DURATION must be a datetime.timedelta, instead got: {duration}"
             ) from e
 
         # actually set it
