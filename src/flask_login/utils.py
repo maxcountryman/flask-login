@@ -126,9 +126,7 @@ def login_url(login_view, next_url=None, next_field="next"):
     md = parse_qs(parsed_result.query, keep_blank_values=True)
     md[next_field] = make_next_param(base, next_url)
     netloc = current_app.config.get("FORCE_HOST_FOR_REDIRECTS") or parsed_result.netloc
-    parsed_result = parsed_result._replace(
-        netloc=netloc, query=urlencode(md, doseq=True)
-    )
+    parsed_result = parsed_result._replace(netloc=netloc, query=urlencode(md, doseq=True))
     return urlunsplit(parsed_result)
 
 
@@ -191,8 +189,7 @@ def login_user(user, remember=False, duration=None, force=False, fresh=True):
             try:
                 # equal to timedelta.total_seconds() but works with Python 2.6
                 session["_remember_seconds"] = (
-                    duration.microseconds
-                    + (duration.seconds + duration.days * 24 * 3600) * 10**6
+                    duration.microseconds + (duration.seconds + duration.days * 24 * 3600) * 10**6
                 ) / 10.0**6
             except AttributeError as e:
                 raise Exception(

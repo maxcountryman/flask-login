@@ -63,6 +63,7 @@ src = ["src"]
 fix = true
 show-fixes = true
 show-source = true
+line-length = 100
 
 [tool.ruff.lint]
 select = [
