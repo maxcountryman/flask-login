@@ -53,7 +53,7 @@ class LoginManager:
         #: The name of the view to redirect to when the user needs to log in.
         #: (This can be an absolute URL as well, if your authentication
         #: machinery is external to your application.)
-        self.login_view = None
+        self.login_view: str | None = None
 
         #: Names of views to redirect to when the user needs to log in,
         #: per blueprint. If the key value is set to None the value of
