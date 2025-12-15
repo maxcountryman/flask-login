@@ -330,7 +330,7 @@ class LoginManager:
             if has_cookie:
                 cookie = request.cookies[cookie_name]
                 user = self._load_user_from_remember_cookie(cookie)
-            elif self._request_callback:
+            if user is None and self._request_callback:
                 user = self._load_user_from_request(request)
 
         return self._update_request_context_with_user(user)
