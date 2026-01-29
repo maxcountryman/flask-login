@@ -350,9 +350,9 @@ def set_login_view(login_view, blueprint=None):
             and None not in current_app.login_manager.blueprint_login_views
         ):
             # Store the app's login_view in the blueprint_login_views dict under None key
-            current_app.login_manager.blueprint_login_views[None] = (
-                current_app.login_manager.login_view
-            )
+            current_app.login_manager.blueprint_login_views[
+                None
+            ] = current_app.login_manager.login_view
 
         current_app.login_manager.login_view = None
     elif num_login_views != 0:
