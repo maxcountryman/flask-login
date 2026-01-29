@@ -567,6 +567,177 @@ class LoginTestCase(unittest.TestCase):
                 expected = "/app_login?next=%2Fprotected"
                 self.assertEqual(result.location, expected)
 
+    def test_unauthorized_blueprint_flashes_message_with_blueprint_login_view(self):
+        """Test that login message is flashed when using blueprint login views."""
+        with self.app.app_context():
+            first = Blueprint("first", "first")
+
+            @self.app.route("/app_login")
+            def app_login():
+                return "App Login"
+
+            @self.app.route("/first_login")
+            def first_login():
+                return "First Login"
+
+            @first.route("/protected")
+            @login_required
+            def first_protected():
+                return "Access Granted"
+
+            self.app.register_blueprint(first, url_prefix="/first")
+
+            self.login_manager.login_message = "Please log in!"
+            self.login_manager.login_message_category = "info"
+
+            set_login_view("first_login", blueprint=first)
+
+            with self.app.test_client() as c:
+                c.get("/first/protected")
+                msgs = get_flashed_messages(category_filter=["info"])
+                self.assertEqual(["Please log in!"], msgs)
+
+    def test_unauthorized_blueprint_message_with_multiple_blueprints(self):
+        """Test that login message is flashed with multiple blueprint login views."""
+        with self.app.app_context():
+            first = Blueprint("first", "first")
+            second = Blueprint("second", "second")
+
+            @self.app.route("/app_login")
+            def app_login():
+                return "App Login"
+
+            @self.app.route("/first_login")
+            def first_login():
+                return "First Login"
+
+            @self.app.route("/second_login")
+            def second_login():
+                return "Second Login"
+
+            @first.route("/protected")
+            @login_required
+            def first_protected():
+                return "Access Granted"
+
+            @second.route("/protected")
+            @login_required
+            def second_protected():
+                return "Access Granted"
+
+            self.app.register_blueprint(first, url_prefix="/first")
+            self.app.register_blueprint(second, url_prefix="/second")
+
+            self.login_manager.login_message = "Please log in!"
+            self.login_manager.login_message_category = "info"
+
+            # Set blueprint-specific login views
+            set_login_view("first_login", blueprint=first)
+            set_login_view("second_login", blueprint=second)
+
+            with self.app.test_client() as c:
+                # Test first blueprint
+                c.get("/first/protected")
+                msgs = get_flashed_messages(category_filter=["info"])
+                self.assertEqual(["Please log in!"], msgs)
+
+            # Need a new test client to reset the session and flash messages
+            with self.app.test_client() as c:
+                # Test second blueprint
+                c.get("/second/protected")
+                msgs = get_flashed_messages(category_filter=["info"])
+                self.assertEqual(["Please log in!"], msgs)
+
+    def test_unauthorized_app_message_with_app_and_blueprint_login_views(self):
+        """Test that login message is flashed from app route after setting blueprint login views."""
+        with self.app.app_context():
+            first = Blueprint("first", "first")
+
+            @self.app.route("/app_login")
+            def app_login():
+                return "App Login"
+
+            @self.app.route("/first_login")
+            def first_login():
+                return "First Login"
+
+            @self.app.route("/protected")
+            @login_required
+            def protected():
+                return "Access Granted"
+
+            @first.route("/protected")
+            @login_required
+            def first_protected():
+                return "Access Granted"
+
+            self.app.register_blueprint(first, url_prefix="/first")
+
+            self.login_manager.login_message = "Please log in!"
+            self.login_manager.login_message_category = "info"
+
+            # Set app login view first, then blueprint login view
+            set_login_view("app_login")
+            set_login_view("first_login", blueprint=first)
+
+            with self.app.test_client() as c:
+                # Test app-level protected route
+                c.get("/protected")
+                msgs = get_flashed_messages(category_filter=["info"])
+                self.assertEqual(["Please log in!"], msgs)
+
+            # Test blueprint protected route with new client
+            with self.app.test_client() as c:
+                c.get("/first/protected")
+                msgs = get_flashed_messages(category_filter=["info"])
+                self.assertEqual(["Please log in!"], msgs)
+
+    def test_set_login_view_with_blueprint_then_app(self):
+        """Test setting app login view AFTER blueprint login view - reproduces issue #749."""
+        with self.app.app_context():
+            first = Blueprint("first", "first")
+
+            @self.app.route("/app_login")
+            def app_login():
+                return "App Login"
+
+            @self.app.route("/first_login")
+            def first_login():
+                return "First Login"
+
+            @self.app.route("/protected")
+            @login_required
+            def protected():
+                return "Access Granted"
+
+            @first.route("/protected")
+            @login_required
+            def first_protected():
+                return "Access Granted"
+
+            self.app.register_blueprint(first, url_prefix="/first")
+
+            self.login_manager.login_message = "Please log in!"
+            self.login_manager.login_message_category = "info"
+
+            # Set blueprint login view FIRST, then app login view
+            # This previously would cause an AttributeError
+            set_login_view("first_login", blueprint=first)
+            set_login_view("app_login")
+
+            with self.app.test_client() as c:
+                # Test that app-level protected route redirects correctly
+                # and flashes the login message
+                c.get("/protected")
+                msgs = get_flashed_messages(category_filter=["info"])
+                self.assertEqual(["Please log in!"], msgs)
+
+            # Test blueprint-level protected route in new client
+            with self.app.test_client() as c:
+                c.get("/first/protected")
+                msgs = get_flashed_messages(category_filter=["info"])
+                self.assertEqual(["Please log in!"], msgs)
+
     #
     # Session Persistence/Freshness
     #
