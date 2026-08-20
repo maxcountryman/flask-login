@@ -15,7 +15,7 @@ user_logged_out = _signals.signal("logged-out")
 user_loaded_from_cookie = _signals.signal("loaded-from-cookie")
 
 #: Sent when the user is loaded from the request. In addition to the app (which
-#: is the #: sender), it is passed `user`, which is the user being reloaded.
+#: is the sender), it is passed `user`, which is the user being reloaded.
 user_loaded_from_request = _signals.signal("loaded-from-request")
 
 #: Sent when a user's login is confirmed, marking it as fresh. (It is not
@@ -31,8 +31,8 @@ user_unauthorized = _signals.signal("unauthorized")
 #: receives no additional arguments besides the app.
 user_needs_refresh = _signals.signal("needs-refresh")
 
-#: Sent whenever the user is accessed/loaded
-#: receives no additional arguments besides the app.
+#: Sent whenever the user is accessed/loaded.
+#: It receives no additional arguments besides the app.
 user_accessed = _signals.signal("accessed")
 
 #: Sent whenever session protection takes effect, and a session is either
