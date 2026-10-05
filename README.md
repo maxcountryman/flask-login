@@ -70,7 +70,7 @@ def login():
     </form>"""
 
 @app.post("/login")
-def login():
+def login_post():
     user = users.get(flask.request.form["email"])
 
     if user is None or user.password != flask.request.form["password"]:
