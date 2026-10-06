@@ -36,8 +36,9 @@ distlib==0.3.7
     # via virtualenv
 docutils==0.20.1
     # via sphinx
-filelock==3.13.1
+filelock==3.32.7
     # via
+    #   python-discovery
     #   tox
     #   virtualenv
 furo==2023.9.10
@@ -85,6 +86,8 @@ pyproject-hooks==1.0.0
     # via build
 pytest==7.4.3
     # via -r tests.in
+python-discovery==1.6.1
+    # via virtualenv
 pyyaml==6.0.1
     # via pre-commit
 requests==2.32.0
@@ -121,7 +124,7 @@ tox==4.11.3
     # via -r dev.in
 urllib3==2.2.2
     # via requests
-virtualenv==20.24.6
+virtualenv==21.7.13
     # via
     #   pre-commit
     #   tox
