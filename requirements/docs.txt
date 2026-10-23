@@ -10,7 +10,7 @@ babel==2.13.1
     # via sphinx
 beautifulsoup4==4.12.2
     # via furo
-certifi==2024.7.4
+certifi==2026.10.19
     # via requests
 charset-normalizer==3.3.1
     # via requests
