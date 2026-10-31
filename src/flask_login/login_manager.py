@@ -453,4 +453,12 @@ class LoginManager:
         cookie_name = config.get("REMEMBER_COOKIE_NAME", COOKIE_NAME)
         domain = config.get("REMEMBER_COOKIE_DOMAIN")
         path = config.get("REMEMBER_COOKIE_PATH", "/")
-        response.delete_cookie(cookie_name, domain=domain, path=path)
+        secure = config.get("REMEMBER_COOKIE_SECURE", COOKIE_SECURE)
+        samesite = config.get("REMEMBER_COOKIE_SAMESITE", COOKIE_SAMESITE)
+        # A deletion response must carry the same Secure/SameSite attributes
+        # as the cookie being cleared, otherwise browsers keep the cookie
+        # (e.g. a SameSite=None; Secure remember cookie is not cleared by
+        # a plain deletion response, leaving the user remembered after logout).
+        response.delete_cookie(
+            cookie_name, domain=domain, path=path, secure=secure, samesite=samesite
+        )
