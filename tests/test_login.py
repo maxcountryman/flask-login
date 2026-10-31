@@ -782,6 +782,21 @@ class LoginTestCase(unittest.TestCase):
             result = c.get("/username")
             self.assertEqual(result.data.decode("utf-8"), "Anonymous")
 
+    def test_logout_clears_remember_cookie_with_same_attributes(self):
+        self.app.config["REMEMBER_COOKIE_SECURE"] = True
+        self.app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
+        with self.app.test_client() as c:
+            c.get("/login-notch-remember")
+            response = c.get("/logout")
+            cleared = [
+                header
+                for header in response.headers.getlist("Set-Cookie")
+                if header.startswith(self.remember_cookie_name + "=")
+            ]
+            self.assertEqual(1, len(cleared))
+            self.assertIn("Secure", cleared[0])
+            self.assertIn("SameSite=Lax", cleared[0])
+
     def test_needs_refresh_uses_handler(self):
         @self.login_manager.needs_refresh_handler
         def _on_refresh():
