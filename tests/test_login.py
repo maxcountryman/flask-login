@@ -167,6 +167,20 @@ class InitializationTestCase(unittest.TestCase):
 
         self.assertIsInstance(login_manager, LoginManager)
 
+    def test_init_app_sets_default_session_protection_config(self):
+        login_manager = LoginManager()
+        login_manager.session_protection = "strong"
+        login_manager.init_app(self.app)
+
+        self.assertEqual(self.app.config["SESSION_PROTECTION"], "strong")
+
+    def test_init_app_preserves_session_protection_config(self):
+        self.app.config["SESSION_PROTECTION"] = None
+        login_manager = LoginManager()
+        login_manager.init_app(self.app)
+
+        self.assertIsNone(self.app.config["SESSION_PROTECTION"])
+
     def test_class_init(self):
         login_manager = LoginManager(self.app, add_context_processor=True)
 

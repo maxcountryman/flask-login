@@ -116,6 +116,7 @@ class LoginManager:
         :type add_context_processor: bool
         """
         app.login_manager = self
+        app.config.setdefault("SESSION_PROTECTION", self.session_protection)
         app.after_request(self._update_remember_cookie)
 
         if add_context_processor:
